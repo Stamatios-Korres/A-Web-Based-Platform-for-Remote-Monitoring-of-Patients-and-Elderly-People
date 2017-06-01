@@ -28,7 +28,7 @@ exports.initialize = function (server) {
             } catch (e) {
                 console.log("Invalid Input");
             }
-            console.log(data);
+            // console.log(data);
             switch (data.type) {
                 case 'init': {
                     findbyToken(data.token,
@@ -60,7 +60,8 @@ exports.initialize = function (server) {
                     break;
                 }
                 case 'new-ice-candidate':
-                    //console.log("Ok so this thing works");
+                    onlineList.Send(data);
+                    console.log('Candidate Received');
                     break;
                 default :
                     console.log("unknown type");
@@ -164,7 +165,7 @@ OnlineList.prototype.friendsOnline = function (username, callback) {
         console.log(_this.list.length);
         for (var j = 0; j < result.friends.length; j++) {
             for (var i = 0; i < _this.list.length; i++) {
-                if (_this.list[i].username === result.friends[j] && _this.list[i].username != username) {
+                if (_this.list[i].username === result.friends[j] && _this.list[i].username !== username) {
                     results.push(result.friends[j]);
                     console.log('sending to : ' + result.friends[j]);
                     _this.list[i].PortIp.send(JSON.stringify({type: 'UserGotOnline', name: username}));

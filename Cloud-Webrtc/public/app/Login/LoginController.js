@@ -43,14 +43,22 @@ angular.module('Openhealth').controller('LoginController', function (FriendsAndS
                     AjaxServices.services.GetRequests();
                     AjaxServices.services.PendingRequests();
                     ws = new WebSocket('wss://healthcloud.menychtas.com/sockets');
+                    // ws = new WebSocket('ws:localhost:3000');
                     AjaxServices.services.GetFriends(function (response) {
                         for (var i = 0; i < response.length; i++) {
                             FriendsAndState.addfriends(response[i], 'inactive');
                         }
-
-                    });
-
                     WebsocketService.InitWebsocket();
+                    });
+                    ws.onopen = function InitWebsocket(e) {
+                        console.log('Setting online: ' + my_name);
+                        message = {
+                            type: 'init',
+                            token: localStorage.getItem('token')
+                        };
+                        message = JSON.stringify(message);
+                        ws.send(message);
+                    };
                     $location.path('index');
                 })
                 .error(function errorCallback(response) {

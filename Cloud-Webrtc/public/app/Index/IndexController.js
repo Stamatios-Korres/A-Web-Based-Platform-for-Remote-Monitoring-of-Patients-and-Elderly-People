@@ -6,14 +6,15 @@ if (token === undefined)
     $location.path('login');
 else {
     $scope.friends = [];
-    ws.onopen = function InitWebsocket(e) {
-        message = {
-            type: 'init',
-            token: localStorage.getItem('token')
-        };
-        message = JSON.stringify(message);
-        ws.send(message);
-    };
+    // ws.onopen = function InitWebsocket(e) {
+    //     console.log('Setting online: ' + my_name);
+    //     message = {
+    //         type: 'init',
+    //         token: localStorage.getItem('token')
+    //     };
+    //     message = JSON.stringify(message);
+    //     ws.send(message);
+    // };
     $scope.user = {
         username: '',
         SetName: function () {
