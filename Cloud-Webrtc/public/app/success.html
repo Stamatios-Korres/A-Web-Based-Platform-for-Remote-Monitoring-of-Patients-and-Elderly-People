@@ -29,6 +29,9 @@
             width: 550px;
             height: 450px;
         }
+        #local_video{
+            z-index: 10;
+            position: absolute        }
     </style>
     <!--<script src="//code.jquery.com/jquery-1.12.4.js"></script>-->
     <!--<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>-->
@@ -91,7 +94,8 @@
         </h1>
         <div class="camera-box">
             <!--<video id="received_video" autoplay ></video>-->
-            <video id="local_video" autoplay muted></video>
+            <video id="local_video" width="150" height="150" autoplay muted></video>
+            <video id="received_video" autoplay width="550" height="4000"></video>
             <!--<button id="hangup-button" onclick="hangUpCall();" ng-disabled="">Hang Up</button>-->
         </div>
         <div id="buttonDiv">
@@ -103,7 +107,7 @@
         </div>
     </div>
 </div>
-<video id="received_video" autoplay></video>
+
 <div ng-view></div>
 
 
