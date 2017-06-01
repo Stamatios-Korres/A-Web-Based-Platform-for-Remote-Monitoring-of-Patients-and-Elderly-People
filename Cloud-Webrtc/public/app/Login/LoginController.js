@@ -41,8 +41,8 @@ angular.module('Openhealth').controller('LoginController', function (FriendsAndS
                     token = localStorage.getItem('token');
                     my_name = $scope.login.getUsername();
                     AjaxServices.services.GetRequests();
-                    // ws = new WebSocket('wss://healthcloud.menychtas.com/sockets');
-                    ws = new WebSocket('ws:localhost:3000');
+                    ws = new WebSocket('wss://healthcloud.menychtas.com/sockets');
+                    // ws = new WebSocket('ws:localhost:3000');
                     AjaxServices.services.GetFriends(function (response) {
                         for (var i = 0; i < response.length; i++) {
                             FriendsAndState.addfriends(response[i], 'inactive');
