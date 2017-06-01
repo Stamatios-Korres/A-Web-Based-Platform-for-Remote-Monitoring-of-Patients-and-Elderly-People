@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <style>
+        #draggable {
+            border: 2px solid black;
+            width: 550px;
+            height: 400px;
+            position: absolute;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        #buttonDiv {
+            position: absolute;
+            bottom: 0;
+        }
+
+        h1 {
+            color: white;
+        }
+
+        #received_video {
+            top: 0;
+            overflow: hidden;
+            position: absolute;
+            width: 550px;
+            height: 450px;
+        }
+    </style>
+    <!--<script src="//code.jquery.com/jquery-1.12.4.js"></script>-->
+    <!--<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>-->
+
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!--<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">-->
+    <title>OpenHealth Online</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+    <script src="js/jquery.js"></script>
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>-->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-route.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-resource.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!--Script to specify moving table-->
+    <script>
+        $(function () {
+            $("#draggable").draggable({});
+        });
+    </script>
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            padding-top: 70px;
+            /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+        }
+    </style>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+    <![endif]-->
+    <!-- Angular Material requires Angular.js Libraries -->
+
+</head>
+</head>
+
+<body ng-app="Openhealth" ng-controller="Video-Controller">
+<div id='draggable' class="ui-widget-content" ng-show="videoInfo.status === 'open' ">
+    <div class="flexChild" id="camera-container">
+        <h1>{{videoInfo.message}}
+            <small></small>
+        </h1>
+        <div class="camera-box">
+            <!--<video id="received_video" autoplay ></video>-->
+            <video id="local_video" autoplay muted></video>
+            <!--<button id="hangup-button" onclick="hangUpCall();" ng-disabled="">Hang Up</button>-->
+        </div>
+        <div id="buttonDiv">
+            <button type="button" class="btn btn-success" ng-click="videoInfo.acceptCall(videoInfo.message)">Accept
+            </button>
+            <button type="button" class="btn btn-primary" ng-click="videoInfo.rejectCall(videoInfo.message)">Reject
+            </button>
+            <button type="button" class="btn btn-warning" ng-click="videoInfo.status = closed">Close</button>
+        </div>
+    </div>
+</div>
+<video id="received_video" autoplay></video>
+<div ng-view></div>
+
+
+<!--<video id="received_video" autoplay ></video>-->
+
+<!-- Navigation -->
+
+ <!-- /.container -->
+
+<!-- jQuery Version 1.11.1 -->
+
+
+<script type="text/javascript" src='js/main-page.js'></script>
+<script type="text/javascript" src='Login/LoginController.js'></script>
+<script type="text/javascript" src='Subscribe/SubscribeController.js'></script>
+<script type="text/javascript" src='Index/IndexController.js'></script>
+<script type="text/javascript" src='Friends/FriendsController.js'></script>
+<script type="text/javascript" src='Requests/RequestsController.js'></script>
+<!-- Bootstrap Core JavaScript -->
+<script src='js/bootstrap.min.js'></script>
+
+
+</body>
+
+</html>

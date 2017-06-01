@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <style>
+        #draggable {
+            border:2px solid black;
+            width: 550px;
+            height: 400px;
+            position:absolute;
+            z-index: 10;
+            overflow: hidden;
+        }
+        #buttonDiv {
+            position:absolute;
+            bottom:0;
+        }
+        h1{
+            color: white;
+        }
+        #received_video {
+            top:0;
+            overflow: hidden;
+            position: absolute;
+            width: 550px;
+            height: 450px;
+        }
+    </style>
+    <!--<script src="//code.jquery.com/jquery-1.12.4.js"></script>-->
+    <!--<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>-->
+
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!--<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">-->
+    <title>OpenHealth Online</title>
+    <script src="js/jquery.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-route.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-resource.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="htpps://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!--Script to specify moving table-->
+    <script>
+        $(function () {
+            console.log("try1");
+            $("#draggable").draggable({
+            });
+        });
+    </script>
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            padding-top: 70px;
+            /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+        }
+    </style>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+    <![endif]-->
+    <!-- Angular Material requires Angular.js Libraries -->
+
+</head>
+
+<body ng-app="Openhealth" ng-controller="Video-Controller">
+<div id='draggable' class="ui-widget-content" ng-show="videoInfo.status === 'open' ">
+    <div class="flexChild" id="camera-container">
+        <h1>{{videoInfo.message}}<small></small></h1>
+        <div class="camera-box">
+            <video id="received_video" autoplay ></video>
+            <video id="local_video" autoplay muted></video>
+            <!--<button id="hangup-button" onclick="hangUpCall();" ng-disabled="">Hang Up</button>-->
+        </div>
+        <div id="buttonDiv" >
+            <button type="button" class="btn btn-success" ng-click="videoInfo.acceptCall(videoInfo.message)">Accept</button>
+            <button type="button" class="btn btn-primary" ng-click="videoInfo.rejectCall(videoInfo.message)">Reject</button>
+            <button type="button" class="btn btn-warning" ng-click="videoInfo.status = closed">Close</button>
+        </div>
+    </div>
+</div>
+<div ng-view></div>
+
+
+
+<!-- Navigation -->
+<script type="text/ng-template" id='addFriends.htm'>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="Bar-controller">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#index">OpenHealth Online</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="#show">Show requests</a>
+                    </li>
+                    <li>
+
+                        <a href="#add">Add Friends</a>
+                    </li>
+                    <li>
+                        <a href='' ng-href="#logout" ng-click="go.check()">Logout</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <div class=".col-lg-4" ng-controller="addController">
+            <div class="form-group row">
+                <label for="example-search-input" class="col-2 col-form-label">Search for friends </label>
+                <h1></h1>
+                <div class="col-lg-6">
+                    <input class="form-control" type="search" id="example-search-input" ng-model="friend.username">
+                </div>
+                <button ng-disabled="!friend.username" type="submit" ng-click="friend.sendRequest()"
+                        class="btn btn-primary">Send Friend Request
+                </button>
+                <h1></h1>
+                <p>{{friend.requestResult}}</p>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id='showRequests.htm'>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="Bar-controller" ng-init="requests.getRequests()">
+        <div class="container" >
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#index">OpenHealth Online</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="#show">Show requests</a>
+                    </li>
+                    <li>
+                        <a href="#add">Add Friends</a>
+                    </li>
+                    <li>
+                        <a href='' ng-href="#logout" ng-click="go.check()">Logout</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+        <div class=".col-lg-4" ng-controller="RequestController" ng-init="Requests.getRequests()">
+            <h1>Friend Requests</h1>
+            <table class=" table-hover">
+                <thead>
+                <tr>
+                    <th>User</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr  ng-repeat="data in Requests.Requests">
+                    <td>{{data}}</td>
+                    <td> <button  class="glyphicon glyphicon-ok" ng-click="Requests.accept(data)">Accept</button></td>
+                    <p><p/>
+                    <td> <button  class="glyphicon glyphicon-trash" ng-click="Requests.reject(data)">Reject</button>  </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</script>
+<script type="text/ng-template" id="index.htm">
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="Bar-controller">
+        <div class="container">
+
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#index">OpenHealth Online</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="#show">Show requests</a>
+                    </li>
+                    <li>
+
+                        <a href="#add">Add Friends</a>
+                    </li>
+                    <li>
+                        <a href='' ng-href="#logout" ng-click="go.check()">Logout</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 text-center" ng-init="user.SetName()" >
+                <h1>Hi {{user.username}} , welcome to OpenHealth </h1>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="col-lg-9"></div>
+        <div  class="col-lg-3">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Friends</th>
+                    <th>State</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat=" temp in friends">
+                    <th>{{temp.username}}</th>
+                    <th  ng-show="temp.state === 'active' "><p class="text-success">Active</p></th>
+                    </th>
+                    <th  ng-hide="temp.state === 'active'"><p class="text-danger">Inactive</p>
+                    <th>
+                    <button ng-click='videoInfo.call(temp.username)' ng-disabled="temp.state == 'inactive'" class="btn btn-primary btn-sm">
+                    Call
+                    </button>
+                    </th>
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</script>
+<script type="text/ng-template" id='video-call.htm'></script>
+<script type="text/ng-template" id='login.htm'>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#login">Login</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a class="navbar-brand" href="#subscribe">Sign Up</a>
+                    </li>
+                </ul>
+
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container" ng-init="">
+        <div class="row">
+            <div class="col-lg-4">
+                <!--<div ng-view></div>-->
+                <!-- <div class=".col-lg-6" > -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Login</h3>
+                    </div>
+                    <div class="panel-body" ng-controller="LoginController">
+
+                        <div name="ValidCredential" class="form-group">
+                            <label>Username </label>
+                            <span style="color:red" ng-show="!login.username">*</span>
+                            <input name="validUsername" type="text" class="form-control" ng-model="login.username"
+                                   required>
+                            </span>
+                            <label>Password</label>
+                            <span style="color:red" ng-show="!login.password">*</span>
+                            <input name='validPassword' type="password" class="form-control" ng-model="login.password"
+                                   required>
+                            <p class="help-block">{{login.message}}</p>
+                        </div>
+                        <button ng-disabled="!login.username || !login.password" ng-click="login.SendRequest()"
+                                type="button" class="btn btn-sm btn-primary">Login
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </div>
+    <!-- /.row -->
+    </div>
+</script>
+<!--/.nav-collapse -->
+<script type="text/ng-template" id='subscribe.htm'>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#login">Login</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a class="navbar-brand" href="#subscribe">Sign Up</a>
+
+                    </li>
+                </ul>
+
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container" ng-init="">
+        <div class="row">
+            <div class="col-lg-4 ">
+                <!-- <div class=".col-lg-6" > -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Subscribe</h3>
+                    </div>
+                    <div class="panel-body" ng-controller="SubscribeController">
+                        <div class="form-group">
+                            <label>Pick a username </label>
+                            <span style="color:red" ng-show="!subscribe.username">*</span>
+                            <input type="text" class="form-control" ng-model="subscribe.username" required>
+                            <label>Pick a password</label>
+                            <span style="color:red" ng-show="!subscribe.password">*</span>
+                            <input type="password" class="form-control" ng-model="subscribe.password" required>
+                            <p class="help-block">{{subscribe.message}}</p>
+                        </div>
+                        <button ng-disabled="!subscribe.username || !subscribe.password"
+                                ng-click="subscribe.SendRequest()"
+                                type="button" class="btn btn-sm btn-primary">Subscribe
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <!-- /.row -->
+    </div>
+</script>
+
+
+<!-- /.container -->
+
+<!-- jQuery Version 1.11.1 -->
+
+
+<script src=js/main-page.js></script>
+<!-- Bootstrap Core JavaScript -->
+<script src="js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

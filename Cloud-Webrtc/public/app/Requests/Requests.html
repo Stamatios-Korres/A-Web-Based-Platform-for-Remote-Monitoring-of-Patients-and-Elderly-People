@@ -1,0 +1,94 @@
+<nav class="navbar navbar-inverse navbar-fixed-top" style="background-color: #e3f2fd;" role="navigation"
+     ng-controller="Bar-controller" ng-init="requests.getRequests()">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#index">OpenHealth Online</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li>
+                    <a href="#show">Requests</a>
+                </li>
+                <li>
+                    <a href="#add">Friends</a>
+                </li>
+                <li>
+                    <a href='' ng-href="#logout" ng-click="go.check()">Logout</a>
+                </li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+<!-- Page Content -->
+<div class="container">
+    <div ng-controller="RequestController" ng-init="Requests.getRequests()">
+        <div class="col-lg-6">
+            <h1>Friend Requests</h1>
+            <div ng-hide="Requests.Requests">
+                <div class="alert alert-info" role="alert">
+                    <strong>No friend Requests </strong>
+                </div>
+            </div>
+            <div ng-show="Requests.Requests">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Request From</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="data in Requests.Requests">
+                        <td><strong>{{data}}</strong></td>
+                        <td>
+                            <button class="btn btn-success" ng-click="Requests.accept(data)">Accept</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger" ng-click="Requests.reject(data)">Reject
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <h1>Pending Requests</h1>
+            <div ng-hide="Requests.PendingRequests" class="alert alert-info " role="alert">
+                <strong>No Pending Requests</strong>
+            </div>
+            <div ng-show="Requests.PendingRequests">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Requests</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="data1 in Requests.PendingRequests">
+                        <td><strong>{{data1}}</strong></td>
+                        <td></td>
+                        <td>
+                            <button class="btn btn-danger" ng-click="Requests.cancel(data1)">Cancel</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

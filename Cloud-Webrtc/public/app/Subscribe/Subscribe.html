@@ -1,0 +1,56 @@
+<nav class="navbar navbar-inverse navbar-fixed-top" style="background-color: #e3f2fd;" role="navigation">
+    <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#login">Login</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li>
+                    <a class="navbar-brand" href="#subscribe">Sign Up</a>
+
+                </li>
+            </ul>
+
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+<!-- Page Content -->
+<div class="container" ng-init="">
+    <div class="row">
+        <div class="col-lg-4 ">
+            <!-- <div class=".col-lg-6" > -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Subscribe</h3>
+                </div>
+                <div class="panel-body" ng-controller="SubscribeController">
+                    <div class="form-group">
+                        <label>Pick a username </label>
+                        <span style="color:red" ng-show="!subscribe.username">*</span>
+                        <input type="text" class="form-control" ng-model="subscribe.username" required>
+                        <label>Pick a password</label>
+                        <span style="color:red" ng-show="!subscribe.password">*</span>
+                        <input type="password" class="form-control" ng-model="subscribe.password" required>
+                        <p class="help-block">{{subscribe.message}}</p>
+                    </div>
+                    <button ng-disabled="!subscribe.username || !subscribe.password"
+                            ng-click="subscribe.SendRequest()"
+                            type="button" class="btn btn-sm btn-primary">Subscribe
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
