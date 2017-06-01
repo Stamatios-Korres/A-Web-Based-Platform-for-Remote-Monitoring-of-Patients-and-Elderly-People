@@ -46,10 +46,8 @@ angular.module('Openhealth').controller('SubscribeController', function (Websock
                         for (var i = 0; i < response.length; i++) {
                             FriendsAndState.addfriends(response[i], 'inactive');
                         }
-
+                        WebsocketService.InitWebsocket();
                     });
-
-                    WebsocketService.InitWebsocket();
                     $location.path('index');
                 }
             })

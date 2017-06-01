@@ -84,7 +84,6 @@
 </head>
 
 <body ng-app="Openhealth" ng-controller="Video-Controller">
-<button ng-click="test.test()">Click me</button>
 <div id='draggable' class="ui-widget-content" ng-show="videoInfo.status === 'open' ">
     <div class="flexChild" id="camera-container">
         <h1>{{videoInfo.message}}
@@ -100,7 +99,7 @@
             </button>
             <button type="button" class="btn btn-primary" ng-click="videoInfo.rejectCall(videoInfo.message)">Reject
             </button>
-            <button type="button" class="btn btn-warning" ng-click="videoInfo.status = closed">Close</button>
+            <button type="button" class="btn btn-warning" ng-click="videoInfo.close()">Close</button>
         </div>
     </div>
 </div>

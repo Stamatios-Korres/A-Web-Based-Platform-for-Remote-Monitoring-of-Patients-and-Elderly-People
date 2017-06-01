@@ -63,6 +63,10 @@ exports.initialize = function (server) {
                     onlineList.Send(data);
                     console.log('Candidate Received');
                     break;
+                case 'hang-up':
+                    onlineList.Send(data);
+                    console.log('Call is ended');
+                    break;
                 default :
                     console.log("unknown type");
             }

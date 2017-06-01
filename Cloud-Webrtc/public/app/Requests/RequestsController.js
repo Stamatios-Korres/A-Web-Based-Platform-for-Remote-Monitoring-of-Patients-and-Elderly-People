@@ -8,8 +8,10 @@ mainApp.controller('RequestController', function (AjaxServices, $scope, $timeout
         Requests: '',
         PendingRequests: '',
         getRequests: function () {
+            AjaxServices.services.PendingRequests(function(){
             $scope.Requests.Requests = requests;
             $scope.Requests.PendingRequests = Pending;
+            });
         },
         accept: function (name) {
             AjaxServices.services.requestReply(name, 'accept', function (reply) {

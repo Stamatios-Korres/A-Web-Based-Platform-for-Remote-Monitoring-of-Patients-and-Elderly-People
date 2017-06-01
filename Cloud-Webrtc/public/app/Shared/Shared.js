@@ -40,7 +40,7 @@ angular.module('Openhealth').service('FriendsAndState', function () {
         removefromlist:function(element){
             for(var i = 0; i < friends.length; i++) {
                 if (friends[i].username === element) {
-                    console.log("removed it")
+                    console.log("removed it");
                     friends.splice(i, 1);
                     break;
                 }
@@ -69,7 +69,7 @@ angular.module('Openhealth').service('AjaxServices', function (FriendsAndState, 
             callback(response);
         })
     };
-    services.PendingRequests = function () {
+    services.PendingRequests = function (callback) {
         // token is initialized inside otherwise it get's undefined
         var string = 'Bearer ' + token;
         $http({
@@ -81,6 +81,7 @@ angular.module('Openhealth').service('AjaxServices', function (FriendsAndState, 
         }).success(function (response) {
             console.log(response);
             Pending = response;
+            callback();
         })
     };
     services.FriendRequest = function (name, callback) {
@@ -191,7 +192,6 @@ angular.module('Openhealth').service('VideoServices', function () {
     };
     var IceCandidates;
     var SDPCandiates;
-
     var MyPeerConnection;
     var configuration = {
         iceServers: [
@@ -214,12 +214,15 @@ angular.module('Openhealth').service('VideoServices', function () {
             ws.send(JSON.stringify(message));
         }
     }
-
+    function closePeer(){
+        MyPeerConnection.close();
+        MyPeerConnection = null;
+    }
     function handleNegotiationNeededEvent() {
 
         if (flag !== true || i >= 1)
             return;
-        i = i + 1;
+       i = i + 1;
         console.log('Sending negotiation Messages');
         MyPeerConnection.createOffer().then(function (offer) {
             return MyPeerConnection.setLocalDescription(offer);
@@ -235,17 +238,52 @@ angular.module('Openhealth').service('VideoServices', function () {
             })
         //.catch(error);
     }
-
+    function CloseVideo (){
+        var remoteVideo = document.getElementById("received_video");
+        var localVideo = document.getElementById("local_video");
+        if (MyPeerConnection) {
+            if (remoteVideo.srcObject) {
+                remoteVideo.srcObject.getTracks()[1].stop();
+                console.log('remote1');
+                remoteVideo.srcObject.getTracks()[0].stop();
+                console.log('remote2');
+                remoteVideo.srcObject = null;
+            }
+            if (localVideo.srcObject) {
+                localVideo.srcObject.getTracks()[0].stop();
+                console.log('local1');
+                localVideo.srcObject.getTracks()[1].stop();
+                console.log('local2');
+                localVideo.srcObject = null;
+            }
+            closePeer();
+        }
+    }
     function handleAddStreamEvent(event) {
         console.log("This is added too");
         document.getElementById("received_video").srcObject = event.stream;
         //document.getElementById("hangup-button").disabled = false;
     }
+    function handleICEConnectionStateChangeEvent(event) {
+        if(MyPeerConnection){
+            switch(MyPeerConnection.iceConnectionState) {
+                case "closed":
+                case "failed":
+                case "disconnected":
+                    CloseVideo();
+                    break;
+            }
+        }
+    }
 
     services = {};
+    services.closeVideo = function(){
+        console.log('ready to close video');
+        CloseVideo();
+    };
     services.addIceCandiate = function(IceCandidate){
         MyPeerConnection.addIceCandidate(IceCandidate);
-    }
+    };
     services.getMedia = function () {
         return mediaConstraints
     };
@@ -257,7 +295,7 @@ angular.module('Openhealth').service('VideoServices', function () {
         MyPeerConnection.onicecandidate = handleICECandidateEvent;
         MyPeerConnection.onaddstream = handleAddStreamEvent;
         // myPeerConnection.onremovestream = handleRemoveStreamEvent;
-        // myPeerConnection.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
+        MyPeerConnection.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
         // myPeerConnection.onicegatheringstatechange = handleICEGatheringStateChangeEvent;
         // myPeerConnection.onsignalingstatechange = handleSignalingStateChangeEvent;
         MyPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
@@ -279,6 +317,7 @@ angular.module('Openhealth').service('VideoServices', function () {
         flag = true;
         response = answer;
     };
+
     return services;
 });
 
@@ -342,8 +381,13 @@ angular.module('Openhealth').service('WebsocketService', function (VideoServices
                     console.log('Got a video-answer message');
                     //Set SDP- candidates answer
                     VideoServices.SetSdp(data.sdp);
-
                     $rootScope.$emit('Video-answer');
+                    break;
+                case 'hang-up':
+
+                    $rootScope.$emit('close-video');
+                    console.log('It was emmited');
+                    VideoServices.closeVideo();
                     break;
                 default:
                     // console.log(data);
@@ -375,7 +419,6 @@ angular.module('Openhealth').service('WebsocketService', function (VideoServices
     };
     return services;
 });
-
 
 angular.module('Openhealth').service('Webrtc',function(){
     var i =0;

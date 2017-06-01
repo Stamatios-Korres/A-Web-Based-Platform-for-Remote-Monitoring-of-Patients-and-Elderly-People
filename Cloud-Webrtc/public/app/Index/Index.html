@@ -32,48 +32,49 @@
     </div>
     <!-- /.container -->
 </nav>
-
-<!-- Page Content -->
-<div class="container">
-    <div class="row">
-        <div class="col-lg-9 text-center" ng-init="user.SetName()">
-            <h1>Hi {{user.username}} , welcome to OpenHealth </h1>
+<div ng-controller="indexController" >
+    <!-- Page Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 text-center" ng-init="user.SetName()">
+                <h1>Hi {{user.username}} , welcome to OpenHealth </h1>
+            </div>
         </div>
     </div>
-</div>
-<div class="container">
-    <div class="col-lg-9"></div>
-    <div class="col-lg-3">
-        <table class="table table-hover">
-            <thead>
-            <tr>
-                <th>Friends</th>
-                <th>State</th>
-                <th></th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat=" temp in friends">
-                <th>{{temp.username}}</th>
-                <th ng-show="temp.state === 'active' "><p class="text-success">Active</p></th>
-                </th>
-                <th ng-hide="temp.state === 'active'"><p class="text-danger">Inactive</p>
-                <th>
-                    <button ng-click='videoInfo.call(temp.username)' ng-disabled="temp.state == 'inactive'"
-                            class="btn btn-primary btn-sm">
-                        Call
-                    </button>
-                </th>
-                <th>
-                    <button type="button" class="btn btn-warning btn-sm" ng-click="user.remove(temp.username)">
-                        Remove
-                    </button>
-                </th>
-            </tr>
+    <div class="container">
+        <div class="col-lg-9"></div>
+        <div class="col-lg-3">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Friends</th>
+                    <th>State</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat=" temp in friends">
+                    <th>{{temp.username}}</th>
+                    <th ng-show="temp.state === 'active' "><p class="text-success">Active</p></th>
+                    </th>
+                    <th ng-hide="temp.state === 'active'"><p class="text-danger">Inactive</p>
+                    <th>
+                        <button ng-click='videoInfo.call(temp.username)' ng-disabled="temp.state == 'inactive'"
+                                class="btn btn-primary btn-sm">
+                            Call
+                        </button>
+                    </th>
+                    <th>
+                        <button type="button" class="btn btn-warning btn-sm" ng-click="user.remove(temp.username)">
+                            Remove
+                        </button>
+                    </th>
+                </tr>
 
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
+
     </div>
-
 </div>

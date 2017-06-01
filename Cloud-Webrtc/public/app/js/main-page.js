@@ -26,7 +26,7 @@ mainApp.run(function ($rootScope) {
     localStorage.clear();
 });
 mainApp.controller('Bar-controller', function (FriendsAndState, $scope, $window, $location) {
-    if (token == undefined) {
+    if (token === undefined) {
         $location.path('login');
     }
     else {
@@ -42,7 +42,7 @@ mainApp.controller('Bar-controller', function (FriendsAndState, $scope, $window,
         }
     }
 });
-mainApp.controller('Video-Controller', function (Webrtc,VideoServices, WebsocketService, $scope, $timeout) {
+mainApp.controller('Video-Controller', function ($rootScope,VideoServices, WebsocketService, $scope, $timeout) {
     $scope.videoInfo = {
         target: '',
         video_lengt: '',
@@ -83,7 +83,20 @@ mainApp.controller('Video-Controller', function (Webrtc,VideoServices, Websocket
             };
             console.log(message);
             ws.send(JSON.stringify(message));
+        },
+        close: function(){
+            console.log('pressed close');
+            VideoServices.closeVideo();
+            var message = {
+                type:'hang-up',
+                target:$scope.videoInfo.target
+            };
+            ws.send(JSON.stringify(message));
+            $scope.videoInfo.status = 'closed';
+            $scope.videoInfo.target ='';
+
         }
+
     };
     function handleGetUserMediaError(e) {
         switch (e.name) {
@@ -99,16 +112,16 @@ mainApp.controller('Video-Controller', function (Webrtc,VideoServices, Websocket
                 alert("Error opening your camera and/or microphone: " + e.message);
                 break;
         }
-        closeVideoCall();
+        VideoServices.closeVideo();
         //define later what close Video is
     }
-    $scope.test={
-        test: function(){
-            console.log('Ready');
-            Webrtc.createPeerConnection();
-        }
-    };
+    $rootScope.$on('close-video',function(){
+        console.log(' I am here');
+        $scope.videoInfo.status = 'closed';
+    }) ;
+
     //define a dialog to promt user to answer or reject and then hide it
+
     WebsocketService.videostart($scope, function () {
         var video = document.getElementById('draggable');
         $scope.videoInfo.status = 'open';
@@ -148,13 +161,12 @@ mainApp.controller('Video-Controller', function (Webrtc,VideoServices, Websocket
             return navigator.mediaDevices.getUserMedia(VideoServices.getMedia());
         })
             .then(function (stream) {
-                localStream = stream;
-                document.getElementById("local_video").srcObject = localStream;
-                return myPeerConnection.addStream(localStream);
+                document.getElementById("received_video").srcObject = stream;
+                return myPeerConnection.addStream(stream);
             })
-
     });
     WebsocketService.videoOffer($scope, function () {
+        alert('I have a video offer');
         var localStream = null;
         var myPeerConnection = VideoServices.setPeer();
         var desc = new RTCSessionDescription(VideoServices.GetSdp());
@@ -185,14 +197,14 @@ mainApp.controller('Video-Controller', function (Webrtc,VideoServices, Websocket
                 VideoServices.RefreshPeer(myPeerConnection);
             })
             .catch(handleGetUserMediaError);
-    })
+    });
+
 });
 
 mainApp.config(['$routeProvider',
     function ($routeProvider) {
         $routeProvider.when('/index', {
             templateUrl: "Index/Index.html",
-            controller: 'indexController'
         }).when('/add', {
             templateUrl: "Friends/Friends.html",
             controller: 'addController'
