@@ -87,6 +87,7 @@
 </head>
 
 <body ng-app="Openhealth" ng-controller="Video-Controller">
+
 <div id='draggable' class="ui-widget-content" ng-show="videoInfo.status === 'open' ">
     <div class="flexChild" id="camera-container">
         <h1>{{videoInfo.message}}
@@ -94,16 +95,16 @@
         </h1>
         <div class="camera-box">
             <!--<video id="received_video" autoplay ></video>-->
-            <video id="local_video" width="150" height="150" autoplay muted></video>
-            <video id="received_video" autoplay width="550" height="4000"></video>
+            <video id="local_video" width="200" height="200" autoplay muted></video>
+            <video id="received_video" autoplay width="550" height="400"></video>
             <!--<button id="hangup-button" onclick="hangUpCall();" ng-disabled="">Hang Up</button>-->
         </div>
         <div id="buttonDiv">
-            <button type="button" class="btn btn-success" ng-click="videoInfo.acceptCall(videoInfo.message)">Accept
-            </button>
-            <button type="button" class="btn btn-primary" ng-click="videoInfo.rejectCall(videoInfo.message)">Reject
-            </button>
-            <button type="button" class="btn btn-warning" ng-click="videoInfo.close()">Close</button>
+            <button type="button" class="btn btn-success" ng-show='videoInfo.Total && videoInfo.Type && !videoInfo.Incall' ng-click="videoInfo.acceptCall()">Accept</button>
+            <button type="button" class="btn btn-primary" ng-show='videoInfo.Total && videoInfo.Type && !videoInfo.Incall'  ng-click="videoInfo.rejectCall()">Reject</button>
+            <!--<button type="button" class="btn btn-warning" ng-click="videoInfo.close()">Close</button>-->
+            <button type="button" class="btn btn-warning" ng-show='videoInfo.Total && !videoInfo.Type && videoInfo.Incall'   ng-click="videoInfo.hangUp()">Hang up</button>
+            <button type="button" class="btn btn-warning" ng-show='videoInfo.Total && !videoInfo.Type && !videoInfo.Incall'  ng-click="videoInfo.cancelCall()">Cancel Call</button>
         </div>
     </div>
 </div>

@@ -15,7 +15,7 @@ angular.module('Openhealth').service('FriendsAndState', function () {
                 username: name,
                 state: state
             };
-            console.log('Set values to :' + newUser.username);
+           // console.log('Set values to :' + newUser.username);
             friends.push(newUser);
             //Data was indeed refreshed !!!
         }
@@ -32,7 +32,7 @@ angular.module('Openhealth').service('FriendsAndState', function () {
             for (var i = 0; i < friends.length; i++) {
                 if (friends[i].username === name) {
                     friends[i].state = state;
-                    console.log("Changing state ...");
+                   // console.log("Changing state ...");
                 }
                 // console.log(i);
             }
@@ -40,7 +40,7 @@ angular.module('Openhealth').service('FriendsAndState', function () {
         removefromlist:function(element){
             for(var i = 0; i < friends.length; i++) {
                 if (friends[i].username === element) {
-                    console.log("removed it");
+                 //   console.log("removed it");
                     friends.splice(i, 1);
                     break;
                 }
@@ -190,7 +190,6 @@ angular.module('Openhealth').service('VideoServices', function () {
         audio: true, // We want an audio track
         video: true // ...and we want a video track
     };
-    var IceCandidates;
     var SDPCandiates;
     var MyPeerConnection;
     var configuration = {
@@ -199,16 +198,31 @@ angular.module('Openhealth').service('VideoServices', function () {
             {'urls': 'turn:test.menychtas.com:3478', 'username': 'bioassistclient', 'credential': 'b10cl13nt'}
         ]
     };
+
+    // Names of the users in call
+    var target;
+    var myself;
+
+    //Flags used for making sure Video Calls use cases
+    var PeerDisconnectedWhileInCall = false;
+    var PeerCancelledCall = false;
+    var MuteFlag = false;
+    var Incall = false;
+
+    //Should get rid of those
     var i = 0;
     var flag = false;
     var j =1;
+
+    // Functions needed by WebRTC PeerConnection ( Object's Fucntion )
+
     function handleICECandidateEvent(event) {
         if (event.candidate) {
             console.log("Sending Candidate number: " + j );
             j++;
             var message = {
                 type: "new-ice-candidate",
-                target: caller,
+                target: target,
                 candidate: event.candidate
             };
             ws.send(JSON.stringify(message));
@@ -216,7 +230,14 @@ angular.module('Openhealth').service('VideoServices', function () {
     }
     function closePeer(){
         MyPeerConnection.close();
-        MyPeerConnection = null;
+          MyPeerConnection = null;
+        //reset flags
+        PeerDisconnectedWhileInCall = false;
+        PeerCancelledCall = false;
+        MuteFlag = false;
+        Incall = false;
+        target = null;
+        myself = null;
     }
     function handleNegotiationNeededEvent() {
 
@@ -230,8 +251,8 @@ angular.module('Openhealth').service('VideoServices', function () {
             .then(function () {
                 message = {
                     type: "video-offer",
-                    source: my_name,
-                    target: caller,
+                    source: myself,
+                    target: target,
                     sdp: MyPeerConnection.localDescription
                 };
                 ws.send(JSON.stringify(message));
@@ -244,39 +265,60 @@ angular.module('Openhealth').service('VideoServices', function () {
         if (MyPeerConnection) {
             if (remoteVideo.srcObject) {
                 remoteVideo.srcObject.getTracks()[1].stop();
-                console.log('remote1');
                 remoteVideo.srcObject.getTracks()[0].stop();
-                console.log('remote2');
                 remoteVideo.srcObject = null;
             }
             if (localVideo.srcObject) {
                 localVideo.srcObject.getTracks()[0].stop();
-                console.log('local1');
                 localVideo.srcObject.getTracks()[1].stop();
-                console.log('local2');
                 localVideo.srcObject = null;
             }
             closePeer();
         }
     }
     function handleAddStreamEvent(event) {
-        console.log("This is added too");
+        console.log("Received incoming stream");
         document.getElementById("received_video").srcObject = event.stream;
         //document.getElementById("hangup-button").disabled = false;
     }
+    function handleGetUserMediaError(e) {
+        switch (e.name) {
+            case "NotFoundError":
+                alert("Unable to open your call because no camera and/or microphone" +
+                    "were found.");
+                break;
+            case "SecurityError":
+            case "PermissionDeniedError":
+                // Do nothing; this is the same as the user canceling the call.
+                break;
+            default:
+                alert("Error opening your camera and/or microphone: " + e.message);
+                break;
+        }
+        VideoServices.closeVideo();
+        //define later what close Video is
+    }
     function handleICEConnectionStateChangeEvent(event) {
-        if(MyPeerConnection){
-            switch(MyPeerConnection.iceConnectionState) {
-                case "closed":
-                case "failed":
-                case "disconnected":
-                    CloseVideo();
-                    break;
-            }
+        switch(MyPeerConnection.iceConnectionState) {
+            //
+            case "closed":
+              // console.log('case closed');
+                MyPeerConnection = null;
+                break;
+            case "failed":
+                // console.log('case failed');
+                break;
+            case "disconnected":
+                MyPeerConnection = null;
+
+                console.log('case disconnected');
+                break;
         }
     }
 
+    // Visible to the outside word function in order to set the object
     services = {};
+    services.incall = function(){return Incall};
     services.closeVideo = function(){
         console.log('ready to close video');
         CloseVideo();
@@ -284,31 +326,69 @@ angular.module('Openhealth').service('VideoServices', function () {
     services.addIceCandiate = function(IceCandidate){
         MyPeerConnection.addIceCandidate(IceCandidate);
     };
-    services.getMedia = function () {
-        return mediaConstraints
-    };
     services.getPeer = function () {
-        return MyPeerConnection
+        if(MyPeerConnection)
+            return true;
+        else
+            return false;
+        //return MyPeerConnection
     };
-    services.setPeer = function () {
+    services.setPeer = function (string) {
+        Incall = true;
         MyPeerConnection = new RTCPeerConnection(configuration);
         MyPeerConnection.onicecandidate = handleICECandidateEvent;
         MyPeerConnection.onaddstream = handleAddStreamEvent;
         // myPeerConnection.onremovestream = handleRemoveStreamEvent;
-        MyPeerConnection.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
+      //  MyPeerConnection.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
         // myPeerConnection.onicegatheringstatechange = handleICEGatheringStateChangeEvent;
         // myPeerConnection.onsignalingstatechange = handleSignalingStateChangeEvent;
         MyPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
-        return MyPeerConnection;
+
+        //Set the stream based on what state you have been called
+        switch(string){
+            case  'Caller' :
+                navigator.mediaDevices.getUserMedia(mediaConstraints)
+                    .then(function (localStream) {
+                        document.getElementById("local_video").srcObject = localStream;
+                        MyPeerConnection.addStream(localStream);
+                    })
+                    .catch(handleGetUserMediaError);
+                break;
+            case 'Callee':
+                var desc = new RTCSessionDescription(SDPCandiates);
+
+                MyPeerConnection.setRemoteDescription(desc).then(function () {
+                    return navigator.mediaDevices.getUserMedia(mediaConstraints);
+                })
+                    .then(function (stream) {
+                        localStream = stream;
+                        document.getElementById("local_video").srcObject = localStream;
+                        return MyPeerConnection.addStream(localStream);
+                    })
+                    .then(function () {
+                        return MyPeerConnection.createAnswer();
+                    })
+                    .then(function (answer) {
+                        return MyPeerConnection.setLocalDescription(answer);
+                    })
+                    .then(function () {
+                        var msg = {
+                            source: myself,
+                            target: target,
+                            type: "video-answer",
+                            sdp: MyPeerConnection.localDescription
+                        };
+                        ws.send(JSON.stringify(msg));
+                    })
+                    .catch(handleGetUserMediaError);
+                break;
+            default :
+                console.log('Wring type of parameter');
+
+        }
     };
     services.SetSdp = function (sdp) {
         SDPCandiates = sdp;
-    };
-    services.GetSdp = function () {
-        return SDPCandiates;
-    };
-    services.RefreshPeer = function (myPeer) {
-        MyPeerConnection = myPeer;
     };
     services.Response = function () {
         return response;
@@ -317,6 +397,41 @@ angular.module('Openhealth').service('VideoServices', function () {
         flag = true;
         response = answer;
     };
+    services.setUsers = function(user1,user2){
+        console.log('The two Peers were set');
+        target = user1;
+        myself = user2;
+    };
+    services.SetAnswer= function (){
+        var desc = new RTCSessionDescription(SDPCandiates);
+        MyPeerConnection.setRemoteDescription(desc).then(function () {
+            return navigator.mediaDevices.getUserMedia(mediaConstraints);
+        })
+            .then(function (stream) {
+                document.getElementById("received_video").srcObject = stream;
+                return MyPeerConnection.addStream(stream);
+            })
+    };
+    services.Interupted= function(){return PeerDisconnectedWhileInCall};
+
+    //Cases that must be iterrupted -> User goes Offline,Rejects,Busy,UserA cancel the call
+
+    //User who we were speaking with got offline
+    services.checkifUsed = function(name){
+        if(name === target) {
+            PeerDisconnectedWhileInCall = true;
+            console.log('Video has to close');
+        }
+    };
+
+    //Global Variables of the call
+    services.getTarget= function(){
+        return target;
+    };
+    services.yourself= function(){
+        return myself;
+    };
+
 
     return services;
 });
@@ -329,73 +444,84 @@ angular.module('Openhealth').service('WebsocketService', function (VideoServices
         message = JSON.stringify(message);
         ws.send(message);
     };
-    services.InitWebsocket = function () {
-        ws.onmessage = function (event) {
-            console.log("Got new message from Websockets");
+    services.InitWebsocket = function (){
+            ws.onmessage = function (event) {
             //I have new message , change FriendsAndState service and inform about the cange
-            var data = JSON.parse(event.data);
-            var i = 1;
-            console.log(data.type);
-            switch (data.type) {
-                case 'onlineUsers':
-                    console.log('my online friends are : ');
-                    for (var ii = 0; ii < data.online.length; ii++) {
-                        console.log("Setting " + data.online[ii] + "to active");
-                        FriendsAndState.changeState(data.online[ii], 'active');
-                    }
-                    break;
-                case 'UserGotOnline':
-                    console.log('User joined : ' + data.name);
-                    FriendsAndState.changeState(data.name, 'active');
-                    FriendsAndState.printFriends();
-                    break;
-                case 'UserGotOffLine':
-                    console.log('he left us : ' + data.name);
-                    FriendsAndState.changeState(data.name, 'inactive');
-                    break;
+            try {
+                var data = JSON.parse(event.data);
+                console.log('Received Websocket message type ' + data.type);
 
-                //Cases for Video - WebRTC
-                case 'video-start':
-                    //  console.log(data);
-                    caller = data.source;
-                    $rootScope.$emit('Video-Start');
-                    break;
-                case 'video-response': // Wiyh video response we define if we accept call or reject it
-                    VideoServices.SetResponse(data.answer);
-                    $rootScope.$emit('Video-Response');
-                    // console.log(data);
-                    break;
-                case 'video-offer':
-                    console.log(data.sdp);
-                    VideoServices.SetSdp(data.sdp);
-                    $rootScope.$emit('Video-offer');
-                    break;
-                case 'new-ice-candidate':
-                    console.log("ICE Candidate number: " + i);
-                    var candidate = new RTCIceCandidate(data.candidate);
-                    VideoServices.addIceCandiate(candidate);
+                switch (data.type) {
+                    case 'onlineUsers':
+                        //console.log('my online friends are : ');
+                        console.log(data.online);
+                        for (var ii = 0; ii < data.online.length; ii++) {
+                            console.log("Setting " + data.online[ii] + " to active");
+                            FriendsAndState.changeState(data.online[ii], 'active');
+                        }
+                        break;
+                    case 'UserGotOnline':
+                        console.log('User joined : ' + data.name);
+                        FriendsAndState.changeState(data.name, 'active');
+                        // FriendsAndState.printFriends();
+                        break;
+                    case 'UserGotOffLine':
+                        console.log('he left us : ' + data.name);
+                        FriendsAndState.changeState(data.name, 'inactive');
+                        VideoServices.checkifUsed(data.name);
+                        $rootScope.$emit('Offline');
+                        break;
 
-                    //Unhandled error
-                    break;
-                case 'video-answer':
-                    console.log('Got a video-answer message');
-                    //Set SDP- candidates answer
-                    VideoServices.SetSdp(data.sdp);
-                    $rootScope.$emit('Video-answer');
-                    break;
-                case 'hang-up':
+                    //Cases for Video - WebRTC
+                    case 'video-start':
+                        VideoServices.setUsers(data.source, my_name);
+                        $rootScope.$emit('Video-Start');
+                        break;
+                    case 'video-response': // Wiyh video response we define if we accept call or reject it
+                        VideoServices.SetResponse(data.answer);
+                        $rootScope.$emit('Video-Response');
+                        // console.log(data);
+                        break;
+                    case 'video-offer':
+                        console.log(data.sdp);
+                        VideoServices.SetSdp(data.sdp);
+                        $rootScope.$emit('Video-offer');
+                        break;
+                    case 'new-ice-candidate':
+                        var candidate = new RTCIceCandidate(data.candidate);
+                        VideoServices.addIceCandiate(candidate);
 
-                    $rootScope.$emit('close-video');
-                    console.log('It was emmited');
-                    VideoServices.closeVideo();
-                    break;
-                default:
-                    // console.log(data);
-                    console.log('Unkown message');
+                        //Unhandled error
+                        break;
+                    case 'video-answer':
+                        console.log('Got a video-answer message');
+                        //Set SDP- candidates answer
+                        VideoServices.SetSdp(data.sdp);
+                        $rootScope.$emit('Video-answer');
+                        break;
+                    case 'hang-up':
+
+                        $rootScope.$emit('close-video');
+                        VideoServices.closeVideo();
+                        break;
+                    case 'busy':
+                        $rootScope.$emit('busy');
+                        break;
+                    case 'cancel':
+                        $rootScope.$emit('cancel');
+                        break;
+                    default:
+                        console.log('Unkown message');
+                }
+                $rootScope.$emit('WebsocketNews');
             }
-            $rootScope.$emit('WebsocketNews');
-        };
-    };
+            catch(e){
+                console.log('error on Webserver');
+            }
+        }; };
+
+    //Services responsible for event handling for Video functions
+
     services.refresh = function (scope, callback) {
         var handler = $rootScope.$on('WebsocketNews', callback);
         scope.$on('$destroy', handler);
@@ -418,49 +544,5 @@ angular.module('Openhealth').service('WebsocketService', function (VideoServices
         scope.$on('$destroy', handler);
     };
     return services;
-});
-
-angular.module('Openhealth').service('Webrtc',function(){
-    var i =0;
-    // var EventHandlers = {
-        handleNegotiationNeededEvent=function(){
-            console.log(this);
-            console.log(i);
-            i++;
-            this.createOffer().then(function(offer) {
-            return this.setLocalDescription(offer);
-            })
-            // .then(function() {
-            //     sendToServer({
-            //         name: myUsername,
-            //         target: targetUsername,
-            //         type: "video-offer",
-            //         sdp: myPeerConnection.localDescription
-            //     });
-            // })
-            // .catch(reportError);
-        };
-    // };
-    var mediaConstraints = {
-        audio: true,  // We want an audio track
-        video: true   // ...and we want a video track
-    };
-    var configuration = {
-        iceServers: [
-            {'urls': 'stun:stun.l.google.com:19302'},
-            {'urls': 'turn:test.menychtas.com:3478', 'username': 'bioassistclient', 'credential': 'b10cl13nt'}
-        ]
-    };
-    var myPeerConnection;
-    //Return Object
-    services={};
-    services.createPeerConnection= function(){
-        myPeerConnection = new RTCPeerConnection(configuration);
-        console.log('It was set');
-        myPeerConnection.onnegotiationneeded = myPeerConnection.handleNegotiationNeededEvent;
-    };
-
-    return services;
-
 });
 

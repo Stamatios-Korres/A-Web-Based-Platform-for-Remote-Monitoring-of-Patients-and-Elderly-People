@@ -4,15 +4,6 @@
 var mainApp = angular.module("Openhealth", ['ngRoute', 'ngResource', 'ngMaterial']);
 
 //Global variables
-//
-// var global = {
-//     token:null,
-//     ws:null,
-//     my_name:null,
-//     requests:null,
-//     Pending:null,
-//     caller:null
-// };
 
 var token; // Acces token given by Authorization Server
 var ws; //Active websocket which connect Client - Server
@@ -43,15 +34,24 @@ mainApp.controller('Bar-controller', function (FriendsAndState, $scope, $window,
     }
 });
 mainApp.controller('Video-Controller', function ($rootScope,VideoServices, WebsocketService, $scope, $timeout) {
+    function closeScreen(){
+        // Next time call is began do not show buttons by default
+        $scope.videoInfo.status = 'closed';
+        $scope.videoInfo.Type = false;
+        $scope.videoInfo.Total = true;
+        $scope.videoInfo.Incall = false;
+    }
+    // information shown in Video View
     $scope.videoInfo = {
         target: '',
-        video_lengt: '',
-        video_status: '',
         status: 'closed',
         message: '',
+        Type:false, //button flags
+        Total:true,
+        Incall:false,
         call: function (username) {
-            $scope.videoInfo.target = username; // Keep this info avaialable through time :)
-            caller = username;
+            $scope.videoInfo.target = username; // Keep this info avaialable through calling proccess :)
+            VideoServices.setUsers(username,my_name);
             var message = {
                 type: 'video-start',
                 source: my_name,
@@ -60,72 +60,92 @@ mainApp.controller('Video-Controller', function ($rootScope,VideoServices, Webso
             WebsocketService.makeVideoCall(message);
             $scope.videoInfo.status = 'open';
             $scope.videoInfo.message = 'Calling ' + username + " ...";
-        },
-        acceptCall: function (name) {
-            // console.log("Accepting calls");
-            $scope.videoInfo.target = name;
+
+        }, //Definfe Functions of each button -> In total 5 buttons
+        acceptCall: function () {
             var message = {
                 type: 'video-response',
-                target: name,
+                target:  VideoServices.getTarget(),
                 source: my_name,
                 answer: 'yes'
             };
             console.log(message);
             ws.send(JSON.stringify(message));
+            $scope.videoInfo.Incall=true;
+            $scope.videoInfo.Type = false;
         },
-        rejectCall: function (name) {
-            // console.log("Rejecting calls");
+        rejectCall: function () {
             var message = {
-                type: 'video-response',
-                target: name,
-                source: my_name,
-                answer: 'no'
+                type: 'busy',
+                target: VideoServices.getTarget(),
+                source: my_name
             };
-            console.log(message);
+            closeScreen();
             ws.send(JSON.stringify(message));
         },
-        close: function(){
-            console.log('pressed close');
+        cancelCall:function(){
+            var message = {
+                type: 'cancel',
+                target:VideoServices.getTarget(),
+                source: my_name
+            };
+            closeScreen();
+            ws.send(JSON.stringify(message));
+        },
+        hangUp:function(){
             VideoServices.closeVideo();
+            closeScreen();
+            //Send message to other Peer to inform screen
             var message = {
-                type:'hang-up',
-                target:$scope.videoInfo.target
+                type: 'hang-up',
+                target: $scope.videoInfo.target
             };
             ws.send(JSON.stringify(message));
-            $scope.videoInfo.status = 'closed';
-            $scope.videoInfo.target ='';
-
         }
-
     };
-    function handleGetUserMediaError(e) {
-        switch (e.name) {
-            case "NotFoundError":
-                alert("Unable to open your call because no camera and/or microphone" +
-                    "were found.");
-                break;
-            case "SecurityError":
-            case "PermissionDeniedError":
-                // Do nothing; this is the same as the user canceling the call.
-                break;
-            default:
-                alert("Error opening your camera and/or microphone: " + e.message);
-                break;
-        }
-        VideoServices.closeVideo();
-        //define later what close Video is
-    }
+
+    //Event handlers when new message arrives from Websockets
+
+    //Peer has already been reset from Websockets
     $rootScope.$on('close-video',function(){
-        console.log(' I am here');
+        console.log('The other peer closed');
         $scope.videoInfo.status = 'closed';
     }) ;
+    $rootScope.$on('busy',function(){
+        $scope.videoInfo.message =  $scope.videoInfo.target + ' is busy';
+        $timeout(function(){$scope.videoInfo.status = 'closed'},5000);
+    });
+    $rootScope.$on('cancel',function(){
+        $scope.videoInfo.Total = false;
+        $scope.videoInfo.message =  VideoServices.getTarget() + ' has closed his phone';
+        $timeout(closeScreen,3000);
+    });
+
+    //User disconnected from Server
+    $rootScope.$on('Offline',function(){
+            console.log("Let's try ");
+          //  if(VideoServices.Interupted()){
+                console.log('Oops users seems to be disconnected');
+                VideoServices.closeVideo();
+                $scope.videoInfo.message = VideoServices.getTarget() + " was disconected";
+                $timeout($scope.videoInfo.status = 'closed',5000);
+            //}
+    });
 
     //define a dialog to promt user to answer or reject and then hide it
-
     WebsocketService.videostart($scope, function () {
         var video = document.getElementById('draggable');
+        //User already is on a call
+        if(VideoServices.getPeer()){
+            var message ={
+                type:'busy',
+                target:VideoServices.getTarget()
+            };
+            ws.send(JSON.stringify(message));
+        }
+        $scope.videoInfo.Type = true; // Only show accept-reject buttons if the user is receiving data
         $scope.videoInfo.status = 'open';
-        $scope.videoInfo.message = caller + "";
+        $scope.videoInfo.message = VideoServices.getTarget() + " is calling";
     });
     WebsocketService.videoresponse($scope, function () {
         var decide = VideoServices.Response();
@@ -136,75 +156,32 @@ mainApp.controller('Video-Controller', function ($rootScope,VideoServices, Webso
             }, 4000)
         }
         else if (decide === 'yes') {
-            $scope.videoInfo.message = '';
-            //Start sending candidates
-            if (VideoServices.getPeer()) {
-                console.log("Can't start a new video during a call");
-            }
+            //Video start here
+            if (VideoServices.getPeer())
+                alert("Can't start a new video during a call");
             else {
-                var myPeerConnection = VideoServices.setPeer();
-                navigator.mediaDevices.getUserMedia(VideoServices.getMedia())
-                    .then(function (localStream) {
-                        document.getElementById("local_video").srcObject = localStream;
-                        myPeerConnection.addStream(localStream);
-                    })
-                    .catch(handleGetUserMediaError);
+                //Let the service know the two User calling each other
+                VideoServices.setPeer('Caller');
+                $scope.videoInfo.Incall=true;
             }
-            VideoServices.RefreshPeer(myPeerConnection);
         }
     });
     WebsocketService.videoAnswer($scope, function () {
-        var myPeerConnection = VideoServices.getPeer();
-        console.log(VideoServices.GetSdp());
-        var desc = new RTCSessionDescription(VideoServices.GetSdp());
-        myPeerConnection.setRemoteDescription(desc).then(function () {
-            return navigator.mediaDevices.getUserMedia(VideoServices.getMedia());
-        })
-            .then(function (stream) {
-                document.getElementById("received_video").srcObject = stream;
-                return myPeerConnection.addStream(stream);
-            })
+        VideoServices.SetAnswer();
     });
     WebsocketService.videoOffer($scope, function () {
-        alert('I have a video offer');
-        var localStream = null;
-        var myPeerConnection = VideoServices.setPeer();
-        var desc = new RTCSessionDescription(VideoServices.GetSdp());
+        VideoServices.setPeer('Callee');
+        $scope.videoInfo.Incall=true;
 
-        myPeerConnection.setRemoteDescription(desc).then(function () {
-            return navigator.mediaDevices.getUserMedia(VideoServices.getMedia());
-        })
-            .then(function (stream) {
-                localStream = stream;
-                document.getElementById("local_video").srcObject = localStream;
-                return myPeerConnection.addStream(localStream);
-            })
-            .then(function () {
-                return myPeerConnection.createAnswer();
-            })
-            .then(function (answer) {
-                return myPeerConnection.setLocalDescription(answer);
-            })
-            .then(function () {
-                var msg = {
-                    source: my_name,
-                    target: $scope.videoInfo.target,
-                    type: "video-answer",
-                    sdp: myPeerConnection.localDescription
-                };
-                ws.send(JSON.stringify(msg));
-                //Save variable at the VideoServices
-                VideoServices.RefreshPeer(myPeerConnection);
-            })
-            .catch(handleGetUserMediaError);
     });
+
 
 });
 
 mainApp.config(['$routeProvider',
     function ($routeProvider) {
         $routeProvider.when('/index', {
-            templateUrl: "Index/Index.html",
+            templateUrl: "Index/Index.html"
         }).when('/add', {
             templateUrl: "Friends/Friends.html",
             controller: 'addController'

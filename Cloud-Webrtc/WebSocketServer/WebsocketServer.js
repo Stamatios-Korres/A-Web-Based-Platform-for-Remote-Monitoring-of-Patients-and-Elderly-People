@@ -25,52 +25,73 @@ exports.initialize = function (server) {
             var data = message.utf8Data;
             try {
                 data = JSON.parse(data);
-            } catch (e) {
-                console.log("Invalid Input");
-            }
-            // console.log(data);
-            switch (data.type) {
-                case 'init': {
-                    findbyToken(data.token,
-                        function (result) {
-                            onlineList.push(result, connection);
-                            onlineList.friendsOnline(result, function (result2) {
-                                // console.log(result2);
-                                var message = {type: 'onlineUsers', online: result2};
-                                // console.log(message);
-                                connection.send(JSON.stringify(message)); // for each online user send that this particular user has come online
+                console.log(data.type);
+                switch (data.type) {
+                    case 'init': {
+                        findbyToken(data.token,
+                            function (err,result) {
+                            //Something went wrong with the user - Disconnect User
+                                if(err){
+                                    console.log('Some error finding the user');
+                                }
+                                onlineList.push(result, connection);
+                                onlineList.friendsOnline(result, function (error,result2) {
+                                    if(error) {
+                                        console.log('Error occured');
+                                        connection.send(JSON.stringify({message: error}));
+                                    }
+                                    else
+                                    {
+                                        console.log('Result outside Callback :');
+                                        console.log(result2);
+                                        var message = {type: 'onlineUsers', online: result2};
+                                        message = JSON.stringify(message);
+                                        connection.send(message); // for each online user send that this particular user has come online
+                                        console.log('sent');
+                                    }
+                                });
                             });
-                        });
-                    break;
+                        break;
+                    }
+                    case 'video-start':{
+                        onlineList.Send(data);
+                        break;
+                    }
+                    case 'video-response': {
+                        onlineList.Send(data);
+                        break;
+                    }
+                    case 'video-offer':{
+                        onlineList.Send(data);
+                        break;
+                    }
+                    case 'video-answer':{
+                        onlineList.Send(data);
+                        break;
+                    }
+                    case 'new-ice-candidate':
+                        onlineList.Send(data);
+                        console.log('Candidate Received');
+                        break;
+                    case 'hang-up':
+                        onlineList.Send(data);
+                        console.log('Call is ended');
+                        break;
+                    case 'busy':
+                        onlineList.Send(data);
+                        break;
+                    case 'cancel':
+                        onlineList.Send(data);
+                        break;
+                    default :
+                        console.log("unknown type");
                 }
-                case 'video-start':{
-                    onlineList.Send(data);
-                    break;
-                }
-                case 'video-response': {
-                    onlineList.Send(data);
-                    break;
-                }
-                case 'video-offer':{
-                    onlineList.Send(data);
-                    break;
-                }
-                case 'video-answer':{
-                    onlineList.Send(data);
-                    break;
-                }
-                case 'new-ice-candidate':
-                    onlineList.Send(data);
-                    console.log('Candidate Received');
-                    break;
-                case 'hang-up':
-                    onlineList.Send(data);
-                    console.log('Call is ended');
-                    break;
-                default :
-                    console.log("unknown type");
+            } catch (e) {
+                console.log(e);
             }
         });
+            // console.log(data);
+
         connection.on('close', function () {
             onlineList.Removeuser(connection);
         })
@@ -87,12 +108,15 @@ function findbyToken(id, callback) {
             else {
                 user.findOne({_id: token_found.userId}, function (err, user_found) {
                         if (err) {
+                            callback(err,null);
                         }
                         else if (!user_found) {
+                            callback({reason:'NoUser'},null)
                         }
                         else {
                             result = user_found.username;
-                            callback(result);
+                            callback(null,result);
+                            console.log(result + ' is now Online');
                         }
                     }
                 );
@@ -100,7 +124,6 @@ function findbyToken(id, callback) {
         }
     )
 }
-
 function OnlineList() {
     this.list = []; // Empty List upon creation
 }
@@ -110,15 +133,15 @@ OnlineList.prototype.push = function (username, portIp) {
         username: username,
         PortIp: portIp
     };
-    console.log(message.username + ' is now Online');
+
     return this.list.push(message);
 };
+
 OnlineList.prototype.Send= function(message) {
-    console.log(message.target);
+    console.log('Sending message to: ' + message.target);
     for (var i = 0; i < this.list.length; i++) {
         if(this.list[i].username === message.target){
-            this.list[i].PortIp.send(JSON.stringify(message));
-            // console.log('message was sentee');
+            this.list[i].PortIp.send(JSON.stringify(message));  // Need to be modified when multiple hosts are allowed
             break;
         }
     }
@@ -160,13 +183,11 @@ OnlineList.prototype.friendsOnline = function (username, callback) {
     var _this = this; // this is the online user's list ,why return jojo ?
     relationship.findOne({user: username}, function (err, result) {
         if (err)
-            callback([]);
-        results = [];
+            callback(err,null);
+       var results = [];
         if (!result)
-            callback([]);
+            callback(null,[]);
         _this.printList();
-        console.log(result.friends.length);
-        console.log(_this.list.length);
         for (var j = 0; j < result.friends.length; j++) {
             for (var i = 0; i < _this.list.length; i++) {
                 if (_this.list[i].username === result.friends[j] && _this.list[i].username !== username) {
@@ -175,8 +196,8 @@ OnlineList.prototype.friendsOnline = function (username, callback) {
                     _this.list[i].PortIp.send(JSON.stringify({type: 'UserGotOnline', name: username}));
                 }
             }
-        };
-        console.log('Ready to send these :');
-        callback(results)
+        }
+
+        callback(null,results)
     });
 };

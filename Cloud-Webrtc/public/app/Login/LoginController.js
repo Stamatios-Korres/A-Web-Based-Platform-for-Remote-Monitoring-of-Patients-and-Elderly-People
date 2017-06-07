@@ -50,7 +50,7 @@ angular.module('Openhealth').controller('LoginController', function (FriendsAndS
                     WebsocketService.InitWebsocket();
                     });
                     ws.onopen = function InitWebsocket(e) {
-                        console.log('Setting online: ' + my_name);
+                        console.log('Init Connection with Server ' + my_name);
                         message = {
                             type: 'init',
                             token: localStorage.getItem('token')

@@ -128,7 +128,6 @@ function SaveRequest(sender, target, callback) {
         callback({answer: "You can't send a request to yourself"});
         return;
     }
-    console.log('Find the error');
     user.findOne({username: target}, function (err, User) {
         if (err)
             callback({answer: 'Some error occured, please try again 1 '});
@@ -184,9 +183,11 @@ function SaveRequest(sender, target, callback) {
                                             if (err)
                                                 callback({answer: 'Some error occured, please try again 3 '});
                                             else {
+                                                console.log(done);
                                                 relationship.update({user: User.username}, {$push: {RequestsReceived: torequest}}, function (err, done) {
                                                     if (err)
                                                         callback({answer: 'Some error occured, please try again 4'});
+                                                    console.log(done);
                                                     callback({answer: 'Your request has been sent '});
                                                 })
                                             }
@@ -219,7 +220,6 @@ function RequestResult(sender, target, answer, callback) {
                 }
                 else{
                     console.log('One request down');
-                    console.log(res);
                     //Update state of request in Sender
 
                     //Here is the problem Update wrong value
@@ -242,11 +242,13 @@ function RequestResult(sender, target, answer, callback) {
                                 if (err)
                                     callback({message: err});
                                 else {
+                                    console.log(results);
                                     relationship.update({user: target}, {$push: {friends: sender}}, function (err, results) {
                                         if (err)
                                             callback({message: err});
                                         else
                                             callback({message: 'Ok'});
+                                        console.log(results);
                                     })
                                 }
 
