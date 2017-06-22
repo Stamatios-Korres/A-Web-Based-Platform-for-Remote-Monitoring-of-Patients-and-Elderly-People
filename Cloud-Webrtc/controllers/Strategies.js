@@ -26,10 +26,10 @@ passport.use(new LocalStrategy(
                 return done(err);
             }
             if (!user) {
-                return done(null, false, {message: 'incorrect passworrd'});
+                return done(null, false, {message: 'incorrect password'});
             }
             if (password != user.password) {
-                return done(null, false,{message: 'incorrect passworrd'});
+                return done(null, false,{message: 'incorrect password'});
             }
             return done(null, user);
         })
@@ -45,8 +45,8 @@ passport.use(new ClientPasswordStrategy(
                 console.log('No client with username : ' + client_id);
                 return done(null, false, {message: 'No user with this name'});
             }
-            if (client_secret != client.Client_Secret) {
-                return done(null, false,{message: 'incorrect passworrd'});
+            if (client_secret !== client.Client_Secret) {
+                return done(null, false,{message: 'incorrect password'});
             }
             console.log('Client has been found');
             return done(null, client);

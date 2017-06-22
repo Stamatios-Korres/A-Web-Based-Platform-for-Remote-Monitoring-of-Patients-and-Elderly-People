@@ -1,9 +1,5 @@
-/**
- * Created by timoskorres on 1/6/2017.
- */
 
-
-angular.module('Openhealth').service('FriendsAndState', function () {
+angular.module('Openhealth').service('FriendsAndState',function(){
     var friends = [];
     return {
         getfriends: function () {
@@ -53,7 +49,7 @@ angular.module('Openhealth').service('FriendsAndState', function () {
     }
 });
 
-angular.module('Openhealth').service('AjaxServices', function (FriendsAndState, $http) {
+angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $http){
     var services = {};
 
     services.CancelRequest = function (name, callback) {
@@ -65,8 +61,8 @@ angular.module('Openhealth').service('AjaxServices', function (FriendsAndState, 
             method: 'post',
             url: 'CancelRequest',
             data: {Cancelfrom: name}
-        }).success(function (response) {
-            callback(response);
+        }).then(function successCallback(response) {
+            callback(response.data);
         })
     };
     services.PendingRequests = function (callback) {
@@ -78,9 +74,9 @@ angular.module('Openhealth').service('AjaxServices', function (FriendsAndState, 
             },
             method: 'get',
             url: 'Pending'
-        }).success(function (response) {
-            console.log(response);
-            Pending = response;
+        }).then(function successCallback(response) {
+            console.log(response.data);
+            Pending = response.data;
             callback();
         })
     };
@@ -97,9 +93,9 @@ angular.module('Openhealth').service('AjaxServices', function (FriendsAndState, 
             method: 'post',
             url: 'friendRequest',
             data: {message: message}
-        }).success(function (response) {
-            console.log(response);
-            callback(response.answer);
+        }).then(function successCallback(response) {
+            console.log(response.data);
+            callback(response.data.answer);
         })
     };
     services.GetRequests = function () {
@@ -110,8 +106,8 @@ angular.module('Openhealth').service('AjaxServices', function (FriendsAndState, 
             },
             method: 'get',
             url: 'GetRequests'
-        }).success(function (response) {
-            requests = response;
+        }).then(function succesCallback(response) {
+            requests = response.data;
 
         });
     };
@@ -127,7 +123,7 @@ angular.module('Openhealth').service('AjaxServices', function (FriendsAndState, 
             my_name = response.data.username;
         });
         function errorCallback(response) {
-            console.log(response)
+            console.log(response.data)
         }
     };
     services.requestReply = function (name, type, callback) {
@@ -144,8 +140,8 @@ angular.module('Openhealth').service('AjaxServices', function (FriendsAndState, 
             method: 'post',
             url: 'requestReply',
             data: {message: message}
-        }).success(function (response) {
-            console.log(response);
+        }).then(function successCallback(response) {
+            console.log(response.data);
             callback(response.message);
         })
     };
@@ -161,9 +157,9 @@ angular.module('Openhealth').service('AjaxServices', function (FriendsAndState, 
             },
             method: 'get',
             url: 'GetFriends'
-        }).success(function (response) {
-            console.log("Adding friends : " + response);
-            callback(response);
+        }).then(function successCallback(response) {
+            console.log("Adding friends : " + response.data);
+            callback(response.data);
         });
     };
     services.DeleteFriends = function(name,callback){
@@ -175,7 +171,7 @@ angular.module('Openhealth').service('AjaxServices', function (FriendsAndState, 
             method: 'post',
             url: 'DeleteFriendship',
             data:{target:name}
-        }).success(function (response) {
+        }).then(function successCallback(response) {
             console.log(response);
             callback(response);
         });
@@ -184,7 +180,7 @@ angular.module('Openhealth').service('AjaxServices', function (FriendsAndState, 
     return {services: services, requests: requests};
 });
 
-angular.module('Openhealth').service('VideoServices', function () {
+angular.module('Openhealth').service('VideoServices',function(){
     var response;
     var mediaConstraints = {
         audio: true, // We want an audio track
@@ -204,8 +200,6 @@ angular.module('Openhealth').service('VideoServices', function () {
     var myself;
 
     //Flags used for making sure Video Calls use cases
-    var PeerDisconnectedWhileInCall = false;
-    var PeerCancelledCall = false;
     var MuteFlag = false;
     var Incall = false;
 
@@ -240,6 +234,8 @@ angular.module('Openhealth').service('VideoServices', function () {
         myself = null;
     }
     function handleNegotiationNeededEvent() {
+
+        //Had a problem with multiple Video - offers -> Dirty way to hide it
 
         if (flag !== true || i >= 1)
             return;
@@ -317,8 +313,8 @@ angular.module('Openhealth').service('VideoServices', function () {
     }
 
     // Visible to the outside word function in order to set the object
+
     services = {};
-    services.incall = function(){return Incall};
     services.closeVideo = function(){
         console.log('ready to close video');
         CloseVideo();
@@ -412,7 +408,6 @@ angular.module('Openhealth').service('VideoServices', function () {
                 return MyPeerConnection.addStream(stream);
             })
     };
-    services.Interupted= function(){return PeerDisconnectedWhileInCall};
 
     //Cases that must be iterrupted -> User goes Offline,Rejects,Busy,UserA cancel the call
 
@@ -436,7 +431,7 @@ angular.module('Openhealth').service('VideoServices', function () {
     return services;
 });
 
-angular.module('Openhealth').service('WebsocketService', function (VideoServices, $timeout, $rootScope, FriendsAndState, $window) {
+angular.module('Openhealth').service('WebsocketService',function(VideoServices, $timeout, $rootScope, FriendsAndState, $window){
     var services = {};
 
 
@@ -545,4 +540,5 @@ angular.module('Openhealth').service('WebsocketService', function (VideoServices
     };
     return services;
 });
+
 

@@ -1,0 +1,100 @@
+<div  layout="column" style="height:100%; width: 100%;">
+
+    <!--ToolBar of mainPage ToolbarController is Responsible-->
+    <md-toolbar class="md-whiteframe-9dp"  color="primary" ng-controller="ToolbarController" layout-align="space-around center">
+        <div class="md-toolbar-tools" layout-margin layout="row">
+            <i flex-offset="15" class="material-icons">favorite_border</i>
+            <div  flex="20">
+                <p   flex="100" class="md-display-1">OpenHealth</p>
+            </div>
+            <input  class="input2 md-whiteframe-2dp"  placeholder="  Search for Friends" ng-model='mainPageInfo.Searching' flex="35" type="text" >
+            <md-button id='add' class="md-raised md-primary" >add</md-button>
+            <h1 flex="10">{{mainPageInfo.Searching}}</h1>
+            <div layout="row" flex="40" layout-margin>
+                <md-menu>
+                    <md-button ng-click="$mdMenu.open($event)">  <i class="material-icons">supervisor_account</i>Requests</md-button>
+                    <md-menu-content width="4">
+                        <md-menu-item>
+                            <md-list>
+                                Pending
+                            </md-list>
+                        </md-menu-item>
+                            <md-list>
+                                NewRequests
+                            </md-list>
+                    </md-menu-content>
+                </md-menu>
+            </div>
+            <div  layout="column">
+                    <md-menu >
+                        <md-button ng-click="$mdMenu.open($event)">  <i  class="material-icons">account_circle</i>Account</md-button>
+                        <md-menu-content  width="3" >
+                            <md-menu-item md-autofocus>
+                                <md-button class="md-primary" md-no-ink md-autofocus>
+                                    <i class="material-icons">build</i>
+                                    Settings
+                                </md-button>
+                            </md-menu-item>
+                            <md-menu-item>
+                                <md-button ng-click='logout.clean()'class="md-primary" md-no-ink md-autofocus>
+                                    <i class="material-icons">power_settings_new</i>
+                                    Logout
+                                </md-button>
+
+                            </md-menu-item>
+                        </md-menu-content>
+                    </md-menu>
+            </div>
+        </div>
+    </md-toolbar>
+
+    <!--Main Page MainPageController is Responsible *(Also ChatController)*-->
+    <div  id="MainPage" layout="row" flex>
+
+        <!--Online Friends and their State-->
+        <div id="OnlineFriends" flex="20" layout="column" class="md-whiteframe-4dp">
+            <h3 flex-offset="20" md-title > friends</h3>
+            <md-divider md-inset ng-if="!$last"></md-divider>
+            <md-list  layout="column">
+                <md-list-item style="float:left;" class='md-primary' ng-repeat="temp in mainPageInfo.friends" flex layout="row">
+                    <md-button  ng-click="SelectedUser(temp.username)" md-auto-focus layout-margin layout="row">
+                        <i class="material-icons">perm_identity</i>
+                            <span>{{temp.username}}</span>
+                    </md-button>
+                    <span ng-if="temp.state=='inactive' "></span>
+                    <span ng-if="temp.state=='active'"><i class="material-icons">cloud_done</i></span>
+                </md-list-item>
+            </md-list>
+        </div>
+
+        <!--Information about a Particular User -->
+        <div id="UserInfo "flex md-whiteframe="1" layout="column" ng-show="mainPageInfo.Selected!=''">
+            <div class="Diagrams"flex></div>
+            <div class='UserOptions'flex="15"  layout-margin  layout="row" >
+                <div  layout="row">
+                    <md-button ng-click="videoInfo.call(mainPageInfo.Selected)" md-no-ink  layout-margin class=" md-fab md-accent md-raised btnInfo">
+                        <p><i  class="material-icons">call</i></p>
+                    </md-button>
+                    <md-button md-no-ink  layout-margin  class="md-fab md-accent md-raised btnInfo">
+                        <p><i class="material-icons">equalizer</i></p>
+                    </md-button>
+                </div>
+                <div flex></div>
+                <div layout="row" layout-margin >
+                    <md-button  md-no-ink layout-margin class="md-accent  md-raised btnInfo md-fab" ><p><i class="material-icons"  >delete_forever</i></p></md-button>
+                </div>
+            </div>
+        </div>
+
+        <!--Chat with a user -->
+        <div id=Chat flex="25" layout="column" ng-show="mainPageInfo.Selected!=''">
+            <md-toolbar style="margin: 1%" md-whiteframe="3"  >
+                <h1 md-title flex-offset="20"> {{ mainPageInfo.Selected}}</h1>
+            </md-toolbar>
+            <div flex class="ChatPlace">
+            </div>
+             <input  placeholder="Type your message" style="margin: 2%">
+        </div>
+    </div>
+
+</div>

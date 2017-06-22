@@ -1,0 +1,76 @@
+/*Video Staffs*/
+body {
+    /*padding-top: 70px;*/
+    /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+}
+
+
+html, body {
+    margin:0;
+    padding:0;
+    font-family: 'Roboto';
+}
+#draggable {
+    /*border: 2px solid black;*/
+    width: 550px;
+    height: 400px;
+    position: absolute;
+    z-index: 10;
+    overflow: hidden;
+}
+
+#buttonDiv {
+    position: absolute;
+    bottom: 0;
+}
+
+h1 {
+    color: white;
+}
+
+#received_video {
+    top: 0;
+    overflow: hidden;
+    position: absolute;
+    width: 550px;
+    height: 450px;
+}
+
+#local_video {
+    z-index: 10;
+    position: absolute
+}
+
+/* Css required for Angular Material */
+
+#myView{
+    /*background-color: red;*/
+    height: 100%;
+}
+md-toolbar{
+    height:70px;
+    /*background-color: gold;*/
+}
+
+.input1{
+    color: black;
+    font-size:12px;
+    height: 30px;
+    width: 160px;
+}
+
+
+.input2 {
+    color: black;
+    font-size: 18px;
+    height: 30px;
+    width: 200px;
+}
+
+#OnlineFriends{
+    /*background-color: red ;*/
+}
+
+.btnInfo{
+
+}
