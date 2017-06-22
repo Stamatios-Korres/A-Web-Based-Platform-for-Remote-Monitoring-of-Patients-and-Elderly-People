@@ -1,53 +1,77 @@
-<div  layout="column" style="height:100% ">
+<div   style="height:100%" layout="column">
+
+    <!--Toolbar of Welcome Page-->
+
     <md-toolbar class="md-whiteframe-11dp"  color="primary" layout="row" layout-align="space-around center">
     <div class="md-toolbar-tools" layout-margin>
-    <i flex-offset="15" class="material-icons">favorite_border</i>
-    <div  flex="50">
-    <p   flex="100" class="md-display-1">OpenHealth</p>
-    </div>
+        <i style='margin-bottom: 1%' flex-offset="15" class="material-icons">favorite_border</i>
+        <div  flex="50">
+        <p   flex="100" class="md-display-1">OpenHealth</p>
+        </div>
 
-    <div layout="column">
-    <div id="toolbarInput"  layout="row"  flex="40">
-    <div layout="column" layout-margin>
-        <p  style="height:4px;" flex="15" >Username</p>
-        <input class="input1"   ng-model='login.username' flex="35" type="text" >
-    </div>
+        <div layout="column">
+            <div id="toolbarInput"  layout="row"  flex="40">
 
-    <div layout="column" layout-margin >
-        <p  style="height:4px; width:50px" flex="15">Password</p>
-        <input class="input1"  flex="35" ng-model='login.password'  type="password">
-    </div>
-    </div>
+            <!--Username && Password-->
 
-    </div>
-    <div>
-    <md-button ng-click='login.SendRequest()' class="md-raised md-primary" style="height:40% ;margin-top:5px" md-no-ink  >Log in</md-button>
-    </div>
+            <div layout="column" layout-margin>
+                <p  style="height:4px;" flex="15" >Username</p>
+                <input class="input1"   ng-model='login.username' flex="35" type="text" >
+            </div>
+            <div layout="column" layout-margin >
+                <p  style="height:4px; width:50px" flex="15">Password</p>
+                <input class="input1"  flex="35" ng-model='login.password'  type="password">
+            </div>
+            </div>
+        </div>
+
+        <div>
+         <md-button ng-click='login.SendRequest()' class="md-raised md-primary" style="height:40% ;margin-top:5px" md-no-ink  >Log in</md-button>
+        </div>
     </div>
     </md-toolbar>
-    <div flex="5"></div>
-    <div flex-offset="10">
-        <div  flex="50" layout-margin layout="column" class="md-whiteframe-11dp" >
+
+
+    <!--Subscribe Area-->
+
+     <div  class="md-whiteframe-11dp"   layout-margin layout="column" style="margin: 10% ;height: 300px ;width: 700px" >
+
+         <!--Title-->
         <h1 flex-offset="10">Subscribe to OpenHealth</h1>
+
+         <!--Subscribe Form -> Username,Password,email -->
+         <form name="SubsrcibeForm">
         <div layout-margin>
             <md-input-container >
-                <input ng-model="subscribe.username" required  placeholder="Pick a username">
-                <div ng-message="required">This is required.</div>
+                <input name='Username' ng-model="subscribe.username" required  placeholder="Pick a username">
+                <div ng-messages="SubscribeForm.Username.$error" >
+                    <!--ng-show='SubscribeForm.Username.$dirty'>-->
+                    <div ng-message="required">This is required.</div>
+                </div>
             </md-input-container>
             <md-input-container>
-                <input ng-model="subscribe.password" required placeholder="Password">
+                <input name='Password' type="password" ng-model="subscribe.password" required placeholder="Password">
+                <div ng-messages="SubscribeForm.Password.$error" >
+                    <!--ng-show='SubscribeForm.Username.$dirty'>-->
+                    <div ng-message="required">This is required.</div>
+                </div>
             </md-input-container>
         </div>
+
+         <!--User's Email-->
         <div layout-margin>
             <md-input-container>
-                <input required style="width: 380px" placeholder="Enter your email">
-                <div ng-messages="projectForm.clientName.$error"></div>
-                <div ng-message="required">This is required.</div>
+                <input name="email" ng-pattern='/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+([^<>()\.,;:\s@\"]{2,}|[\d\.]+))$/' required style="width: 380px" ng-model="subscribe.email" placeholder="Enter your email">
+            <div ng-messages="SubscribeForm.email.$error" >
+                <div ng-message-exp="[pattern,required]">Enter a valid email</div>
+            </div>
             </md-input-container>
         </div>
-        <div layout-margin md-disable-backdrop="true">
-             <md-button  ng-click="subscribe.SendRequest()" flex-offset="50" md-no-ink class="md-raised  md-primary"  >Subscribe</md-button>
+
+         <!--Hit button subscribe -->
+        <div layout-margin  md-disable-backdrop="true">
+             <md-button  type="submit" style="margin-left: 85%; margin-top: 5%" ng-click="subscribe.SendRequest()" flex-offset="50" md-no-ink class="md-raised  md-primary"  >Subscribe</md-button>
         </div>
-    </div>
+         </form>
     </div>
 </div>

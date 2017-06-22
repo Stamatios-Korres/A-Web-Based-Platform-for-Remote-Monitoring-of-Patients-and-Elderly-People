@@ -53,6 +53,8 @@ md-toolbar{
 }
 
 .input1{
+
+    margin: 5px;
     color: black;
     font-size:12px;
     height: 30px;
