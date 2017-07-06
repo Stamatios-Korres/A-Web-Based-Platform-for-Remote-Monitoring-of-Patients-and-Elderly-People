@@ -143,7 +143,7 @@ function SaveRequest(sender, target, callback) {
                 from: sender,
                 state: 'pending'
             };
-            //Check user hasnot send another request already
+            //Check user has not send another request already
             relationship.findOne({
                 user: sender,
                 RequestsSent: {$elemMatch: {state: 'pending', to: target}}
@@ -154,7 +154,7 @@ function SaveRequest(sender, target, callback) {
                     callback({answer: 'You have already sent a request'})
                 }
                 else {
-                    //User A can't send request to User B if User B has already sent him a request
+                    // User A can't send request to User B if User B has already sent him a request
                     relationship.findOne({
                         user: target,
                         RequestsSent: {$elemMatch: {state: 'pending', to: sender}}
@@ -165,7 +165,6 @@ function SaveRequest(sender, target, callback) {
                             callback({answer: 'A request from him has been sent, cancel it or accept it'});
                             return;
                         }
-
                         //check if user sends requests to user whom he is friend with
                         relationship.findOne({user: sender, friends: {$in: [target]}},
                             function (err, SenderRecord) {
@@ -174,7 +173,7 @@ function SaveRequest(sender, target, callback) {
                                 else if (SenderRecord)
                                     callback({answer: 'You are already friends'});
                                 else {
-                                    //  console.log('Ok fresh request');
+                                   console.log('Ready to update new Users ');
                                     relationship.update({user: sender}, {$push: {RequestsSent: fromrequest}}
                                         , function (err, done) {
                                             if (!done)
@@ -183,8 +182,10 @@ function SaveRequest(sender, target, callback) {
                                             if (err)
                                                 callback({answer: 'Some error occured, please try again 3 '});
                                             else {
-                                                console.log(done);
+                                                console.log('login.js 185 - Sender was updated');
+                                                console.log('login.js 186 ' + done);
                                                 relationship.update({user: User.username}, {$push: {RequestsReceived: torequest}}, function (err, done) {
+
                                                     if (err)
                                                         callback({answer: 'Some error occured, please try again 4'});
                                                     console.log(done);
@@ -208,53 +209,53 @@ function RequestResult(sender, target, answer, callback) {
         console.log("Request have been accepted ");
         //Update state of request in Sender
         //relationship.update({user: sender, "RequestsReceived.state": 'pending', "RequestsReceived.from": target},
-            relationship.update({user:sender,RequestsReceived:{$elemMatch:{state:'pending',from:target}}},
+        relationship.update({user: sender, RequestsReceived: {$elemMatch: {state: 'pending', from: target}}},
             {$set: {'RequestsReceived.$.state': 'accepted'}},
-        function (err, res) {
-            console.log(res);
+            function (err, res) {
+                console.log(res);
                 if (err)
                     callback(err);
                 else if (res.n === 0) {
                     callback({message: 'Already friends or uknown friend'});
                     console.log("Probaply here");
                 }
-                else{
+                else {
                     console.log('One request down');
                     //Update state of request in Sender
 
                     //Here is the problem Update wrong value
-                    relationship.update({user:target,RequestsSent:{$elemMatch:{state:'pending',to:sender}}},
-                    //relationship.update({user: target, "RequestsSent.state": 'pending', "RequestsSent.to": sender},
+                    relationship.update({user: target, RequestsSent: {$elemMatch: {state: 'pending', to: sender}}},
+                        //relationship.update({user: target, "RequestsSent.state": 'pending', "RequestsSent.to": sender},
                         {$set: {'RequestsSent.$.state': 'accepted'}}, function (err, result) {
-                        console.log(result);
-                        if (err)
-                            callback({message: err});
-                        else if (!result)
-                            callback({message: target + " may have cancelled his request"});
-                        else if (result.n === 0) {
-                            console.log('Found the problem');
-                        }
-                        else {
                             console.log(result);
-                            //Update friends
-                            console.log('Second request down');
-                            relationship.update({user: sender}, {$push: {friends: target}}, function (err, results) {
-                                if (err)
-                                    callback({message: err});
-                                else {
-                                    console.log(results);
-                                    relationship.update({user: target}, {$push: {friends: sender}}, function (err, results) {
-                                        if (err)
-                                            callback({message: err});
-                                        else
-                                            callback({message: 'Ok'});
+                            if (err)
+                                callback({message: err});
+                            else if (!result)
+                                callback({message: target + " may have cancelled his request"});
+                            else if (result.n === 0) {
+                                console.log('Found the problem');
+                            }
+                            else {
+                                console.log(result);
+                                //Update friends
+                                console.log('Second request down');
+                                relationship.update({user: sender}, {$push: {friends: target}}, function (err, results) {
+                                    if (err)
+                                        callback({message: err});
+                                    else {
                                         console.log(results);
-                                    })
-                                }
+                                        relationship.update({user: target}, {$push: {friends: sender}}, function (err, results) {
+                                            if (err)
+                                                callback({message: err});
+                                            else
+                                                callback({message: 'Ok'});
+                                            console.log(results);
+                                        })
+                                    }
 
-                            })
-                        }
-                    })
+                                })
+                            }
+                        })
                 }
             }
         )
@@ -313,7 +314,7 @@ function cancelRequest(sender, target, callback) {
                         if (err)
                             callback(err);
                         else if (!result)
-                            callback({message: target + "have probably accepted/rejected the request"});
+                            callback({message: target + " have probably  already accepted or rejected the request "});
                         else {
                             console.log(result);
                             callback({message: 'Ok'});

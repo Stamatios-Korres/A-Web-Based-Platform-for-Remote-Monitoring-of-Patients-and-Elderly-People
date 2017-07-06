@@ -17,12 +17,10 @@ html, body {
     position: absolute;
     z-index: 10;
     overflow: hidden;
+    border: 6px solid darkblue;
+    border-radius:10px;
 }
 
-#buttonDiv {
-    position: absolute;
-    bottom: 0;
-}
 
 h1 {
     color: white;
@@ -75,4 +73,8 @@ md-toolbar{
 
 .btnInfo{
 
+}
+
+.flexChild {
+    height: 100%;
 }

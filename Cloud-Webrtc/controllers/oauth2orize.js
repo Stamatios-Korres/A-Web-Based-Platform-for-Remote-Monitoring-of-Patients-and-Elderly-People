@@ -28,21 +28,17 @@ server.exchange(oauth2orize.exchange.password(
                 else if (!isMatch)
                     return done(null, false);
                 console.log('confirmed password');
-                //Success
-                //Delete previous tokens the user had been given
-                token.remove({userId: user_found._id}, function (err, res) {
-                    //Create and save new token
-                    var token_value = utils.uid(256);
-                    var token = new Token({
-                        value: token_value,
-                        clientId: client.ClientId,
-                        userId: user_found._id,
-                        expirationDate: new Date(new Date().getTime() + (3600 * 1000))
-                    });
-                    token.save(function (err) {
-                        if (err) return done(err);
-                        return done(null, token_value);
-                    })
+                //Create and save new token
+                var token_value = utils.uid(256);
+                var token = new Token({
+                    value: token_value,
+                    clientId: client.ClientId,
+                    userId: user_found._id,
+                    expirationDate: new Date(new Date().getTime() + (24 * 3600 * 1000)) // Each token is Valid for one Day
+                });
+                token.save(function (err) {
+                    if (err) return done(err);
+                    return done(null, token_value);
                 });
             });
         })

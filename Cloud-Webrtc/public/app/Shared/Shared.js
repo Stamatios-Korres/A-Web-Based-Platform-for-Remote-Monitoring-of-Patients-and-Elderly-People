@@ -11,9 +11,7 @@ angular.module('Openhealth').service('FriendsAndState',function(){
                 username: name,
                 state: state
             };
-           // console.log('Set values to :' + newUser.username);
             friends.push(newUser);
-            //Data was indeed refreshed !!!
         }
         ,
         printFriends: function () {
@@ -24,13 +22,10 @@ angular.module('Openhealth').service('FriendsAndState',function(){
         }
         ,
         changeState: function (name, state) {
-            // console.log('I received the following data: ' + name +' '+state);
             for (var i = 0; i < friends.length; i++) {
                 if (friends[i].username === name) {
                     friends[i].state = state;
-                   // console.log("Changing state ...");
                 }
-                // console.log(i);
             }
         },
         removefromlist:function(element){
@@ -42,6 +37,14 @@ angular.module('Openhealth').service('FriendsAndState',function(){
                 }
             }
             return friends;
+        },
+        memeber:function(name){
+            for(var j = 0;j<friends.length;j++) {
+                if (friends[j].username === name){
+                    return true;
+                }
+            }
+                return false;
         },
         clean: function () {
             friends = [];
@@ -75,7 +78,7 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             method: 'get',
             url: 'Pending'
         }).then(function successCallback(response) {
-            console.log(response.data);
+           // console.log(response.data);
             Pending = response.data;
             callback();
         })
@@ -98,7 +101,7 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             callback(response.data.answer);
         })
     };
-    services.GetRequests = function () {
+    services.GetRequests = function (callback) {
         var string = 'Bearer ' + token;
         $http({
             headers: {
@@ -107,7 +110,9 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             method: 'get',
             url: 'GetRequests'
         }).then(function succesCallback(response) {
+         //   console.log(response.data);
             requests = response.data;
+            callback();
 
         });
     };
@@ -133,6 +138,7 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             target: name,
             type: type
         };
+        console.log(message);
         $http({
             headers: {
                 'Authorization': string
@@ -142,7 +148,7 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             data: {message: message}
         }).then(function successCallback(response) {
             console.log(response.data);
-            callback(response.message);
+            callback(response.data.message);
         })
     };
     services.GetFriends = function (callback) {
@@ -158,7 +164,7 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             method: 'get',
             url: 'GetFriends'
         }).then(function successCallback(response) {
-            console.log("Adding friends : " + response.data);
+            console.log("Friends of User are  : " + response.data);
             callback(response.data);
         });
     };
@@ -195,20 +201,19 @@ angular.module('Openhealth').service('VideoServices',function(){
         ]
     };
 
-    // Names of the users in call
-    var target;
+    var target;  // Names of the users in call
     var myself;
+    var target_id = -1; // Unique Id's to distinct multiple User's logged in the same Account
+    var mine_id = -1;
 
-    //Flags used for making sure Video Calls use cases
-    var MuteFlag = false;
+    var MuteFlag = false;  //Flags used for making sure Video Calls use cases
     var Incall = false;
+    var PeerDisconnectedWhileInCall = false;
 
-    //Should get rid of those
+    //Should get rid of those -> Problem with spd !!
     var i = 0;
     var flag = false;
     var j =1;
-
-    // Functions needed by WebRTC PeerConnection ( Object's Fucntion )
 
     function handleICECandidateEvent(event) {
         if (event.candidate) {
@@ -221,25 +226,28 @@ angular.module('Openhealth').service('VideoServices',function(){
             };
             ws.send(JSON.stringify(message));
         }
-    }
+    }  // Functions needed by WebRTC PeerConnection ( Object's Fucntion )
     function closePeer(){
         MyPeerConnection.close();
-          MyPeerConnection = null;
+        MyPeerConnection = null;
         //reset flags
         PeerDisconnectedWhileInCall = false;
         PeerCancelledCall = false;
         MuteFlag = false;
         Incall = false;
         target = null;
-        myself = null;
+        flag=false;
+        i=0;
     }
     function handleNegotiationNeededEvent() {
 
         //Had a problem with multiple Video - offers -> Dirty way to hide it
 
-        if (flag !== true || i >= 1)
+        if ((flag === false) || i >= 1){
+            console.log("In need for " + i);
             return;
-       i = i + 1;
+        }
+        i = i + 1;
         console.log('Sending negotiation Messages');
         MyPeerConnection.createOffer().then(function (offer) {
             return MyPeerConnection.setLocalDescription(offer);
@@ -294,27 +302,32 @@ angular.module('Openhealth').service('VideoServices',function(){
         VideoServices.closeVideo();
         //define later what close Video is
     }
-    function handleICEConnectionStateChangeEvent(event) {
-        switch(MyPeerConnection.iceConnectionState) {
-            //
-            case "closed":
-              // console.log('case closed');
-                MyPeerConnection = null;
-                break;
-            case "failed":
-                // console.log('case failed');
-                break;
-            case "disconnected":
-                MyPeerConnection = null;
 
-                console.log('case disconnected');
-                break;
-        }
-    }
+    // Probably this function is usefull if Video is interrupted for a reason different from user disconnection
 
-    // Visible to the outside word function in order to set the object
+    // function handleICEConnectionStateChangeEvent(event) {
+    //     switch(MyPeerConnection.iceConnectionState) {
+    //         //
+    //         case "closed":
+    //           // console.log('case closed');
+    //             MyPeerConnection = null;
+    //             break;
+    //         case "failed":
+    //             // console.log('case failed');
+    //             break;
+    //         case "disconnected":
+    //             MyPeerConnection = null;
+    //
+    //             console.log('case disconnected');
+    //             break;
+    //     }
+    // }
 
-    services = {};
+
+
+
+
+    services = {};   // Visible to the outside word function in order to set the object
     services.closeVideo = function(){
         console.log('ready to close video');
         CloseVideo();
@@ -323,11 +336,7 @@ angular.module('Openhealth').service('VideoServices',function(){
         MyPeerConnection.addIceCandidate(IceCandidate);
     };
     services.getPeer = function () {
-        if(MyPeerConnection)
-            return true;
-        else
-            return false;
-        //return MyPeerConnection
+        return !!MyPeerConnection; // Auto Changed by compiler
     };
     services.setPeer = function (string) {
         Incall = true;
@@ -408,33 +417,45 @@ angular.module('Openhealth').service('VideoServices',function(){
                 return MyPeerConnection.addStream(stream);
             })
     };
+    services.ResetTarget = function(){
+        target = null;
+        target_id=-1;
+        mine_id =-1;
+    };
+    services.setTargetId = function(CallerId){
+            target_id = CallerId;
+    };
+    services.getTargetid = function(){
+        return target_id;
+    };
+    services.setMyId = function(CallerId){
+        target_id = CallerId;
+    };
+    services.getMyid = function(){
+        return target_id;
+    };
 
     //Cases that must be iterrupted -> User goes Offline,Rejects,Busy,UserA cancel the call
 
-    //User who we were speaking with got offline
     services.checkifUsed = function(name){
         if(name === target) {
             PeerDisconnectedWhileInCall = true;
             console.log('Video has to close');
         }
-    };
-
-    //Global Variables of the call
-    services.getTarget= function(){
+        return PeerDisconnectedWhileInCall;
+    };  //User who we were speaking with got offline
+    services.getTarget= function(){   //Global Variables of the call
         return target;
     };
     services.yourself= function(){
         return myself;
     };
 
-
     return services;
 });
 
 angular.module('Openhealth').service('WebsocketService',function(VideoServices, $timeout, $rootScope, FriendsAndState, $window){
     var services = {};
-
-
     services.makeVideoCall = function (message) {
         message = JSON.stringify(message);
         ws.send(message);
@@ -444,38 +465,96 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices, 
             //I have new message , change FriendsAndState service and inform about the cange
             try {
                 var data = JSON.parse(event.data);
-                console.log('Received Websocket message type ' + data.type);
-
+                if(data.type !== 'update')
+                    console.log('Received Websocket message type ' + data.type);
                 switch (data.type) {
                     case 'onlineUsers':
-                        //console.log('my online friends are : ');
+                        console.log('Online Users : ');
                         console.log(data.online);
                         for (var ii = 0; ii < data.online.length; ii++) {
-                            console.log("Setting " + data.online[ii] + " to active");
                             FriendsAndState.changeState(data.online[ii], 'active');
                         }
+                        $rootScope.$emit('WebsocketNews');
                         break;
                     case 'UserGotOnline':
-                        console.log('User joined : ' + data.name);
                         FriendsAndState.changeState(data.name, 'active');
-                        // FriendsAndState.printFriends();
+                        $rootScope.$emit('WebsocketNews');
                         break;
                     case 'UserGotOffLine':
                         console.log('he left us : ' + data.name);
-                        FriendsAndState.changeState(data.name, 'inactive');
-                        VideoServices.checkifUsed(data.name);
-                        $rootScope.$emit('Offline');
+                        FriendsAndState.changeState(data.name, 'inative');
+                        var IstheTargetDisconnected = VideoServices.checkifUsed(data.name);                        //User got disconnected while still in call
+                        if(IstheTargetDisconnected)
+                            $rootScope.$emit('Offline');
+                        $rootScope.$emit('WebsocketNews');
                         break;
+                    case 'update':{
+                        //So here we have our information
+                        //console.log(data);
+
+                        //Create a function that update the view
+                        var friends = data.friends;
+                        var online =  data.online;
+                        for(var j=0; j<friends.length; j++){
+                            var name = friends[j];
+                            var flag = FriendsAndState.memeber(name);
+                            for(var jj=0;jj<online.length;jj++) {
+                                //friend is online
+                                if (name === online[jj] ) {
+                                    if(flag)
+                                        FriendsAndState.changeState(name, 'active');
+                                    else
+                                        //new User
+                                        FriendsAndState.addfriends(name,'active');
+                                    break;
+                                }
+                            }
+                            //New friend or not online
+                            if(jj===online.length && flag )
+                                FriendsAndState.changeState(name, 'inactive');
+                            else if(jj===online.length  && !flag )
+                                FriendsAndState.addfriends(name,'inactive');
+
+                        }
+                        //console.log('done with update');
+                        $rootScope.$emit('WebsocketNews');
+                        break;
+                    }
+
 
                     //Cases for Video - WebRTC
                     case 'video-start':
-                        VideoServices.setUsers(data.source, my_name);
-                        $rootScope.$emit('Video-Start');
+                        console.log(data);
+                        var peer = VideoServices.getPeer();
+                        var message = {
+                            type: 'busy',
+                            target: data.source,
+                            source: data.target
+                        };
+                        if(!peer) {
+                            if(VideoServices.getTarget()) {
+                                console.log('In here');
+                                if (VideoServices.getTarget() !== data.source) {
+                                    console.log('User has already a received call waiting');
+                                    ws.send(JSON.stringify(message));
+                                }
+                            }
+                            else {
+                                VideoServices.setUsers(data.source, my_name);
+                                VideoServices.setTargetId(data.sourceid);
+                                console.log('Signal emmited');
+                                $rootScope.$emit('Video-Start');
+                            }
+                        }
+                        else {
+                            console.log('New Call arrived while in call ');
+                            ws.send(JSON.stringify(message));
+                        }
                         break;
-                    case 'video-response': // Wiyh video response we define if we accept call or reject it
+                    case 'video-response': // With video response we define if we accept call or reject it
+                        console.log('his response was ' + data.answer);
                         VideoServices.SetResponse(data.answer);
                         $rootScope.$emit('Video-Response');
-                        // console.log(data);
                         break;
                     case 'video-offer':
                         console.log(data.sdp);
@@ -488,41 +567,50 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices, 
 
                         //Unhandled error
                         break;
-                    case 'video-answer':
-                        console.log('Got a video-answer message');
-                        //Set SDP- candidates answer
+                    case 'video-answer':   //Set SDP- candidates answer
                         VideoServices.SetSdp(data.sdp);
                         $rootScope.$emit('Video-answer');
                         break;
                     case 'hang-up':
 
                         $rootScope.$emit('close-video');
-                        VideoServices.closeVideo();
                         break;
                     case 'busy':
                         $rootScope.$emit('busy');
                         break;
                     case 'cancel':
-                        $rootScope.$emit('cancel');
+                        if(VideoServices.getTarget() === data.source) { // Just for safety reasons
+                            console.log('Ok we are here ');
+                            $rootScope.$emit('cancel');
+                        }
                         break;
+                    case 'multipleUsers':{
+                        MultpleUsersResult = data.result;
+                        $rootScope.$emit('multipleUsers');
+                        break;
+                    }
                     default:
                         console.log('Unkown message');
                 }
-                $rootScope.$emit('WebsocketNews');
             }
             catch(e){
-                console.log('error on Webserver');
+                console.log(e);
             }
         }; };
 
-    //Services responsible for event handling for Video functions
 
-    services.refresh = function (scope, callback) {
+
+    //Services responsible for event handling for Video functions
+    services.Multiple = function($scope,callback){
+        var handler = $rootScope.$on('multipleUsers',callback);
+        $scope.$on('$destroy', handler);
+    };
+    services.refresh =       function (scope, callback) {
         var handler = $rootScope.$on('WebsocketNews', callback);
         scope.$on('$destroy', handler);
 
     };
-    services.videostart = function (scope, callback) {
+    services.videostart =    function (scope, callback) {
         var handler = $rootScope.$on('Video-Start', callback);
         scope.$on('$destroy', handler);
     };
@@ -530,11 +618,11 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices, 
         var handler = $rootScope.$on('Video-Response', callback);
         scope.$on('$destroy', handler);
     };
-    services.videoOffer = function (scope, callback) {
+    services.videoOffer =    function (scope, callback) {
         var handler = $rootScope.$on('Video-offer', callback);
         scope.$on('$destroy', handler);
     };
-    services.videoAnswer = function (scope, callback) {
+    services.videoAnswer =   function (scope, callback) {
         var handler = $rootScope.$on('Video-answer', callback);
         scope.$on('$destroy', handler);
     };

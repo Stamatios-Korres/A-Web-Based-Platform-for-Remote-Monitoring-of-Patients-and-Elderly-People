@@ -3,6 +3,25 @@
  */
 
 angular.module('Openhealth').controller('WelcomePageController', function (FriendsAndState, $mdToast, $mdDialog, WebsocketService, AjaxServices, $scope, $http, $window, $location, $timeout) {
+
+
+    $scope.openFromLeft = function () {
+        $mdDialog.show(
+            $mdDialog.alert()
+                .clickOutsideToClose(true)
+                .title('Wrong Username/Password')
+                .textContent('Please try Again')
+                .ariaLabel()
+                .ok('Ok!')
+                // You can specify either sting with query selector
+                .openFrom('#left')
+                // or an element
+                .closeTo(angular.element(document.querySelector('#right')))
+        );
+    };
+
+
+
     $scope.login = {
         username: null,
         password: null,
@@ -25,13 +44,15 @@ angular.module('Openhealth').controller('WelcomePageController', function (Frien
                         username: $scope.login.username,
                         password: $scope.login.password
                     }
-                }).then(function (response) {
+                }).then(
+                    function (response) {
                     console.log("Setting Token");
+
                     // Global Variables Probably unseen by my controller
                     localStorage.setItem('token', response.data.access_token);
                     token = localStorage.getItem('token');
                     my_name = $scope.login.username;
-                    AjaxServices.services.GetRequests();
+                    //AjaxServices.services.GetRequests();
                     // ws = new WebSocket('wss://healthcloud.menychtas.com/sockets');
                     ws = new WebSocket('ws:localhost:3000');
                     AjaxServices.services.GetFriends(function (response) {
@@ -50,40 +71,17 @@ angular.module('Openhealth').controller('WelcomePageController', function (Frien
                         ws.send(message);
                     };
                     $location.path('main-page');
-                }, function errorCallback(response) {
+                }, //Succesfull Login
+                    function errorCallback(response) {
                     console.log(response);
                     $scope.openFromLeft();
-                })
+                })  //Unsuccesfull Login
             }
             else
                 console.log('empty input');
         }
     };
 
-    $scope.openToast = function () {
-        var toast = $mdToast.simple()
-            .textContent('Username Exists')
-            .action('Ok')
-            .highlightAction(true)
-            .highlightClass('md-accent')// Accent is used by default, this just demonstrates the usage.
-            .position('bottom left');
-        $mdToast.show(toast)
-        // Could also do $mdToast.showSimple('Hello');
-    };
-    $scope.openFromLeft = function () {
-        $mdDialog.show(
-            $mdDialog.alert()
-                .clickOutsideToClose(true)
-                .title('Wrong Username/Password')
-                .textContent('Please try Again')
-                .ariaLabel()
-                .ok('Ok!')
-                // You can specify either sting with query selector
-                .openFrom('#left')
-                // or an element
-                .closeTo(angular.element(document.querySelector('#right')))
-        );
-    };
 
     $scope.subscribe = {
         username: null,
@@ -100,8 +98,9 @@ angular.module('Openhealth').controller('WelcomePageController', function (Frien
         return /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+([^<>()\.,;:\s@\"]{2,}|[\d\.]+))$/.test(mail);
         },
         SendRequest: function () {
-            if ($scope.subscribe.username  && $scope.subscribe.password && $scope.subscribe.email){
+            if ($scope.subscribe.username  && $scope.subscribe.password && $scope.subscribe.email && $scope.subscribe.validMail($scope.subscribe.email)===true){
                 console.log('Request should have been sent here');
+                console.log($scope.subscribe.email);
                 $http({
                     method: 'post',
                     url: 'subscribe',
@@ -110,7 +109,8 @@ angular.module('Openhealth').controller('WelcomePageController', function (Frien
                         client_id: 'myApp',
                         client_secret: 'hmmy1994',
                         username: $scope.subscribe.username,
-                        password: $scope.subscribe.password
+                        password: $scope.subscribe.password,
+                        email: $scope.subscribe.email
                     }
                 }).then(function succesCallback(response) {
                     console.log(response);
@@ -127,15 +127,25 @@ angular.module('Openhealth').controller('WelcomePageController', function (Frien
                         token = localStorage.getItem('token');
                         console.log(token);
                         my_name = $scope.subscribe.username;
-                        AjaxServices.services.GetRequests();
+                       // ? AjaxServices.services.GetRequests();
                         // ws = new WebSocket('wss://healthcloud.menychtas.com/sockets');
                         ws = new WebSocket('ws:localhost:3000');
+
                         AjaxServices.services.GetFriends(function (response) {
-                            for (var i = 0; i < response.data.length; i++) {
+                            for (var i = 0; i < response.length; i++) {
                                 FriendsAndState.addfriends(response.data[i], 'inactive');
                             }
                             WebsocketService.InitWebsocket();
                         });
+                        ws.onopen = function InitWebsocket(e) {
+                            console.log('Initializing Connection with Server ' + my_name);
+                            message = {
+                                type: 'init',
+                                token: localStorage.getItem('token')
+                            };
+                            message = JSON.stringify(message);
+                            ws.send(message);
+                        };
                         $location.path('main-page');
                     }
 
@@ -149,4 +159,5 @@ angular.module('Openhealth').controller('WelcomePageController', function (Frien
 
         }
     }
+
 });

@@ -8,11 +8,10 @@
 var App = angular.module('AngularMaterial',['ngMaterial']);
 
 App.config(
-    function($mdThemingProvider){
-    $mdThemingProvider.theme('default')
-        .primaryPalette('indigo')
-        .accentPalette('blue-grey')
-        // .backgroundPalette('yellow');
+    function($mdThemingProvider,$mdToastProvider) {
+        $mdThemingProvider.theme('default')
+            .primaryPalette('indigo')
+            .accentPalette('blue-grey');
     }
 );
 App.controller('TestingController',function($scope,$mdDialog){

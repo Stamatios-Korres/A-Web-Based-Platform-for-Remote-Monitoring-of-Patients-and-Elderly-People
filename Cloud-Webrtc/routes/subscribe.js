@@ -15,7 +15,8 @@ router.post('/', function (req, res, next) {
         var newUser = new user(
             {
                 username: req.body.username,
-                password: req.body.password
+                password: req.body.password,
+                email:req.body.email
             });
         console.log(newUser);
         var Relationship = new relationship({

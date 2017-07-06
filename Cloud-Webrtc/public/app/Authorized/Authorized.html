@@ -7,31 +7,63 @@
             <div  flex="20">
                 <p   flex="100" class="md-display-1">OpenHealth</p>
             </div>
-            <input  class="input2 md-whiteframe-2dp"  placeholder="  Search for Friends" ng-model='mainPageInfo.Searching' flex="35" type="text" >
-            <md-button id='add' class="md-raised md-primary" >add</md-button>
-            <h1 flex="10">{{mainPageInfo.Searching}}</h1>
+
+                <input  class="input2 md-whiteframe-2dp"  placeholder="  Search for Friends" ng-model='RequestsSent.target' flex="35" type="text" >
+            <md-button id='add' ng-click="RequestsSent.sendRequest()" class="md-raised md-primary" >add</md-button>
+
+            <!--Requests Management -->
             <div layout="row" flex="40" layout-margin>
                 <md-menu>
-                    <md-button ng-click="$mdMenu.open($event)">  <i class="material-icons">supervisor_account</i>Requests</md-button>
-                    <md-menu-content width="4">
-                        <md-menu-item>
-                            <md-list>
-                                Pending
-                            </md-list>
-                        </md-menu-item>
-                            <md-list>
-                                NewRequests
-                            </md-list>
+                    <md-button ng-click="$mdMenu.open($event)">  <i style='margin-top: 5px'class="material-icons">supervisor_account</i>Requests</md-button>
+                    <md-menu-content width="4" layout="column">
+
+                       <!--Friend Requests Received-->
+                        <div layout-align="space-around" layout="row">
+                            <i  style="margin-left: 5%"class="material-icons">accessibility</i>
+                            <span style="margin:1% "flex-offset="50">New Requests</span>
+                        </div>
+                        <md-divider md-inset></md-divider>
+
+                        <span ng-show='RequestsReceived.Received.length === 0' style="margin: 5%">You have no friend Requests</span>
+                        <md-list>
+                            <md-list-item ng-repeat="newRequest in RequestsReceived.Received">
+                                <div layout="row" layout-margin layout-align="space-around">
+                                    <strong>{{newRequest}}</strong>
+                                    <md-button ng-click="RequestsReceived.accept(newRequest)" class="md-accent md-raised">Accept</md-button>
+                                    <md-button ng-click="RequestsReceived.reject(newRequest)" class="md-accent md-raised ">Reject</md-button>
+                                </div>
+
+                            </md-list-item>
+                        </md-list>
+
+                        <!--Pending Friend Requests-->
+                        <div layout-align="space-around" layout="row">
+                            <i class="material-icons">accessibility</i>
+                            <span style="margin:1% " flex-offset="50">Pending</span>
+                        </div>
+                        <md-divider md-inset></md-divider>
+                        <span ng-show='RequestsSent.sent.length === 0' style="margin: 5%">No Requests Pending</span>
+                        <md-list>
+                            <md-list-item ng-repeat="pending in RequestsSent.sent">
+                                <div layout-align="space-around" layout="row" layout-margin>
+                                    <div style="margin-right: 10%"> {{pending}} </div>
+                                    <md-button ng-click="RequestsSent.cancel(pending)" style='margin-left: 20%' class="md-accent md-raised">Cancel</md-button>
+                                </div>
+
+                            </md-list-item>
+                        </md-list>
                     </md-menu-content>
                 </md-menu>
             </div>
+
+            <!--User's Account-->
             <div  layout="column">
                     <md-menu >
-                        <md-button ng-click="$mdMenu.open($event)">  <i  class="material-icons">account_circle</i>Account</md-button>
+                        <md-button ng-click="$mdMenu.open($event)">  <i  class="material-icons">account_circle</i>{{username}}</md-button>
                         <md-menu-content  width="3" >
                             <md-menu-item md-autofocus>
-                                <md-button class="md-primary" md-no-ink md-autofocus>
-                                    <i class="material-icons">build</i>
+                                <md-button class="md-primary" md-no-ink md-autofocus layout="row">
+                                    <i  class="material-icons">build</i>
                                     Settings
                                 </md-button>
                             </md-menu-item>
@@ -45,6 +77,7 @@
                         </md-menu-content>
                     </md-menu>
             </div>
+
         </div>
     </md-toolbar>
 
@@ -54,10 +87,10 @@
         <!--Online Friends and their State-->
         <div id="OnlineFriends" flex="20" layout="column" class="md-whiteframe-4dp">
             <h3 flex-offset="20" md-title > friends</h3>
-            <md-divider md-inset ng-if="!$last"></md-divider>
+            <md-divider  ng-if="!$last"></md-divider>
             <md-list  layout="column">
                 <md-list-item style="float:left;" class='md-primary' ng-repeat="temp in mainPageInfo.friends" flex layout="row">
-                    <md-button  ng-click="SelectedUser(temp.username)" md-auto-focus layout-margin layout="row">
+                    <md-button  class="active" ng-click="SelectedUser(temp.username)" md-auto-focus layout-margin layout="row">
                         <i class="material-icons">perm_identity</i>
                             <span>{{temp.username}}</span>
                     </md-button>
@@ -81,7 +114,7 @@
                 </div>
                 <div flex></div>
                 <div layout="row" layout-margin >
-                    <md-button  md-no-ink layout-margin class="md-accent  md-raised btnInfo md-fab" ><p><i class="material-icons"  >delete_forever</i></p></md-button>
+                    <md-button  md-no-ink layout-margin ng-click='delete()' class="md-accent  md-raised btnInfo md-fab" ><p><i class="material-icons"  >delete_forever</i></p></md-button>
                 </div>
             </div>
         </div>
@@ -89,12 +122,13 @@
         <!--Chat with a user -->
         <div id=Chat flex="25" layout="column" ng-show="mainPageInfo.Selected!=''">
             <md-toolbar style="margin: 1%" md-whiteframe="3"  >
-                <h1 md-title flex-offset="20"> {{ mainPageInfo.Selected}}</h1>
+                <h1 md-title flex-offset="20"> {{mainPageInfo.Selected}}</h1>
             </md-toolbar>
             <div flex class="ChatPlace">
             </div>
              <input  placeholder="Type your message" style="margin: 2%">
         </div>
+
     </div>
 
 </div>

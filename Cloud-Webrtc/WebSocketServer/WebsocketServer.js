@@ -10,6 +10,7 @@ var relationship = require('../models/friends');
 
 
 var wss;
+var Uid = 0 ;
 
 
 exports.initialize = function (server) {
@@ -25,7 +26,7 @@ exports.initialize = function (server) {
             var data = message.utf8Data;
             try {
                 data = JSON.parse(data);
-                console.log(data.type);
+                console.log(' Websocket received '+data.type);
                 switch (data.type) {
                     case 'init': {
                         findbyToken(data.token,
@@ -34,31 +35,68 @@ exports.initialize = function (server) {
                                 if(err){
                                     console.log('Some error finding the user');
                                 }
-                                onlineList.push(result, connection);
-                                onlineList.friendsOnline(result, function (error,result2) {
+                                else {
+                                    onlineList.push(result, connection,data.token); // Save (1) User (2) Ip (3) Token to distinct the users
+                                    onlineList.friendsOnline(result, 'yes', function (error, result2) {
+                                        if (error) {
+                                            console.log('Error occured');
+                                            connection.send(JSON.stringify({message: error}));
+                                        }
+                                        else {
+                                            console.log('Result outside Callback :');
+                                            console.log(result2);
+                                            var message = {type: 'onlineUsers', online: result2};
+                                            message = JSON.stringify(message);
+                                            connection.send(message); // for each online user send that this particular user has come online
+                                            console.log('sent');
+                                        }
+                                    });
+                                }
+                            });
+                        break;
+                    }
+                    case 'video-start':{
+                        data.sourceid = onlineList.findUser(connection);
+                        console.log(data);
+                        onlineList.SendtoAll(data);
+                        break;
+                    }
+                    case 'update':{  // User asks frequently about State of users
+                        findbyToken(data.token,
+                            function (err,result) {
+                                //Something went wrong with the user - Disconnect User
+                                if(err){
+                                    console.log('Some error finding the user');
+                                }
+                                //Side effect of the friendsOnline function is that update also the other users -> Do I want this ??
+                                onlineList.friendsOnline(result,'no', function (error,result2) {
                                     if(error) {
                                         console.log('Error occured');
                                         connection.send(JSON.stringify({message: error}));
                                     }
                                     else
                                     {
-                                        console.log('Result outside Callback :');
                                         console.log(result2);
-                                        var message = {type: 'onlineUsers', online: result2};
-                                        message = JSON.stringify(message);
-                                        connection.send(message); // for each online user send that this particular user has come online
-                                        console.log('sent');
+                                        relationship.findOne({user: data.source}, function (err, result) {
+                                            if (err)
+                                               connection.send(JSON.stringify({message: err}));
+                                            else{
+                                                var message = {type: 'update', online: result2, friends: result.friends};
+                                                connection.send(JSON.stringify(message)); // for each online user send that this particular user has come online
+                                                console.log('Update message sent');
+                                            }
+
+                                        });
+
                                     }
                                 });
                             });
                         break;
                     }
-                    case 'video-start':{
-                        onlineList.Send(data);
-                        break;
-                    }
                     case 'video-response': {
-                        onlineList.Send(data);
+                        data.sourceId = onlineList.findUser(connection);
+                        onlineList.Send(data); // Sends data back to the original target
+                        onlineList.SendResultToAll(connection,data); // Send result to possible duplicates Users
                         break;
                     }
                     case 'video-offer':{
@@ -78,10 +116,11 @@ exports.initialize = function (server) {
                         console.log('Call is ended');
                         break;
                     case 'busy':
+                        onlineList.SendResultToAll(connection,data);
                         onlineList.Send(data);
                         break;
                     case 'cancel':
-                        onlineList.Send(data);
+                        onlineList.SendtoAll(data); // Inform all Devices logged in as the same User
                         break;
                     default :
                         console.log("unknown type");
@@ -90,7 +129,6 @@ exports.initialize = function (server) {
                 console.log(e);
             }
         });
-            // console.log(data);
 
         connection.on('close', function () {
             onlineList.Removeuser(connection);
@@ -128,19 +166,81 @@ function OnlineList() {
     this.list = []; // Empty List upon creation
 }
 
-OnlineList.prototype.push = function (username, portIp) {
-    var message = {
-        username: username,
-        PortIp: portIp
-    };
-
-    return this.list.push(message);
+OnlineList.prototype.findUser = function(connection){
+    var User;
+    for (var i = 0; i < this.list.length; i++) {
+        if (this.list[i].PortIp === connection) {
+            User = this.list[i];
+            break;
+        }
+    }
+    console.log(User.Id);
+    return User.Id;
 };
+OnlineList.prototype.SendResultToAll=function(connection,forwardedMessage) {
+    var userAnswered;
+    var Username;
+    console.log(forwardedMessage);
+    for (var i = 0; i < this.list.length; i++) {        // Find the username of User which answered
+        if (this.list[i].PortIp === connection) {
+            userAnswered = this.list[i];
+            Username = userAnswered.username;
+            break;
+        }
+    }
+    if (userAnswered.SameAccount > 0) {
+        var result;
+        if(forwardedMessage.type === 'busy')
+            result = 'no';
+        else
+            result = 'yes';
+        var message = {
+            type : 'multipleUsers',
+            result:result,
+            source: forwardedMessage.source
+        };
+        console.log('Final message to be sent is: ');
+        console.log(message);
+        for (var j = 0; j < this.list.length; j++) {
+            if (this.list[j].PortIp !== userAnswered.PortIp && this.list[j].username === Username) { // Inform all other Users logged in to the same account
+                 this.list[j].PortIp.send(JSON.stringify(message));
 
-OnlineList.prototype.Send= function(message) {
+            }
+        }
+    }
+};          // Call has been Answered/Rejected by another Device -> Inform others
+OnlineList.prototype.SendtoAll = function(message) {   // Send to alla User's which are currently online to the same account
     console.log('Sending message to: ' + message.target);
     for (var i = 0; i < this.list.length; i++) {
         if(this.list[i].username === message.target){
+            this.list[i].PortIp.send(JSON.stringify(message));
+        }
+    }
+};                                  // Video-offer is sent to all devices which are logged in as the same User
+OnlineList.prototype.push = function (username, portIp,token) {
+    var Same = 0;
+    for(var j =0;j<this.list.length;j++){
+        if(this.list[j].username === username){
+            Same ++;
+            this.list[j].SameAccount++; // We increase all our Users by one
+        }
+
+    }
+
+    var OnlineUser = {
+        username: username,
+        PortIp: portIp,
+        token: token,
+        SameAccount: Same,
+        Id:Uid
+    };
+    Uid++;
+    return this.list.push(OnlineUser);
+};
+OnlineList.prototype.Send= function(message) {
+    console.log('Sending message to: ' + message.target);
+    for (var i = 0; i < this.list.length; i++) {
+        if(this.list[i].username === message.target && this.list[i].Id === message.target){
             this.list[i].PortIp.send(JSON.stringify(message));  // Need to be modified when multiple hosts are allowed
             break;
         }
@@ -154,32 +254,52 @@ OnlineList.prototype.printList = function () {
 };
 OnlineList.prototype.Removeuser = function (connection) {
     var userLeft;
-    //console.log(this.list.length);
+    var Username;
     for (var i = 0; i < this.list.length; i++) {
         if (this.list[i].PortIp === connection) {
-            userLeft = this.list[i].username;
-            //Remove user from Online
+            userLeft = this.list[i];
+            Username = userLeft.username;
+            console.log('Found the user you have been asking for');
             this.list.splice(i,1);
             break;
         }
     }
-    console.log(userLeft + ' is now offline');
+    console.log(Username + ' is now offline');
     var _this = this;
-    relationship.findOne({user: userLeft}, function (err, result) {
-        //results = All friends of user who left
-        if (err) {
+    if(userLeft.SameAccount > 0 ){
+        console.log('more than one users online');
+        for (var j = 0; j < this.list.length; j++) {
+            if(Username === this.list[j].username)
+                this.list[j].SameAccount--;
         }
-        //Find which of user's friends are online
-        for (var i = 0; i < _this.list.length; i++) {
-            for (var j = 0; j < result.friends.length; j++) {
-                if (_this.list[i].username === result.friends[j] && _this.list[i].username !== userLeft) {
-                    _this.list[i].PortIp.send(JSON.stringify({type: 'UserGotOffLine', name: userLeft}));
+    }
+    else { // SameAccount is 0 , there is not another User online to the same account
+        console.log('Only 1 user online');
+        relationship.findOne({user: Username}, function (err, result) {
+            //results = All friends of user who left
+            if (err) {
+                console.log('Some error occured')
+            }
+            //User has no current Friends
+            else if (!result)
+                return;
+            //Find which of user's friends are online
+            else {
+                for (var i = 0; i < _this.list.length; i++) {
+                    //this.list -> Online Users
+                    //Result -> Friends of user who disconnected
+                    for (var j = 0; j < result.friends.length; j++) {
+                        if (_this.list[i].username === result.friends[j] && _this.list[i].username !== Username) {
+                            _this.list[i].PortIp.send(JSON.stringify({type: 'UserGotOffLine', name: Username}));
+                            break;
+                        }
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 };
-OnlineList.prototype.friendsOnline = function (username, callback) {
+OnlineList.prototype.friendsOnline = function (username,option, callback) {
     var _this = this; // this is the online user's list ,why return jojo ?
     relationship.findOne({user: username}, function (err, result) {
         if (err)
@@ -193,6 +313,7 @@ OnlineList.prototype.friendsOnline = function (username, callback) {
                 if (_this.list[i].username === result.friends[j] && _this.list[i].username !== username) {
                     results.push(result.friends[j]);
                     console.log('sending to : ' + result.friends[j]);
+                    if(option==='yes')
                     _this.list[i].PortIp.send(JSON.stringify({type: 'UserGotOnline', name: username}));
                 }
             }
@@ -201,3 +322,4 @@ OnlineList.prototype.friendsOnline = function (username, callback) {
         callback(null,results)
     });
 };
+
