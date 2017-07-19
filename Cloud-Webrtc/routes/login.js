@@ -11,6 +11,10 @@ var path = require('path');
 var login = require('../controllers/Strategies').login;
 var user = require('../models/user');
 var relationship = require('../models/friends');
+var message = require('../models/messages');
+var conversation = require('../models/conversation');
+const uuidv1 = require('uuid/v1');
+
 
 //Main page of my SPA
 router.get('/login', function (req, res, next) {
@@ -206,9 +210,8 @@ function RequestResult(sender, target, answer, callback) {
     if (answer === 'accept') {
         console.log(sender + ' accepted the requests');
         console.log(target);
-        console.log("Request have been accepted ");
+        console.log("Request has been accepted ");
         //Update state of request in Sender
-        //relationship.update({user: sender, "RequestsReceived.state": 'pending', "RequestsReceived.from": target},
         relationship.update({user: sender, RequestsReceived: {$elemMatch: {state: 'pending', from: target}}},
             {$set: {'RequestsReceived.$.state': 'accepted'}},
             function (err, res) {
@@ -247,9 +250,10 @@ function RequestResult(sender, target, answer, callback) {
                                         relationship.update({user: target}, {$push: {friends: sender}}, function (err, results) {
                                             if (err)
                                                 callback({message: err});
-                                            else
-                                                callback({message: 'Ok'});
-                                            console.log(results);
+                                            else{                                       //Now that both Users are friends I must add a schema for their Chat
+                                                // callback({message: 'Ok'});
+                                                CreateConversation(sender,target,callback);
+                                            }
                                         })
                                     }
 
@@ -341,5 +345,28 @@ function deleteFriendship(sender, target, callback) {
             callback({message: 'Ok'});
         })
 
+    })
+}
+function CreateConversation(sender,target,callback) {
+    var ConvId = uuidv1();
+    var Conversation = new conversation({
+        ConversationId: ConvId,
+        Participants: [sender, target]
+    });
+    Conversation.save(function (err, result) {
+        if (err)
+            console.log(err);
+        else {
+            var msg = new message({
+                ConvesrationId: ConvId,
+                message: []
+            });
+            msg.save(function (err, result) {
+                if (err)
+                    console.log(err);
+                else
+                    callback({message: 'Ok'});
+            })
+        }
     })
 }

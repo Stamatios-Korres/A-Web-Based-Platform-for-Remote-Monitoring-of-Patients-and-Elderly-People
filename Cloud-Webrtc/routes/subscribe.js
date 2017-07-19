@@ -33,11 +33,11 @@ router.post('/', function (req, res, next) {
                             res.send(err);
                             return;
                         }
-                        next();
+                            next();
                     })
                 }
             });
-        console.log('Ready to create Token ');
+        //console.log('Ready to create Token ');
         }
     ,getToken);
 

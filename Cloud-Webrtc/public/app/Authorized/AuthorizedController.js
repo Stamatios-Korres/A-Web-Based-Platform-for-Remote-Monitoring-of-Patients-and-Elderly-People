@@ -4,7 +4,6 @@
 
 var MainPage = angular.module('MainPage', ['ngRoute', 'ngResource', 'ngMaterial']);
 
-
 MainPage.controller('ToolbarController', function ($mdToast, $timeout, $location, $scope, FriendsAndState, WebsocketService, AjaxServices) {
     if (token !== undefined) {
         $scope.username = my_name;
@@ -124,8 +123,7 @@ MainPage.controller('ToolbarController', function ($mdToast, $timeout, $location
     }
 });
 
-
-MainPage.controller('AuthorizedController', function ($scope, $mdDialog, $timeout, $location, FriendsAndState, WebsocketService, AjaxServices) {
+MainPage.controller('AuthorizedController', function ($rootScope,$scope, $mdDialog, $timeout, $location, FriendsAndState, WebsocketService, AjaxServices) {
         if (token === undefined)
             $location.path('login');
         else {
@@ -140,6 +138,8 @@ MainPage.controller('AuthorizedController', function ($scope, $mdDialog, $timeou
             };
             $scope.SelectedUser = function (username) {
                 $scope.mainPageInfo.Selected = username;
+                ChatUser = username;
+                $rootScope.$emit('NewMessage');
             };
             $scope.delete = function () {
                 var status;
@@ -179,8 +179,6 @@ MainPage.controller('AuthorizedController', function ($scope, $mdDialog, $timeou
             //Update the users state -> Async Function
             WebsocketService.refresh($scope, function () {
                 $scope.mainPageInfo.friends = FriendsAndState.getfriends();
-                // console.log( $scope.mainPageInfo.friends);
-                // console.log(' Something about online Users ');
                 $scope.$apply();
             });
 
@@ -199,18 +197,58 @@ MainPage.controller('AuthorizedController', function ($scope, $mdDialog, $timeou
 
             $timeout(FriendsDeamon,1000);
         }
-    }
-);
+    });
 
-//Still empty - haven't started it
-MainPage.controller('ChatController', function ($scope, FriendAndSate, WebsocketService) {
+MainPage.controller('ChatController', function (AjaxServices,ChatServices,$timeout,$scope) {
 
+    //Trial Chat Controller
+    $scope.messages = {
+        currentMessage: '',
+        arrayofMessages: [],
+        SelectedUser : '',
+        addText: function (Someone) {
+            console.log($scope.messages.currentMessage);
+            $scope.messages.SelectedUser = Someone;
+            if ($scope.messages.currentMessage !== '') {
+                ChatServices.NewMessage(Someone,$scope.messages.currentMessage,'me',null);
+                $scope.messages.arrayofMessages = ChatServices.SelectUser(Someone);
+                //Send the message back to server
+                var message = {
+                    type: 'Chat',
+                    target: Someone,
+                    data: $scope.messages.currentMessage,
+                    source: my_name
+                };
+                ws.send(JSON.stringify(message));
+            }
+            $scope.messages.currentMessage = '';
+        } // We take the input of the user and add it to the specific user's array
+    };
+
+
+    ChatServices.refresh($scope, function () {
+        $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
+        //Ask from Server if empty array
+        if($scope.messages.arrayofMessages.length === 0){
+            console.log('Going to ask Chat from: '+ ChatUser);
+            AjaxServices.services.GetChat(ChatUser,function(result){
+                var SavedMessages = result.data.message;
+                for(var i=0;i<SavedMessages.length;i++){
+                    ChatServices.NewMessage(ChatUser,SavedMessages[i].message,SavedMessages[i].message);
+                }
+                $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
+            });
+        }
+        if(!$scope.$$phase) {
+            $scope.$apply();
+        }
+    });
 });
 
 MainPage.controller('Video-Controller', function ($rootScope, VideoServices, WebsocketService, $scope, $timeout) {
     function closeScreen() {
-
-        $scope.videoInfo.status = 'closed';  // Next time call is began do not show buttons by default
+        $scope.videoInfo.HowVideoWasClosedFlag = false;
+        $scope.videoInfo.status = 'Closed';  // Next time call is began do not show buttons by default
         $scope.videoInfo.Type = null;
         $scope.videoInfo.InCall = false;
         $scope.videoInfo.target = '';
@@ -218,8 +256,9 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
 
 
     $scope.videoInfo = {
+        HowVideoWasClosedFlag: false,   // The only use of this Flag is to determine when Video Screen must be closed
         target: '',
-        status: 'closed',
+        status: 'Closed',
         message: '',
         Type: null, //options are icnoming,outgoing
         InCall: false,
@@ -227,10 +266,10 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
             closeScreen();
         },
         call: function (username) {
-            if($scope.videoInfo.status === 'closed') { // Safety reason, user can't start calling while he is in a call
+            if($scope.videoInfo.status === 'Closed') { // Safety reason, user can't start calling while he is in a call
                 $scope.videoInfo.Type = 'Outgoing';
                 $scope.videoInfo.target = username; // Keep this info avaialable through calling proccess :)
-
+                $scope.videoInfo.HowVideoWasClosedFlag = true;
                 var message = {
                     type: 'video-start',
                     source: my_name,
@@ -242,14 +281,17 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
             }
         },
         acceptCall: function () {
+            $scope.videoInfo.message = '';
             var message = {
                 type: 'video-response',
                 target: VideoServices.getTarget(),
                 source: my_name,
                 answer: 'yes',
+                sourceId: VideoServices.getMyid(),
                 targetId: VideoServices.getTargetid()
             };
             console.log(message);
+            $scope.videoInfo.message = '';
             ws.send(JSON.stringify(message));
             $scope.videoInfo.InCall = true;
         },
@@ -258,7 +300,10 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
             var message = {
                 type: 'busy',
                 target: VideoServices.getTarget(),
-                source: my_name
+                source: my_name,
+                sourceId: VideoServices.getMyid(),
+                targetId: VideoServices.getTargetid()
+                // No User Id here we want to inform all users
             };
             ws.send(JSON.stringify(message));
             console.log('Target was set to null');
@@ -281,7 +326,9 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
             //Send message to other Peer to inform screen
             var message = {
                 type: 'hang-up',
-                target:VideoServices.getTarget()
+                target:VideoServices.getTarget(),
+                sourceId: VideoServices.getMyid(),
+                targetId: VideoServices.getTargetid()
             };
             ws.send(JSON.stringify(message));
             VideoServices.closeVideo();
@@ -294,20 +341,28 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
 
     $rootScope.$on('close-video', function () {
         console.log('The other peer closed');
-        closeScreen();
+        $scope.videoInfo.Type = 'Closed';
+        $scope.videoInfo.InCall = false ;
+        $scope.videoInfo.message = 'Call Ended ';
         VideoServices.closeVideo();
         $scope.$apply();
+        $timeout(function(){
+                if($scope.videoInfo.HowVideoWasClosedFlag === false)
+                    closeScreen()
+            }
+            , 5000);
+
     });
     $rootScope.$on('busy', function () {
-        console.log('We are busy');
-        $scope.videoInfo.message = $scope.videoInfo.target + ' is busy ... Try Later ';
+        $scope.videoInfo.message = 'Sorry '+ $scope.videoInfo.target + ' is busy!';
         $scope.videoInfo.Type = 'Closed';
         $scope.$apply();
-        $timeout(function () {
-            $scope.videoInfo.status = 'closed';
-            $scope.videoInfo.target ='';
-            $scope.videoInfo.message = '';
-        }, 5000);
+        $scope.videoInfo.HowVideoWasClosedFlag = false;
+        $timeout(function(){
+            if($scope.videoInfo.HowVideoWasClosedFlag === false)
+              closeScreen()
+            }
+        , 5000);
     });
     $rootScope.$on('cancel', function () {
         $scope.videoInfo.Total = false;
@@ -320,9 +375,16 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
     });
     $rootScope.$on('Offline', function () {
         console.log('Oops users seems to be disconnected');
+        $scope.videoInfo.Type = 'Closed';
+        $scope.videoInfo.InCall = false ;
         $scope.videoInfo.message = VideoServices.getTarget() + " was disconected";
+        $scope.$apply();
         VideoServices.closeVideo();
-        $timeout(closeScreen, 5000);
+        $timeout(function(){
+                if($scope.videoInfo.HowVideoWasClosedFlag === false)
+                    closeScreen()
+            }
+            , 5000);
     }); //User disconnected from Server
 
 
@@ -332,11 +394,14 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
                 $scope.videoInfo.Type = 'Incoming';     // Only show accept-reject buttons if the user is receiving data
                 $scope.videoInfo.status = 'open';
                 $scope.videoInfo.message = VideoServices.getTarget() + " is calling";
+                $scope.videoInfo.HowVideoWasClosedFlag = true;
 
             }
             else{ //User already is calling other user,inform the other user
                 var message = {
                     type: 'busy',
+                    sourceId: VideoServices.getMyid(),
+                    targetId: VideoServices.getTargetid(),
                     target: VideoServices.getTarget(),
                     source: my_name
                 };
@@ -347,24 +412,16 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
             $scope.$apply();
     });
     WebsocketService.videoresponse($scope, function () {
-        var decide = VideoServices.Response();
-        if (decide === 'no') {
-            $scope.videoInfo.message = 'Busy ...';
-            $timeout(function () {
-                $scope.videoInfo.status = 'closed';
-            }, 4000)
-        }
-        else if (decide === 'yes') {
-            //Video start here
-            if (VideoServices.getPeer())
-                alert("Can't start a new video during a call");
-            else {
-                VideoServices.setUsers($scope.videoInfo.target, my_name);
-                //Let the service know the two User calling each other
-                VideoServices.setPeer('Caller');
-                $scope.videoInfo.InCall = true;
-                $scope.$apply();
-            }
+        //Video start here
+        if (VideoServices.getPeer())
+            alert("Can't start a new video during a call");
+        else {
+            VideoServices.setUsers($scope.videoInfo.target, my_name);
+            //Let the service know the two User calling each other
+            VideoServices.setPeer('Caller');
+            $scope.videoInfo.InCall = true;
+            $scope.videoInfo.message = '';
+            $scope.$apply();
         }
     });
     WebsocketService.videoAnswer($scope, function () {
@@ -403,3 +460,4 @@ function deleteFromList(list, element) {
     console.log(list);
     return list;
 }
+

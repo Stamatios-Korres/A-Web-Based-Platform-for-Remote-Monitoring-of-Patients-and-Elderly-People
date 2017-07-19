@@ -11,14 +11,12 @@ html, body {
     font-family: 'Roboto';
 }
 #draggable {
-    /*border: 2px solid black;*/
-    width: 550px;
-    height: 400px;
+    width: 500px;
+    height: 500px;
     position: absolute;
     z-index: 10;
     overflow: hidden;
-    border: 6px solid darkblue;
-    border-radius:10px;
+    border-radius:4px;
 }
 
 
@@ -26,17 +24,21 @@ h1 {
     color: white;
 }
 
+
 #received_video {
     top: 0;
     overflow: hidden;
     position: absolute;
-    width: 550px;
-    height: 450px;
 }
 
 #local_video {
+    float:top;
+    right: 0;
+    overflow: hidden;
     z-index: 10;
-    position: absolute
+    position: absolute;
+    width: 200px;
+    height:200px;
 }
 
 /* Css required for Angular Material */

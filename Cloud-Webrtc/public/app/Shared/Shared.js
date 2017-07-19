@@ -182,11 +182,25 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             callback(response);
         });
     };
+    services.GetChat = function(username,callback){
+        console.log('Something');
+        var string = 'Bearer ' + token;
+        $http({
+            headers: {
+                'Authorization': string
+            },
+            method: 'get',
+            url: 'messages',
+            params:{target:username}
+        }).then(function successCallback(response) {
+            callback(response);
+        });
+    };
 
     return {services: services, requests: requests};
 });
 
-angular.module('Openhealth').service('VideoServices',function(){
+angular.module('Openhealth').service('VideoServices',function($rootScope){
     var response;
     var mediaConstraints = {
         audio: true, // We want an audio track
@@ -209,6 +223,7 @@ angular.module('Openhealth').service('VideoServices',function(){
     var MuteFlag = false;  //Flags used for making sure Video Calls use cases
     var Incall = false;
     var PeerDisconnectedWhileInCall = false;
+    var busy ='';
 
     //Should get rid of those -> Problem with spd !!
     var i = 0;
@@ -217,10 +232,11 @@ angular.module('Openhealth').service('VideoServices',function(){
 
     function handleICECandidateEvent(event) {
         if (event.candidate) {
-            console.log("Sending Candidate number: " + j );
             j++;
             var message = {
                 type: "new-ice-candidate",
+                sourceId:mine_id,
+                targetId: target_id,
                 target: target,
                 candidate: event.candidate
             };
@@ -228,7 +244,10 @@ angular.module('Openhealth').service('VideoServices',function(){
         }
     }  // Functions needed by WebRTC PeerConnection ( Object's Fucntion )
     function closePeer(){
-        MyPeerConnection.close();
+        target_id = -1; // Unique Id's to distinct multiple User's logged in the same Account
+        mine_id = -1;
+        if (MyPeerConnection)
+            MyPeerConnection.close();
         MyPeerConnection = null;
         //reset flags
         PeerDisconnectedWhileInCall = false;
@@ -253,12 +272,16 @@ angular.module('Openhealth').service('VideoServices',function(){
             return MyPeerConnection.setLocalDescription(offer);
         })
             .then(function () {
-                message = {
+               var  message = {
                     type: "video-offer",
                     source: myself,
                     target: target,
+                    sourceId: mine_id,
+                    targetId: target_id,
                     sdp: MyPeerConnection.localDescription
                 };
+                console.log(message);
+
                 ws.send(JSON.stringify(message));
             })
         //.catch(error);
@@ -266,19 +289,20 @@ angular.module('Openhealth').service('VideoServices',function(){
     function CloseVideo (){
         var remoteVideo = document.getElementById("received_video");
         var localVideo = document.getElementById("local_video");
-        if (MyPeerConnection) {
-            if (remoteVideo.srcObject) {
+           if (remoteVideo.srcObject) {
+               console.log('Remote is killed');
                 remoteVideo.srcObject.getTracks()[1].stop();
                 remoteVideo.srcObject.getTracks()[0].stop();
                 remoteVideo.srcObject = null;
-            }
-            if (localVideo.srcObject) {
+           }
+           if (localVideo.srcObject) {
+                console.log('Local is killed');
                 localVideo.srcObject.getTracks()[0].stop();
                 localVideo.srcObject.getTracks()[1].stop();
                 localVideo.srcObject = null;
             }
             closePeer();
-        }
+            console.log('Ok video is closed');
     }
     function handleAddStreamEvent(event) {
         console.log("Received incoming stream");
@@ -299,8 +323,27 @@ angular.module('Openhealth').service('VideoServices',function(){
                 alert("Error opening your camera and/or microphone: " + e.message);
                 break;
         }
-        VideoServices.closeVideo();
+        CloseVideo();
         //define later what close Video is
+    }
+    function handleICEConnectionStateChangeEvent(event) {
+        console.log('Ice Connection Change of State');
+        if(MyPeerConnection) {
+            switch (MyPeerConnection.iceConnectionState) {
+                case "closed":
+                    console.log('Closed State');
+                    break;
+                case "failed":
+                    console.log('Failed State');
+                    break;
+                case "disconnected":
+                    console.log('Disconnected State');
+                    //CloseVideo();
+                    $rootScope.$emit('Offline');
+
+                    break;
+            }
+        }
     }
 
     // Probably this function is usefull if Video is interrupted for a reason different from user disconnection
@@ -344,8 +387,8 @@ angular.module('Openhealth').service('VideoServices',function(){
         MyPeerConnection.onicecandidate = handleICECandidateEvent;
         MyPeerConnection.onaddstream = handleAddStreamEvent;
         // myPeerConnection.onremovestream = handleRemoveStreamEvent;
-      //  MyPeerConnection.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
-        // myPeerConnection.onicegatheringstatechange = handleICEGatheringStateChangeEvent;
+        MyPeerConnection.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
+         //myPeerConnection.onicegatheringstatechange = handleICEGatheringStateChangeEvent;
         // myPeerConnection.onsignalingstatechange = handleSignalingStateChangeEvent;
         MyPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
 
@@ -381,6 +424,8 @@ angular.module('Openhealth').service('VideoServices',function(){
                             source: myself,
                             target: target,
                             type: "video-answer",
+                            sourceId: mine_id,
+                            targetId: target_id,
                             sdp: MyPeerConnection.localDescription
                         };
                         ws.send(JSON.stringify(msg));
@@ -388,7 +433,7 @@ angular.module('Openhealth').service('VideoServices',function(){
                     .catch(handleGetUserMediaError);
                 break;
             default :
-                console.log('Wring type of parameter');
+                console.log('Wrong type of parameter');
 
         }
     };
@@ -429,11 +474,18 @@ angular.module('Openhealth').service('VideoServices',function(){
         return target_id;
     };
     services.setMyId = function(CallerId){
-        target_id = CallerId;
+        mine_id = CallerId;
     };
     services.getMyid = function(){
-        return target_id;
+        return mine_id;
     };
+    services.setBusy = function(Busy){
+        busy=Busy;
+    };
+    services.getBusy = function(){
+        return busy;
+    };
+
 
     //Cases that must be iterrupted -> User goes Offline,Rejects,Busy,UserA cancel the call
 
@@ -454,7 +506,63 @@ angular.module('Openhealth').service('VideoServices',function(){
     return services;
 });
 
-angular.module('Openhealth').service('WebsocketService',function(VideoServices, $timeout, $rootScope, FriendsAndState, $window){
+angular.module('Openhealth').service('ChatServices',function($rootScope,FriendsAndState){
+
+    var services = {};
+    var ArraysofTexts= [];
+    services.createArray = function(){
+        var friends = FriendsAndState.getfriends();
+        for (var i=0;i<friends.length;i++){
+            var object = {
+                name: friends[i].username,
+                Chat: []
+            };
+            ArraysofTexts.push(object);
+        }
+    };
+    services.SelectUser = function(username){
+        for(var i=0;i<ArraysofTexts.length;i++){
+            if(ArraysofTexts[i].name === username) {
+                return ArraysofTexts[i].Chat;
+            }
+        }
+    };
+    services.NewMessage = function(username,message,Sender,uuid){
+        for(var i=0;i<ArraysofTexts.length;i++){
+            if(ArraysofTexts[i].name === username) {
+                var msg = {
+                    message:message,
+                    direction:Sender,
+                    uuid:uuid
+                };
+                if(Sender  !== 'me')
+                    console.log(msg);
+                ArraysofTexts[i].Chat.push(msg);
+                break;
+            }
+        }
+    };
+    services.updateUuid = function(uuid,username){
+        var index;
+        for(var i=0;i<ArraysofTexts.length;i++){
+            if(ArraysofTexts[i].name === username) {
+                index = i;
+            }
+        }
+        ArraysofTexts[index].Chat[ArraysofTexts[index].Chat.length-1].uuid = uuid;
+    };
+    services.refresh =function (scope, callback) {
+        var handler = $rootScope.$on('NewMessage', callback);
+        scope.$on('$destroy', handler);
+
+    };
+    return services;
+
+
+
+});
+
+angular.module('Openhealth').service('WebsocketService',function(VideoServices,ChatServices, $timeout, $rootScope, FriendsAndState, $window){
     var services = {};
     services.makeVideoCall = function (message) {
         message = JSON.stringify(message);
@@ -462,12 +570,14 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices, 
     };
     services.InitWebsocket = function (){
             ws.onmessage = function (event) {
-            //I have new message , change FriendsAndState service and inform about the cange
             try {
                 var data = JSON.parse(event.data);
                 if(data.type !== 'update')
                     console.log('Received Websocket message type ' + data.type);
                 switch (data.type) {
+
+                    //General Purpose
+
                     case 'onlineUsers':
                         console.log('Online Users : ');
                         console.log(data.online);
@@ -523,25 +633,26 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices, 
 
 
                     //Cases for Video - WebRTC
+
                     case 'video-start':
                         console.log(data);
                         var peer = VideoServices.getPeer();
                         var message = {
                             type: 'busy',
                             target: data.source,
-                            source: data.target
+                            source: data.target,
+                            sourceId: VideoServices.getMyid(),
+                            targetId: data.sourceId
                         };
                         if(!peer) {
                             if(VideoServices.getTarget()) {
-                                console.log('In here');
-                                if (VideoServices.getTarget() !== data.source) {
-                                    console.log('User has already a received call waiting');
-                                    ws.send(JSON.stringify(message));
-                                }
+                                console.log('User has already a received call waiting');
+                                ws.send(JSON.stringify(message));
                             }
                             else {
                                 VideoServices.setUsers(data.source, my_name);
-                                VideoServices.setTargetId(data.sourceid);
+                                VideoServices.setTargetId(data.sourceId);
+                                VideoServices.setMyId(data.targetId);
                                 console.log('Signal emmited');
                                 $rootScope.$emit('Video-Start');
                             }
@@ -552,7 +663,11 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices, 
                         }
                         break;
                     case 'video-response': // With video response we define if we accept call or reject it
-                        console.log('his response was ' + data.answer);
+                        console.log("Answer is:");
+                        console.log(data);
+                        VideoServices.setTargetId(data.sourceId);
+                        VideoServices.setMyId(data.targetId);
+                        //console.log('his response was ' + data.answer);
                         VideoServices.SetResponse(data.answer);
                         $rootScope.$emit('Video-Response');
                         break;
@@ -580,8 +695,9 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices, 
                         break;
                     case 'cancel':
                         if(VideoServices.getTarget() === data.source) { // Just for safety reasons
-                            console.log('Ok we are here ');
-                            $rootScope.$emit('cancel');
+
+                                console.log('Ok we are here ');
+                                $rootScope.$emit('cancel');
                         }
                         break;
                     case 'multipleUsers':{
@@ -589,6 +705,23 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices, 
                         $rootScope.$emit('multipleUsers');
                         break;
                     }
+
+
+                    // Chat App
+                    case 'Chat' :{
+                        ChatServices.NewMessage(data.source,data.data,data.source,data.uuid); // Username of Friend/Message/and Direction
+                        $rootScope.$emit('NewMessage');
+                        console.log('Message was added and signal was emmited');
+                        break;
+
+                    }
+                    case 'updateUuid':{
+                        console.log(data);
+                        ChatServices.updateUuid(data.uuid,data.User);
+                        break;
+                    }
+
+
                     default:
                         console.log('Unkown message');
                 }

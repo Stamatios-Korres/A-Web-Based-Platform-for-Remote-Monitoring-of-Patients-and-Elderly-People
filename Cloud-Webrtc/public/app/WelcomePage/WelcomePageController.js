@@ -2,7 +2,7 @@
  * Created by timoskorres on 1/6/2017.
  */
 
-angular.module('Openhealth').controller('WelcomePageController', function (FriendsAndState, $mdToast, $mdDialog, WebsocketService, AjaxServices, $scope, $http, $window, $location, $timeout) {
+angular.module('Openhealth').controller('WelcomePageController', function (ChatServices,FriendsAndState, $mdToast, $mdDialog, WebsocketService, AjaxServices, $scope, $http, $window, $location, $timeout) {
 
 
     $scope.openFromLeft = function () {
@@ -60,6 +60,7 @@ angular.module('Openhealth').controller('WelcomePageController', function (Frien
                             FriendsAndState.addfriends(response[i], 'inactive');
                         }
                         WebsocketService.InitWebsocket();
+                        ChatServices.createArray();
                     });
                     ws.onopen = function InitWebsocket(e) {
                         console.log('Initializing Connection with Server ' + my_name);
@@ -69,6 +70,7 @@ angular.module('Openhealth').controller('WelcomePageController', function (Frien
                         };
                         message = JSON.stringify(message);
                         ws.send(message);
+
                     };
                     $location.path('main-page');
                 }, //Succesfull Login

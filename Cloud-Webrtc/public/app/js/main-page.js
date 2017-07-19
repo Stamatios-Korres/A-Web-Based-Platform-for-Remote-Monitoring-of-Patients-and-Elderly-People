@@ -13,15 +13,18 @@ var my_name;                  // User's username
 var requests = [];            // Requests that the user hasn't still answered
 var Pending = [];             // Requests that the user has send and haven't been accepted or rejected
 var MultpleUsersResult;
+var ChatUser = '';            // Every Time one User will be available for sending messages. ChatUser defines the Username of this Users
 
 //This clears localStorage History -> Change when use cookies
 mainApp.run(function ($rootScope) {
     localStorage.clear();
+
 });
-mainApp.controller('Bar-controller', function (FriendsAndState, $scope, $window, $location) {
+mainApp.controller('Bar-controller', function ($timeout,FriendsAndState, $scope, $window, $location) {
     if (token === undefined) {
         $location.path('login');
     }
+
 });
 
 mainApp.config(['$routeProvider',

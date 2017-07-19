@@ -120,13 +120,25 @@
         </div>
 
         <!--Chat with a user -->
-        <div id=Chat flex="25" layout="column" ng-show="mainPageInfo.Selected!=''">
+        <div id=Chat flex="25" layout="column" ng-controller="ChatController" ng-show="mainPageInfo.Selected!=''">
             <md-toolbar style="margin: 1%" md-whiteframe="3"  >
                 <h1 md-title flex-offset="20"> {{mainPageInfo.Selected}}</h1>
             </md-toolbar>
-            <div flex class="ChatPlace">
+            <div   style="overflow-y: auto;"  flex id="ChatPlace">
+                    <md-list>
+                        <md-list-item flex ng-repeat="message in messages.arrayofMessages  track by $index" ng-click="null">
+                            <div class=" md-accent md-list-item-text" layout="column" ng-show="message.direction === 'me' " >
+                                <h1  class="md-subhead">Me:<br><em>{{message.message}}</em></h1>
+                            </div>
+                            <div class=" md-list-item-text"  flex-offset="100" layout="row" ng-show="message.direction !== 'me' " >
+                                <h3  class="md-subhead">{{mainPageInfo.Selected}}:<br><em>{{message.message}}</em></h3>
+                            </div>
+                            <md-divider ></md-divider>
+                        </md-list-item>
+                    </md-list>
             </div>
-             <input  placeholder="Type your message" style="margin: 2%">
+             <input  ng-model='messages.currentMessage' placeholder="Type your message" style="margin: 2%">
+            <md-button class="md-primary md-raised" ng-click='messages.addText(mainPageInfo.Selected)'>Hit me</md-button>
         </div>
 
     </div>

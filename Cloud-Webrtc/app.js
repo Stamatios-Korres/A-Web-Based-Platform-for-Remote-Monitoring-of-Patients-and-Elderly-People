@@ -10,9 +10,11 @@ var index = require('./routes/index');
 var token = require('./routes/tokens');
 var login = require('./routes/login');
 var subscribe = require('./routes/subscribe');
+var message = require('./routes/message');
 var app = express();
 var flash = require('connect-flash');
 var passport = require('passport');
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -28,6 +30,7 @@ app.use(express.static(path.join(__dirname, 'public/app')));
 app.use('/tokens',token);
 app.use('/',login);
 app.use('/subscribe',subscribe);
+app.use('/messages',message);
 mongoose.connect('mongodb://127.0.0.1/Webrtc');
 // catch 404 and forward to error handler
 
