@@ -183,7 +183,6 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
         });
     };
     services.GetChat = function(username,callback){
-        console.log('Something');
         var string = 'Bearer ' + token;
         $http({
             headers: {
@@ -194,6 +193,20 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             params:{target:username}
         }).then(function successCallback(response) {
             callback(response);
+        });
+    };
+    services.DeleteMessage = function(uuid,target,callback){
+        var string = 'Bearer ' + token;
+        $http({
+            headers: {
+                'Authorization': string
+            },
+            method: 'delete',
+            url: 'messages',
+            params:{uuid:uuid,target:target}
+        }).then(function successCallback(response) {
+            console.log(response);
+            callback();
         });
     };
 
@@ -550,6 +563,7 @@ angular.module('Openhealth').service('ChatServices',function($rootScope,FriendsA
             }
         }
         ArraysofTexts[index].Chat[ArraysofTexts[index].Chat.length-1].uuid = uuid;
+        console.log(  ArraysofTexts[index].Chat[ArraysofTexts[index].Chat.length-1]);
     };
     services.refresh =function (scope, callback) {
         var handler = $rootScope.$on('NewMessage', callback);

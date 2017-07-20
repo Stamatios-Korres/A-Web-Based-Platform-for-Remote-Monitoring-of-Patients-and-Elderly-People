@@ -124,9 +124,9 @@
             <md-toolbar style="margin: 1%" md-whiteframe="3"  >
                 <h1 md-title flex-offset="20"> {{mainPageInfo.Selected}}</h1>
             </md-toolbar>
-            <div   style="overflow-y: auto;"  flex id="ChatPlace">
+            <div   style="overflow-x: auto;overflow-y: auto;"  flex id="ChatPlace">
                     <md-list>
-                        <md-list-item flex ng-repeat="message in messages.arrayofMessages  track by $index" ng-click="null">
+                        <md-list-item flex ng-repeat="message in messages.arrayofMessages  track by $index" ng-click="messages.show(message.uuid)">
                             <div class=" md-accent md-list-item-text" layout="column" ng-show="message.direction === 'me' " >
                                 <h1  class="md-subhead">Me:<br><em>{{message.message}}</em></h1>
                             </div>

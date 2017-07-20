@@ -112,7 +112,7 @@ MainPage.controller('ToolbarController', function ($mdToast, $timeout, $location
         //Check for Unanswered Friend Requests
         function deamon() {
             //console.log('Inside the great deamon');
-            if(token !== undefined) {
+            if (token !== undefined) {
                 $scope.RequestsSent.checkPending();
                 $scope.RequestsReceived.checkRequests();
                 $timeout(deamon, 30000);
@@ -123,97 +123,96 @@ MainPage.controller('ToolbarController', function ($mdToast, $timeout, $location
     }
 });
 
-MainPage.controller('AuthorizedController', function ($rootScope,$scope, $mdDialog, $timeout, $location, FriendsAndState, WebsocketService, AjaxServices) {
-        if (token === undefined)
-            $location.path('login');
-        else {
-            $scope.mainPageInfo = {
-                Searching: '',
-                Selected: '',
-                friends: []
-            };
-            //Does take consideration into friends coming online
-            $scope.init = function () {
-                $scope.mainPageInfo.friends = FriendsAndState.getfriends();
-            };
-            $scope.SelectedUser = function (username) {
-                $scope.mainPageInfo.Selected = username;
-                ChatUser = username;
-                $rootScope.$emit('NewMessage');
-            };
-            $scope.delete = function () {
-                var status;
-                console.log("About to delete " + $scope.mainPageInfo.Selected);
-                var confirm = $mdDialog.confirm()
-                    .clickOutsideToClose(true)
-                    .title('Confirm')
-                    .textContent('Are you sure you want to delete ' + $scope.mainPageInfo.Selected + ' ? ')
-                    .ariaLabel()
-                    .openFrom('#left')
-                    .closeTo(angular.element(document.querySelector('#right')))
-                    .ok('Yes I am ')
-                    .cancel('No');
+MainPage.controller('AuthorizedController', function ($rootScope, $scope, $mdDialog, $timeout, $location, FriendsAndState, WebsocketService, AjaxServices) {
+    if (token === undefined)
+        $location.path('login');
+    else {
+        $scope.mainPageInfo = {
+            Searching: '',
+            Selected: '',
+            friends: []
+        };
+        //Does take consideration into friends coming online
+        $scope.init = function () {
+            $scope.mainPageInfo.friends = FriendsAndState.getfriends();
+        };
+        $scope.SelectedUser = function (username) {
+            $scope.mainPageInfo.Selected = username;
+            ChatUser = username;
+            $rootScope.$emit('NewMessage');
+        };
+        $scope.delete = function () {
+            var status;
+            console.log("About to delete " + $scope.mainPageInfo.Selected);
+            var confirm = $mdDialog.confirm()
+                .clickOutsideToClose(true)
+                .title('Confirm')
+                .textContent('Are you sure you want to delete ' + $scope.mainPageInfo.Selected + ' ? ')
+                .ariaLabel()
+                .openFrom('#left')
+                .closeTo(angular.element(document.querySelector('#right')))
+                .ok('Yes I am ')
+                .cancel('No');
 
-                $mdDialog.show(confirm).then(
-                    function () {
-                        //Delete users
-                        AjaxServices.services.DeleteFriends($scope.mainPageInfo.Selected, function (result) {
-                            console.log('Here we are');
-                            for (var i = 0; i < $scope.mainPageInfo.friends.length; i++) {
-                                console.log($scope.mainPageInfo.friends[i].username);
-                                if ($scope.mainPageInfo.friends[i].username === $scope.mainPageInfo.Selected) {
-                                    console.log('deleted ' + $scope.mainPageInfo.Selected);
-                                    $scope.mainPageInfo.friends.splice(i, 1);
-                                    break;
-                                }
+            $mdDialog.show(confirm).then(
+                function () {
+                    //Delete users
+                    AjaxServices.services.DeleteFriends($scope.mainPageInfo.Selected, function (result) {
+                        console.log('Here we are');
+                        for (var i = 0; i < $scope.mainPageInfo.friends.length; i++) {
+                            console.log($scope.mainPageInfo.friends[i].username);
+                            if ($scope.mainPageInfo.friends[i].username === $scope.mainPageInfo.Selected) {
+                                console.log('deleted ' + $scope.mainPageInfo.Selected);
+                                $scope.mainPageInfo.friends.splice(i, 1);
+                                break;
                             }
-                        })
-                    },
-                    function () {
-                        //Nothing happened, users cancelled his request
-                    });
+                        }
+                    })
+                },
+                function () {
+                    //Nothing happened, users cancelled his request
+                });
 
-            };
-            $scope.init();
+        };
+        $scope.init();
 
-            //Update the users state -> Async Function
-            WebsocketService.refresh($scope, function () {
-                $scope.mainPageInfo.friends = FriendsAndState.getfriends();
-                $scope.$apply();
-            });
+        //Update the users state -> Async Function
+        WebsocketService.refresh($scope, function () {
+            $scope.mainPageInfo.friends = FriendsAndState.getfriends();
+            $scope.$apply();
+        });
 
-            //This function goal is to update friends of a User real time
-            function FriendsDeamon() {
-                if(token !== undefined) {
-                    var message = {
-                        type: 'update',
-                        source: my_name,
-                        token: token
-                    };
-                    ws.send(JSON.stringify(message));
-                    $timeout(FriendsDeamon, 15000);
-                }
+        //This function goal is to update friends of a User real time
+        function FriendsDeamon() {
+            if (token !== undefined) {
+                var message = {
+                    type: 'update',
+                    source: my_name,
+                    token: token
+                };
+                ws.send(JSON.stringify(message));
+                $timeout(FriendsDeamon, 15000);
             }
-
-            $timeout(FriendsDeamon,1000);
         }
-    });
 
-MainPage.controller('ChatController', function (AjaxServices,ChatServices,$timeout,$scope) {
+        $timeout(FriendsDeamon, 1000);
+    }
+});
+
+MainPage.controller('ChatController', function (AjaxServices, ChatServices, $timeout, $scope) {
 
     //Trial Chat Controller
     $scope.messages = {
         currentMessage: '',
         arrayofMessages: [],
-        SelectedUser : '',
+        SelectedUser: '',
         addText: function (Someone) {
             console.log($scope.messages.currentMessage);
             $scope.messages.SelectedUser = Someone;
             if ($scope.messages.currentMessage !== '') {
-                ChatServices.NewMessage(Someone,$scope.messages.currentMessage,'me',null);
+                ChatServices.NewMessage(Someone, $scope.messages.currentMessage, 'me', null);
                 $scope.messages.arrayofMessages = ChatServices.SelectUser(Someone);
-                //Send the message back to server
-                var message = {
+                var message = {                                     //Send the message back to server
                     type: 'Chat',
                     target: Someone,
                     data: $scope.messages.currentMessage,
@@ -222,24 +221,29 @@ MainPage.controller('ChatController', function (AjaxServices,ChatServices,$timeo
                 ws.send(JSON.stringify(message));
             }
             $scope.messages.currentMessage = '';
-        } // We take the input of the user and add it to the specific user's array
+        },
+        show: function (uuid) {
+            AjaxServices.services.DeleteMessage(uuid, ChatUser, function () {
+                //Update the messages
+            });
+        }
     };
 
 
     ChatServices.refresh($scope, function () {
         $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
         //Ask from Server if empty array
-        if($scope.messages.arrayofMessages.length === 0){
-            console.log('Going to ask Chat from: '+ ChatUser);
-            AjaxServices.services.GetChat(ChatUser,function(result){
+        if ($scope.messages.arrayofMessages.length === 0) {
+            console.log('Going to ask Chat from: ' + ChatUser);
+            AjaxServices.services.GetChat(ChatUser, function (result) {
                 var SavedMessages = result.data.message;
-                for(var i=0;i<SavedMessages.length;i++){
-                    ChatServices.NewMessage(ChatUser,SavedMessages[i].message,SavedMessages[i].message);
+                for (var i = 0; i < SavedMessages.length; i++) {
+                    ChatServices.NewMessage(ChatUser, SavedMessages[i].message, SavedMessages[i].direction, SavedMessages[i].uuid);
                 }
                 $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
             });
         }
-        if(!$scope.$$phase) {
+        if (!$scope.$$phase) {
             $scope.$apply();
         }
     });
@@ -262,11 +266,11 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
         message: '',
         Type: null, //options are icnoming,outgoing
         InCall: false,
-        closeScreen:function(){
+        closeScreen: function () {
             closeScreen();
         },
         call: function (username) {
-            if($scope.videoInfo.status === 'Closed') { // Safety reason, user can't start calling while he is in a call
+            if ($scope.videoInfo.status === 'Closed') { // Safety reason, user can't start calling while he is in a call
                 $scope.videoInfo.Type = 'Outgoing';
                 $scope.videoInfo.target = username; // Keep this info avaialable through calling proccess :)
                 $scope.videoInfo.HowVideoWasClosedFlag = true;
@@ -326,7 +330,7 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
             //Send message to other Peer to inform screen
             var message = {
                 type: 'hang-up',
-                target:VideoServices.getTarget(),
+                target: VideoServices.getTarget(),
                 sourceId: VideoServices.getMyid(),
                 targetId: VideoServices.getTargetid()
             };
@@ -342,27 +346,27 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
     $rootScope.$on('close-video', function () {
         console.log('The other peer closed');
         $scope.videoInfo.Type = 'Closed';
-        $scope.videoInfo.InCall = false ;
+        $scope.videoInfo.InCall = false;
         $scope.videoInfo.message = 'Call Ended ';
         VideoServices.closeVideo();
         $scope.$apply();
-        $timeout(function(){
-                if($scope.videoInfo.HowVideoWasClosedFlag === false)
+        $timeout(function () {
+                if ($scope.videoInfo.HowVideoWasClosedFlag === false)
                     closeScreen()
             }
             , 5000);
 
     });
     $rootScope.$on('busy', function () {
-        $scope.videoInfo.message = 'Sorry '+ $scope.videoInfo.target + ' is busy!';
+        $scope.videoInfo.message = 'Sorry ' + $scope.videoInfo.target + ' is busy!';
         $scope.videoInfo.Type = 'Closed';
         $scope.$apply();
         $scope.videoInfo.HowVideoWasClosedFlag = false;
-        $timeout(function(){
-            if($scope.videoInfo.HowVideoWasClosedFlag === false)
-              closeScreen()
+        $timeout(function () {
+                if ($scope.videoInfo.HowVideoWasClosedFlag === false)
+                    closeScreen()
             }
-        , 5000);
+            , 5000);
     });
     $rootScope.$on('cancel', function () {
         $scope.videoInfo.Total = false;
@@ -376,40 +380,40 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
     $rootScope.$on('Offline', function () {
         console.log('Oops users seems to be disconnected');
         $scope.videoInfo.Type = 'Closed';
-        $scope.videoInfo.InCall = false ;
+        $scope.videoInfo.InCall = false;
         $scope.videoInfo.message = VideoServices.getTarget() + " was disconected";
         $scope.$apply();
         VideoServices.closeVideo();
-        $timeout(function(){
-                if($scope.videoInfo.HowVideoWasClosedFlag === false)
+        $timeout(function () {
+                if ($scope.videoInfo.HowVideoWasClosedFlag === false)
                     closeScreen()
             }
             , 5000);
     }); //User disconnected from Server
 
 
-    WebsocketService.videostart($scope,function () {
-            var peer = VideoServices.getPeer();
-            if(!peer && $scope.videoInfo.target === '' ){                                  // Extra safety it has already beeing checked
-                $scope.videoInfo.Type = 'Incoming';     // Only show accept-reject buttons if the user is receiving data
-                $scope.videoInfo.status = 'open';
-                $scope.videoInfo.message = VideoServices.getTarget() + " is calling";
-                $scope.videoInfo.HowVideoWasClosedFlag = true;
+    WebsocketService.videostart($scope, function () {
+        var peer = VideoServices.getPeer();
+        if (!peer && $scope.videoInfo.target === '') {                                  // Extra safety it has already beeing checked
+            $scope.videoInfo.Type = 'Incoming';     // Only show accept-reject buttons if the user is receiving data
+            $scope.videoInfo.status = 'open';
+            $scope.videoInfo.message = VideoServices.getTarget() + " is calling";
+            $scope.videoInfo.HowVideoWasClosedFlag = true;
 
-            }
-            else{ //User already is calling other user,inform the other user
-                var message = {
-                    type: 'busy',
-                    sourceId: VideoServices.getMyid(),
-                    targetId: VideoServices.getTargetid(),
-                    target: VideoServices.getTarget(),
-                    source: my_name
-                };
-                ws.send(JSON.stringify(message));
-                VideoServices.ResetTarget();
-            }
+        }
+        else { //User already is calling other user,inform the other user
+            var message = {
+                type: 'busy',
+                sourceId: VideoServices.getMyid(),
+                targetId: VideoServices.getTargetid(),
+                target: VideoServices.getTarget(),
+                source: my_name
+            };
+            ws.send(JSON.stringify(message));
+            VideoServices.ResetTarget();
+        }
 
-            $scope.$apply();
+        $scope.$apply();
     });
     WebsocketService.videoresponse($scope, function () {
         //Video start here
@@ -432,16 +436,16 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
         $scope.videoInfo.Incall = true;
 
     });
-    WebsocketService.Multiple($scope,function(){
-       $scope.videoInfo.Type = 'Closed';
-       if(MultpleUsersResult === 'yes')
-        $scope.videoInfo.message = 'Answered on another Device';
+    WebsocketService.Multiple($scope, function () {
+        $scope.videoInfo.Type = 'Closed';
+        if (MultpleUsersResult === 'yes')
+            $scope.videoInfo.message = 'Answered on another Device';
         else
-           $scope.videoInfo.message = 'Cancelled by another Device';
+            $scope.videoInfo.message = 'Cancelled by another Device';
         $scope.$apply();
         VideoServices.ResetTarget();
 
-        $timeout(closeScreen,4000);
+        $timeout(closeScreen, 4000);
     })
 
 

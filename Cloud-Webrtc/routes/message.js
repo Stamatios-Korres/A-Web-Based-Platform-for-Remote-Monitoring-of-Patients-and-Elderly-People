@@ -36,7 +36,8 @@ router.get('/',passport.authenticate('bearer', {session: false}),function(req,re
                                     direction = 'me';
                                 var msg = {
                                     message:data,
-                                    direction: direction
+                                    direction: direction,
+                                    uuid:messages[i].uniqueId
                                 };
                                 Result.push(msg);
                             }
@@ -51,6 +52,20 @@ router.get('/',passport.authenticate('bearer', {session: false}),function(req,re
             res.send({message:'Please try again'});
         }
 
+});
+router.delete('/',passport.authenticate('bearer', {session: false}),function(req,res,next){ // We have to delete message from database
+    var uuid =req.query.uuid;
+    var Array=[req.query.target,req.user.username];
+    conversation.findOne({Participants:{$all:Array}},function(err,result){
+        if(err)
+            res.send({message:err});
+        else{
+            var ConvId = result.ConversationId;
+            message.update({ConvesrationId:ConvId,messages:{$elemMatch:{}}},)
+        }
+    });
+
+    res.send({message:'Still not working'});
 });
 
 
