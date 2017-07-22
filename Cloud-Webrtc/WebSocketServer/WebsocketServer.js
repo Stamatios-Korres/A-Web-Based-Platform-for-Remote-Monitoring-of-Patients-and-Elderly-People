@@ -14,12 +14,29 @@ var conversation = require('../models/conversation');
 
 
 var wss;
+var onlineList = new OnlineList();
+exports.delete = function(source,Userid,uuid,target){
+    var message1 ={
+        type:"messageToBeDeleted",
+        uuid: uuid,
+        target:target,
+        User:source         // This is sent to real target => User is source
+    };
+    onlineList.SendtoAll(message1); // Send to all other Users on the same account
+    var message2 ={
+        type:"messageToBeDeleted",
+        uuid: uuid,
+        target:source,
+        User:target,
+        targetId:Userid
+    };
+    onlineList.sendAllOthers(message2);
+};
 exports.initialize = function (server) {
     wss = new Wss({
         httpServer: server
     });
     console.log("creating new list");
-    var onlineList = new OnlineList();
     wss.on('request', function (request) {
         var connection = request.accept(null, request.origin);
         console.log((new Date()) + ' Connection accepted ');
@@ -39,7 +56,7 @@ exports.initialize = function (server) {
                                     console.log('Some error finding the user');
                                 }
                                 else {
-                                    onlineList.push(result, connection, data.token); // Save (1) User (2) Ip (3) Token to distinct the users
+                                     var id = onlineList.push(result, connection, data.token); // Save (1) User (2) Ip (3) Token to distinct the users
                                     onlineList.friendsOnline(result, 'yes', function (error, result2) {
                                         if (error) {
                                             console.log('Error occured');
@@ -48,7 +65,7 @@ exports.initialize = function (server) {
                                         else {
                                             console.log('Result outside Callback :');
                                             console.log(result2);
-                                            var message = {type: 'onlineUsers', online: result2};
+                                            var message = {type: 'onlineUsers',id:id,online: result2};
                                             message = JSON.stringify(message);
                                             connection.send(message); // for each online user send that this particular user has come online
                                             console.log('sent');
@@ -136,17 +153,21 @@ exports.initialize = function (server) {
                     case 'Chat': {
                         SaveMessage(data.source, data.target, data.data,function(uuid){
                             data.uuid = uuid;
+                            var SenderId = onlineList.findUser(connection);
+                            // Actions to be taken (1) Inform Sender about Uuid (2) Send message to other user logged in (3) Send to all B's account
                             onlineList.SendtoAll(data);
-                            console.log(data);
-
                             var msg = {           // Give back to User a unique UUID so he ca delete it in Near Future
                                 type:'updateUuid',
                                 info:data.data,
                                 target:data.source,
                                 User:data.target,
-                                uuid:uuid
+                                uuid:uuid,
+                                targetId:SenderId
                             };
-                            onlineList.Send(msg);
+                            onlineList.SendBasedonId(msg); // Update User
+                            //Change type of message and send it
+                            msg.type = 'NewMessageFromOtherAccount';
+                            onlineList.sendAllOthers(msg);
                         });
                         break;
                     }
@@ -213,11 +234,13 @@ function SaveMessage(source, target, info,callback) {
         message.update({ConvesrationId:ConvId},{$push:{message:newmessage}},function(err,result){
             if(err)
                 console.log(err);
-            else
+            else {
+                console.log(result);
                 callback(uuid);
+            }
         })
     })
-}
+} // Requires the message with a UUID and saves is to the database
 
 OnlineList.prototype.findUser = function (connection) {
     var User;
@@ -287,7 +310,9 @@ OnlineList.prototype.push = function (username, portIp, token) {
         SameAccount: Same,
         Id: id
     };
-    return this.list.push(OnlineUser);
+    this.list.push(OnlineUser);
+    return id;
+
 };
 OnlineList.prototype.Send = function (message) {
     for (var i = 0; i < this.list.length; i++) {
@@ -381,6 +406,14 @@ OnlineList.prototype.SendBasedonId = function (message) {
         }
     }
 
+};
+OnlineList.prototype.sendAllOthers = function(message){
+    var UniqueId = message.targetId;
+    var username = message.target;
+    for (var j = 0; j < this.list.length; j++) {
+        if(this.list[j].username === username && this.list[j].Id !== UniqueId)
+            this.list[j].PortIp.send(JSON.stringify(message));
+    }
 };
 
 

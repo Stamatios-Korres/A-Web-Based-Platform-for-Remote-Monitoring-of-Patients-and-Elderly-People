@@ -192,6 +192,7 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             url: 'messages',
             params:{target:username}
         }).then(function successCallback(response) {
+            console.log(response);
             callback(response);
         });
     };
@@ -203,10 +204,10 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             },
             method: 'delete',
             url: 'messages',
-            params:{uuid:uuid,target:target}
+            params:{uuidUser:Myid,uuid:uuid,target:target}
         }).then(function successCallback(response) {
             console.log(response);
-            callback();
+            callback(response);
         });
     };
 
@@ -384,6 +385,22 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
 
 
     services = {};   // Visible to the outside word function in order to set the object
+    services.reset = function(){
+        response=null;
+        SDPCandiates=null;
+        MyPeerConnection=null;
+        var target=null;  // Names of the users in call
+        var myself=null;
+        target_id = -1; // Unique Id's to distinct multiple User's logged in the same Account
+        mine_id = -1;
+        MuteFlag = false;  //Flags used for making sure Video Calls use cases
+        Incall = false;
+        PeerDisconnectedWhileInCall = false;
+        busy ='';
+        i = 0;
+        flag = false;
+        j =1;
+    };
     services.closeVideo = function(){
         console.log('ready to close video');
         CloseVideo();
@@ -533,6 +550,14 @@ angular.module('Openhealth').service('ChatServices',function($rootScope,FriendsA
             ArraysofTexts.push(object);
         }
     };
+    services.newfriend = function(username){
+        var object = {
+            name: username,
+            Chat: []
+        };
+        console.log('New friend was added');
+        ArraysofTexts.push(object);
+    };
     services.SelectUser = function(username){
         for(var i=0;i<ArraysofTexts.length;i++){
             if(ArraysofTexts[i].name === username) {
@@ -540,6 +565,20 @@ angular.module('Openhealth').service('ChatServices',function($rootScope,FriendsA
             }
         }
     };
+    services.Delete= function(username,uuid){
+        var i;
+        for(i=0;i<ArraysofTexts.length;i++) {
+            if (ArraysofTexts[i].name === username) {
+                break;
+            }
+        }
+            for(var j=0;j<ArraysofTexts[i].Chat.length;j++){
+                if(ArraysofTexts[i].Chat[j].uuid === uuid){
+                    ArraysofTexts[i].Chat.splice(j,1);
+                    break;
+                }
+            }
+        };
     services.NewMessage = function(username,message,Sender,uuid){
         for(var i=0;i<ArraysofTexts.length;i++){
             if(ArraysofTexts[i].name === username) {
@@ -570,7 +609,11 @@ angular.module('Openhealth').service('ChatServices',function($rootScope,FriendsA
         scope.$on('$destroy', handler);
 
     };
+    services.reset= function(){
+        ArraysofTexts = [];
+    };
     return services;
+
 
 
 
@@ -595,6 +638,7 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices,C
                     case 'onlineUsers':
                         console.log('Online Users : ');
                         console.log(data.online);
+                        Myid = data.id;
                         for (var ii = 0; ii < data.online.length; ii++) {
                             FriendsAndState.changeState(data.online[ii], 'active');
                         }
@@ -627,19 +671,24 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices,C
                                 if (name === online[jj] ) {
                                     if(flag)
                                         FriendsAndState.changeState(name, 'active');
-                                    else
+                                    else {
                                         //new User
-                                        FriendsAndState.addfriends(name,'active');
+                                        ChatServices.newfriend(name);
+                                        FriendsAndState.addfriends(name, 'active');
+                                    }
                                     break;
                                 }
                             }
                             //New friend or not online
                             if(jj===online.length && flag )
                                 FriendsAndState.changeState(name, 'inactive');
-                            else if(jj===online.length  && !flag )
-                                FriendsAndState.addfriends(name,'inactive');
+                            else if(jj===online.length  && !flag ) {
+                                FriendsAndState.addfriends(name, 'inactive');
+                                ChatServices.newfriend(name);
+                            }
 
                         }
+                        //Update Chat
                         //console.log('done with update');
                         $rootScope.$emit('WebsocketNews');
                         break;
@@ -734,8 +783,17 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices,C
                         ChatServices.updateUuid(data.uuid,data.User);
                         break;
                     }
-
-
+                    case 'NewMessageFromOtherAccount':{
+                        ChatServices.NewMessage(data.User,data.info,'me',data.uuid);
+                        console.log('new message was succesfully added');
+                        $rootScope.$emit('NewMessage');
+                        break;
+                    }
+                    case "messageToBeDeleted" :{
+                        ChatServices.Delete(data.User,data.uuid);
+                        $rootScope.$emit('NewMessage');
+                        break;
+                    }
                     default:
                         console.log('Unkown message');
                 }

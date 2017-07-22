@@ -8,10 +8,10 @@ var router = express.Router();
 var passport = require('passport');
 var message = require('../models/messages');
 var conversation = require('../models/conversation');
+var Wssdelete = require('../WebSocketServer/WebsocketServer').delete;
 
 
-
-router.get('/',passport.authenticate('bearer', {session: false}),function(req,res,next){
+router.get('/',passport.authenticate('bearer', {session: false}),function(req,res,next) { // Get messages from Server with a particular friend
         var UserFound = req.user;
         var target =req.query.target;
         var Array = [target,UserFound.username];
@@ -24,7 +24,7 @@ router.get('/',passport.authenticate('bearer', {session: false}),function(req,re
                     message.findOne({ConvesrationId: ConvId}, function (err, result2) {
                         if (err)
                             console.log(err);
-                        else {
+                        else if(result2) {
                             var Result = [];
                             var messages = result2.message;
                             for(var i=0;i<messages.length;i++){
@@ -43,6 +43,9 @@ router.get('/',passport.authenticate('bearer', {session: false}),function(req,re
                             }
                             res.send({message: Result});
                         }
+                        else{
+                            res.send({message: []});
+                        }
                     })
                 }
             })
@@ -53,19 +56,29 @@ router.get('/',passport.authenticate('bearer', {session: false}),function(req,re
         }
 
 });
-router.delete('/',passport.authenticate('bearer', {session: false}),function(req,res,next){ // We have to delete message from database
+
+
+ router.delete('/',passport.authenticate('bearer', {session: false}),function(req,res,next){ // We have to delete message from database
     var uuid =req.query.uuid;
+     var Userid =req.query.uuidUser;
     var Array=[req.query.target,req.user.username];
     conversation.findOne({Participants:{$all:Array}},function(err,result){
         if(err)
             res.send({message:err});
         else{
             var ConvId = result.ConversationId;
-            message.update({ConvesrationId:ConvId,messages:{$elemMatch:{}}},)
-        }
-    });
+            message.update({ConvesrationId:ConvId},{$pull:{message:{uniqueId:uuid}}},function(err,result){
+                if(err)
+                    res.send({message:err});
 
-    res.send({message:'Still not working'});
+                else{
+                    console.log(result);
+                    res.send({message:'Message was deleted'});
+                }
+            })
+        }
+        Wssdelete(req.user.username,Userid,uuid,req.query.target);
+    });
 });
 
 

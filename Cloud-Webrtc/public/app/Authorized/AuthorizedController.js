@@ -4,7 +4,7 @@
 
 var MainPage = angular.module('MainPage', ['ngRoute', 'ngResource', 'ngMaterial']);
 
-MainPage.controller('ToolbarController', function ($mdToast, $timeout, $location, $scope, FriendsAndState, WebsocketService, AjaxServices) {
+MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $timeout, $location, $scope,VideoServices, FriendsAndState, WebsocketService, AjaxServices) {
     if (token !== undefined) {
         $scope.username = my_name;
         //Hit the logout button
@@ -14,7 +14,16 @@ MainPage.controller('ToolbarController', function ($mdToast, $timeout, $location
                 token = undefined;
                 ws.close();
                 FriendsAndState.clean();
+                VideoServices.reset();
                 $location.path('login');
+                ws=undefined;                       //Active websocket which connect Client - Server
+                my_name=undefined;                  // User's username
+                requests = [];            // Requests that the user hasn't still answered
+                Pending = [];             // Requests that the user has send and haven't been accepted or rejected
+                MultpleUsersResult=undefined;
+                ChatUser = '';            // Every Time one User will be available for sending messages. ChatUser defines the Username of this Users
+                Myid=undefined;
+                ChatServices.reset();
 
             }
         };
@@ -84,10 +93,11 @@ MainPage.controller('ToolbarController', function ($mdToast, $timeout, $location
                             source: my_name,
                             token: token
                         };
+
+                        ChatServices.newfriend(name);
                         ws.send(JSON.stringify(message));
                         $scope.RequestsReceived.Received = deleteFromList($scope.RequestsReceived.Received, name);
                         requests = $scope.RequestsReceived.Received;
-                        // console.log(requests);
                         console.log("accepting " + name);
                     }
 
@@ -223,8 +233,17 @@ MainPage.controller('ChatController', function (AjaxServices, ChatServices, $tim
             $scope.messages.currentMessage = '';
         },
         show: function (uuid) {
-            AjaxServices.services.DeleteMessage(uuid, ChatUser, function () {
+            AjaxServices.services.DeleteMessage(uuid, ChatUser, function (response) {
                 //Update the messages
+                console.log(response);
+                if (response.data.message === 'Message was deleted') {
+                    ChatServices.Delete(ChatUser, uuid);
+                    $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
+                }
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                }
+
             });
         }
     };
@@ -233,15 +252,17 @@ MainPage.controller('ChatController', function (AjaxServices, ChatServices, $tim
     ChatServices.refresh($scope, function () {
         $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
         //Ask from Server if empty array
-        if ($scope.messages.arrayofMessages.length === 0) {
-            console.log('Going to ask Chat from: ' + ChatUser);
-            AjaxServices.services.GetChat(ChatUser, function (result) {
-                var SavedMessages = result.data.message;
-                for (var i = 0; i < SavedMessages.length; i++) {
-                    ChatServices.NewMessage(ChatUser, SavedMessages[i].message, SavedMessages[i].direction, SavedMessages[i].uuid);
-                }
-                $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
-            });
+        if ($scope.messages.arrayofMessages) {
+            if ($scope.messages.arrayofMessages.length === 0) {
+                console.log('Going to ask Chat from: ' + ChatUser);
+                AjaxServices.services.GetChat(ChatUser, function (result) {
+                    var SavedMessages = result.data.message;
+                    for (var i = 0; i < SavedMessages.length; i++) {
+                        ChatServices.NewMessage(ChatUser, SavedMessages[i].message, SavedMessages[i].direction, SavedMessages[i].uuid);
+                    }
+                    $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
+                });
+            }
         }
         if (!$scope.$$phase) {
             $scope.$apply();

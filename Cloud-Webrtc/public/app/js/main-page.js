@@ -14,6 +14,7 @@ var requests = [];            // Requests that the user hasn't still answered
 var Pending = [];             // Requests that the user has send and haven't been accepted or rejected
 var MultpleUsersResult;
 var ChatUser = '';            // Every Time one User will be available for sending messages. ChatUser defines the Username of this Users
+var Myid;
 
 //This clears localStorage History -> Change when use cookies
 mainApp.run(function ($rootScope) {
