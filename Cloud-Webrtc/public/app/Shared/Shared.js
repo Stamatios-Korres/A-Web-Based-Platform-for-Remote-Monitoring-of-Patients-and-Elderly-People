@@ -321,7 +321,6 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
     function handleAddStreamEvent(event) {
         console.log("Received incoming stream");
         document.getElementById("received_video").srcObject = event.stream;
-        //document.getElementById("hangup-button").disabled = false;
     }
     function handleGetUserMediaError(e) {
         switch (e.name) {
@@ -415,7 +414,7 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
         Incall = true;
         MyPeerConnection = new RTCPeerConnection(configuration);
         MyPeerConnection.onicecandidate = handleICECandidateEvent;
-        MyPeerConnection.onaddstream = handleAddStreamEvent;
+        //MyPeerConnection.onaddstream = handleAddStreamEvent;
         // myPeerConnection.onremovestream = handleRemoveStreamEvent;
         MyPeerConnection.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
          //myPeerConnection.onicegatheringstatechange = handleICEGatheringStateChangeEvent;
@@ -468,6 +467,7 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
         }
     };
     services.SetSdp = function (sdp) {
+        console.log('Spd was set');
         SDPCandiates = sdp;
     };
     services.Response = function () {
