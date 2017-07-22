@@ -53,8 +53,8 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
                     token = localStorage.getItem('token');
                     my_name = $scope.login.username;
                     //AjaxServices.services.GetRequests();
-                    // ws = new WebSocket('wss://healthcloud.menychtas.com/sockets');
-                    ws = new WebSocket('ws:localhost:3000');
+                    ws = new WebSocket('wss://healthcloud.menychtas.com/sockets');
+                    // ws = new WebSocket('ws:localhost:3000');
                     AjaxServices.services.GetFriends(function (response) {
                         for (var i = 0; i < response.length; i++) {
                             FriendsAndState.addfriends(response[i], 'inactive');
@@ -130,8 +130,8 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
                         console.log(token);
                         my_name = $scope.subscribe.username;
                        // ? AjaxServices.services.GetRequests();
-                        // ws = new WebSocket('wss://healthcloud.menychtas.com/sockets');
-                        ws = new WebSocket('ws:localhost:3000');
+                        ws = new WebSocket('wss://healthcloud.menychtas.com/sockets');
+                        // ws = new WebSocket('ws:localhost:3000');
 
                         AjaxServices.services.GetFriends(function (response) {
                             for (var i = 0; i < response.length; i++) {
