@@ -414,7 +414,7 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
         Incall = true;
         MyPeerConnection = new RTCPeerConnection(configuration);
         MyPeerConnection.onicecandidate = handleICECandidateEvent;
-        //MyPeerConnection.onaddstream = handleAddStreamEvent;
+        MyPeerConnection.onaddstream = handleAddStreamEvent;
         // myPeerConnection.onremovestream = handleRemoveStreamEvent;
         MyPeerConnection.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
          //myPeerConnection.onicegatheringstatechange = handleICEGatheringStateChangeEvent;
