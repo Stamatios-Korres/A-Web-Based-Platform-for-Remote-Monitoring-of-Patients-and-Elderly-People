@@ -414,16 +414,8 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
         Incall = true;
         MyPeerConnection = null;
         MyPeerConnection = new RTCPeerConnection(configuration);
-        MyPeerConnection.onicecandidate = handleICECandidateEvent;
-        MyPeerConnection.onaddstream = handleAddStreamEvent;
-        // myPeerConnection.onremovestream = handleRemoveStreamEvent;
-        MyPeerConnection.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
-         //myPeerConnection.onicegatheringstatechange = handleICEGatheringStateChangeEvent;
-        // myPeerConnection.onsignalingstatechange = handleSignalingStateChangeEvent;
-        MyPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
-
         //Set the stream based on what state you have been called
-        switch(string){
+        switch(string) {
             case  'Caller' :
                 navigator.mediaDevices.getUserMedia(mediaConstraints)
                     .then(function (localStream) {
@@ -464,8 +456,14 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
                 break;
             default :
                 console.log('Wrong type of parameter');
-
         }
+        MyPeerConnection.onicecandidate = handleICECandidateEvent;
+        MyPeerConnection.onaddstream = handleAddStreamEvent;
+        // myPeerConnection.onremovestream = handleRemoveStreamEvent;
+        MyPeerConnection.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
+        //myPeerConnection.onicegatheringstatechange = handleICEGatheringStateChangeEvent;
+        // myPeerConnection.onsignalingstatechange = handleSignalingStateChangeEvent;
+        MyPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
     };
     services.SetSdp = function (sdp) {
         console.log('Spd was set');
