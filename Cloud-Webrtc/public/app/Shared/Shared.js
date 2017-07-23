@@ -318,7 +318,7 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
             closePeer();
             console.log('Ok video is closed');
     }
-    function handleAddStreamEvent(event) {
+    function handleAddStreamEvent(event) { // It is called only when remote stream has arrived 
         console.log("Received incoming stream");
         document.getElementById("received_video").srcObject = event.stream;
     }
@@ -425,8 +425,8 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
                     .catch(handleGetUserMediaError);
                 break;
             case 'Callee':
+                var localStream = null;
                 var desc = new RTCSessionDescription(SDPCandiates);
-
                 MyPeerConnection.setRemoteDescription(desc).then(function () {
                     return navigator.mediaDevices.getUserMedia(mediaConstraints);
                 })
