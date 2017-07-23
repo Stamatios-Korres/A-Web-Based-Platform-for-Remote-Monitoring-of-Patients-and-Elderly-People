@@ -412,6 +412,7 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
     };
     services.setPeer = function (string) {
         Incall = true;
+        MyPeerConnection = null;
         MyPeerConnection = new RTCPeerConnection(configuration);
         MyPeerConnection.onicecandidate = handleICECandidateEvent;
         MyPeerConnection.onaddstream = handleAddStreamEvent;
@@ -487,10 +488,10 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
         MyPeerConnection.setRemoteDescription(desc).then(function () {
             return navigator.mediaDevices.getUserMedia(mediaConstraints);
         })
-            .then(function (stream) {
-                document.getElementById("received_video").srcObject = stream;
-                return MyPeerConnection.addStream(stream);
-            })
+            // .then(function (stream) {
+            //     document.getElementById("received_video").srcObject = stream;
+            //     return MyPeerConnection.addStream(stream);
+            // })
     };
     services.ResetTarget = function(){
         target = null;
