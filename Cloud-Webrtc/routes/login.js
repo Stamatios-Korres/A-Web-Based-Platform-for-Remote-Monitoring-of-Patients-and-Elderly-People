@@ -270,7 +270,7 @@ function RequestResult(sender, target, answer, callback) {
     }
     else if (answer === 'reject') {
         console.log("Request have been rejected ");
-        relationship.update({user: sender, RequestsReceived:{$elemMatch:{state:'pending',to:target}}},
+        relationship.update({user: sender, RequestsReceived:{$elemMatch:{state:'pending',from:target}}},
             {$set: {'RequestsReceived.$.state': 'RejectedFromReceiver'}},
             function (err, res) {
                 if (err) {
@@ -278,13 +278,15 @@ function RequestResult(sender, target, answer, callback) {
                     callback(err);
                     return;
                 }
-                if (res.n === 0)
+                if (res.n === 0){
+                    console.log(res);
                     callback({message: 'May have cancelled friend request or Already friends'});
+                }
                 else {
-                    //Update state of request in Sender
-                    // relationship.update({user: target, "RequestsSent.state": 'pending', "RequestsSent.to": sender},
+                    console.log(res);
                     relationship.update({user:target,RequestsSent:{$elemMatch:{state:'pending',to:sender}}},
                         {$set: {'RequestsSent.$.state': 'RejectedFromReceiver'}}, function (err, result) {
+                            console.log(result);
                             if (err)
                                 callback({message: err});
                             if (!result)

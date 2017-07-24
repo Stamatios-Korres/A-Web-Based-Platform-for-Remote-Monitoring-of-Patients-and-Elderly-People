@@ -108,6 +108,7 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
             reject: function (name) {
                 console.log(name);
                 AjaxServices.services.requestReply(name, 'reject', function (reply) {
+                    console.log(reply);
                     if (reply === 'Ok') {
                         console.log("rejecting " + name);
                         $scope.RequestsReceived.Received = deleteFromList($scope.RequestsReceived.Received, name);

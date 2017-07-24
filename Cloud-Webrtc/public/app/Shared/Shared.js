@@ -18,15 +18,24 @@ angular.module('Openhealth').service('FriendsAndState',function(){
             var newUser = {
                 username: name,
                 state: state,
-                undread: unread
+                unread: unread
             };
+            console.log(typeof newUser.unread);
             friends.push(newUser);
         },
         newmessage:function(name){
             var i;
+            console.log("Let's see the problem");
             for ( i = 0; i < friends.length; i++) {
                 if(friends[i].username === name){
-                    friends[i].unread = friends[i].unread=1;
+                    console.log("Ok found the User");
+                    var times = friends[i].unread;
+                    console.log(typeof times);
+                        if(typeof times === 'number'){
+                            console.log('Ok it has increased since then');
+                            times++;
+                            friends[i].unread = times;
+                        }
                     break;
                 }
             }
@@ -704,7 +713,7 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
                             //Friend&State & Chat Room
                             console.log('new friend is in state: '+ data.state);
                             ChatServices.newfriend(data.source);
-                            FriendsAndState.addfriends(data.source,data.state);
+                            FriendsAndState.addfriends(data.source,data.state,0);
                             $rootScope.$emit('WebsocketNews');
                         }
                         break;
@@ -712,7 +721,7 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
                     case 'NewFriend':{
 
                         ChatServices.newfriend(data.source);
-                        FriendsAndState.addfriends(data.source,data.state);
+                        FriendsAndState.addfriends(data.source,data.state,0);
                         $rootScope.$emit('WebsocketNews');
                         return;
                     }
