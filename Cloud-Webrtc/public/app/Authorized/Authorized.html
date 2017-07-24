@@ -14,7 +14,7 @@
             <!--Requests Management -->
             <div layout="row" flex="40" layout-margin>
                 <md-menu>
-                    <md-button ng-click="$mdMenu.open($event)">  <i style='margin-top: 5px'class="material-icons">supervisor_account</i>Requests</md-button>
+                    <md-button  id='RequestInfo' ng-click="$mdMenu.open($event); removeClass();">  <i style='margin-top: 5px' class="material-icons">supervisor_account</i>Requests</md-button>
                     <md-menu-content width="4" layout="column">
 
                        <!--Friend Requests Received-->
@@ -91,11 +91,13 @@
             <md-list  layout="column">
                 <md-list-item style="float:left;" class='md-primary' ng-repeat="temp in mainPageInfo.friends" flex layout="row">
                     <md-button  class="active" ng-click="SelectedUser(temp.username)" md-auto-focus layout-margin layout="row">
+                        <span ng-if="temp.unread !==0">{{temp.unread}}</span>
                         <i class="material-icons">perm_identity</i>
                             <span>{{temp.username}}</span>
                     </md-button>
                     <span ng-if="temp.state=='inactive' "></span>
                     <span ng-if="temp.state=='active'"><i class="material-icons">cloud_done</i></span>
+
                 </md-list-item>
             </md-list>
         </div>

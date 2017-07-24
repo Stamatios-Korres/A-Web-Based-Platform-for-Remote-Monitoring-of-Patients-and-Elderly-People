@@ -42,7 +42,8 @@ var relationship = new Schema(
                     enum:[
                         'pending',
                         'accepted',
-                        'rejected'
+                        'RejectedFromReceiver',
+                        'cancelled'
                     ]
                 }
         }]

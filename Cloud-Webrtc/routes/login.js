@@ -14,6 +14,10 @@ var relationship = require('../models/friends');
 var message = require('../models/messages');
 var conversation = require('../models/conversation');
 const uuidv1 = require('uuid/v1');
+var wwsSentRequest = require('../WebSocketServer/WebsocketServer').SentRequest;
+var wwsCancelRequest = require('../WebSocketServer/WebsocketServer').CancelRequest;
+var wwsRequestReply = require('../WebSocketServer/WebsocketServer').RequestReply;
+var wwsFriendsDelete = require('../WebSocketServer/WebsocketServer').FriendsDelete;
 
 
 //Main page of my SPA
@@ -29,7 +33,7 @@ router.get('/getName', passport.authenticate('bearer', {session: false}), functi
 
 //Save friend requests users make
 router.post('/friendRequest', passport.authenticate('bearer', {session: false}), function (req, res, next) {
-    console.log(req.body);
+    //console.log(req.body);
     SaveRequest(req.body.message.sender, req.body.message.target, function (result) {
         res.send(result);
     })
@@ -78,6 +82,7 @@ router.post('/CancelRequest', passport.authenticate('bearer', {session: false}),
     console.log(req.user.username);
     console.log(req.body.Cancelfrom);
     cancelRequest(req.user.username, req.body.Cancelfrom, function (result) {
+
         console.log(result);
         res.send(result);
     });
@@ -138,7 +143,6 @@ function SaveRequest(sender, target, callback) {
         else if (!User)
             callback({answer: "The User doesn't Exists"});
         else {
-            //     console.log("you sent a request to " + User);
             var fromrequest = {
                 to: target,
                 state: 'pending'
@@ -189,16 +193,19 @@ function SaveRequest(sender, target, callback) {
                                                 console.log('login.js 185 - Sender was updated');
                                                 console.log('login.js 186 ' + done);
                                                 relationship.update({user: User.username}, {$push: {RequestsReceived: torequest}}, function (err, done) {
-
                                                     if (err)
                                                         callback({answer: 'Some error occured, please try again 4'});
-                                                    console.log(done);
-                                                    callback({answer: 'Your request has been sent '});
+                                                    else {
+                                                        console.log(done);
+                                                        wwsSentRequest(sender,target);
+                                                        callback({answer: 'Your request has been sent '});
+                                                    }
                                                 })
                                             }
                                         });
                                 }
-                            })
+                            }
+                        )
                     })
                 }
             })
@@ -235,9 +242,6 @@ function RequestResult(sender, target, answer, callback) {
                                 callback({message: err});
                             else if (!result)
                                 callback({message: target + " may have cancelled his request"});
-                            else if (result.n === 0) {
-                                console.log('Found the problem');
-                            }
                             else {
                                 console.log(result);
                                 //Update friends
@@ -251,8 +255,8 @@ function RequestResult(sender, target, answer, callback) {
                                             if (err)
                                                 callback({message: err});
                                             else{                                       //Now that both Users are friends I must add a schema for their Chat
-                                                // callback({message: 'Ok'});
-                                                CreateConversation(sender,target,callback);
+                                                CreateConversation(sender,target,answer,callback);
+
                                             }
                                         })
                                     }
@@ -266,7 +270,7 @@ function RequestResult(sender, target, answer, callback) {
     }
     else if (answer === 'reject') {
         console.log("Request have been rejected ");
-        relationship.update({user: sender, "RequestsReceived.state": 'pending', "RequestsReceived.from": target},
+        relationship.update({user: sender, RequestsReceived:{$elemMatch:{state:'pending',to:target}}},
             {$set: {'RequestsReceived.$.state': 'RejectedFromReceiver'}},
             function (err, res) {
                 if (err) {
@@ -278,16 +282,18 @@ function RequestResult(sender, target, answer, callback) {
                     callback({message: 'May have cancelled friend request or Already friends'});
                 else {
                     //Update state of request in Sender
-                    // console.log(target);
-                    // console.log(sender);
-                    relationship.update({user: target, "RequestsSent.state": 'pending', "RequestsSent.to": sender},
+                    // relationship.update({user: target, "RequestsSent.state": 'pending', "RequestsSent.to": sender},
+                    relationship.update({user:target,RequestsSent:{$elemMatch:{state:'pending',to:sender}}},
                         {$set: {'RequestsSent.$.state': 'RejectedFromReceiver'}}, function (err, result) {
                             if (err)
                                 callback({message: err});
                             if (!result)
                                 callback({message: target + " may have cancelled his request"});
-                            console.log(result);
-                            callback({message: 'Ok'});
+                            else {
+                                console.log(result);
+                                wwsRequestReply(target,sender,answer);
+                                callback({message: 'Ok'});
+                            }
                         })
                 }
             })
@@ -308,7 +314,7 @@ function cancelRequest(sender, target, callback) {
             if (err)
                 callback(err);
             else if (!result1 || result1.n === 0)
-                callback({message: target + "have probably accepted/rejected the request"});
+                callback({message: target + " have probably accepted/rejected the request"});
             else {
                 console.log(result1);
                 console.log('One request cancelled');
@@ -321,6 +327,7 @@ function cancelRequest(sender, target, callback) {
                             callback({message: target + " have probably  already accepted or rejected the request "});
                         else {
                             console.log(result);
+                            wwsCancelRequest(sender,target);
                             callback({message: 'Ok'});
                         }
                     });
@@ -342,12 +349,13 @@ function deleteFriendship(sender, target, callback) {
                 return;
             }
             console.log(result2);
+            wwsFriendsDelete(sender,target);
             callback({message: 'Ok'});
         })
 
     })
 }
-function CreateConversation(sender,target,callback) {
+function CreateConversation(sender,target,answer,callback) {
     var ConvId = uuidv1();
     var Conversation = new conversation({
         ConversationId: ConvId,
@@ -364,8 +372,10 @@ function CreateConversation(sender,target,callback) {
             msg.save(function (err, result) {
                 if (err)
                     console.log(err);
-                else
+                else {
                     callback({message: 'Ok'});
+                    wwsRequestReply(target,sender,answer);
+                }
             })
         }
     })

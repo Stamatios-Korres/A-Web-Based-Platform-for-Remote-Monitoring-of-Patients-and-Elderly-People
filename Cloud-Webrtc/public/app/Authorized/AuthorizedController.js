@@ -27,7 +27,18 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
 
             }
         };
-
+        $scope.removeClass = function(){
+            console.log('Lets Change the class');
+            document.getElementById('RequestInfo').classList.remove('md-warn');
+        };
+        WebsocketService.UpdateRequest($scope,function(){
+            console.log('About to Change the requests');
+            $scope.RequestsReceived.Received = requests;
+            $scope.RequestsSent.sent = Pending;
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
+        });
         $scope.RequestsSent = {
 
             //These are about sending new requests
@@ -43,6 +54,7 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
                 }
             },
             showResult: function (string) {
+                string = string.toUpperCase();
                 $mdToast.show(
                     $mdToast.simple()
                         .textContent(string)
@@ -87,18 +99,8 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
             accept: function (name) {
                 AjaxServices.services.requestReply(name, 'accept', function (reply) {
                     if (reply === 'Ok') {
-                        //Update instantly your frriends
-                        var message = {
-                            type: 'update',
-                            source: my_name,
-                            token: token
-                        };
-
-                        ChatServices.newfriend(name);
-                        ws.send(JSON.stringify(message));
                         $scope.RequestsReceived.Received = deleteFromList($scope.RequestsReceived.Received, name);
                         requests = $scope.RequestsReceived.Received;
-                        console.log("accepting " + name);
                     }
 
                 })
@@ -107,28 +109,21 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
                 console.log(name);
                 AjaxServices.services.requestReply(name, 'reject', function (reply) {
                     if (reply === 'Ok') {
+                        console.log("rejecting " + name);
                         $scope.RequestsReceived.Received = deleteFromList($scope.RequestsReceived.Received, name);
                         requests = $scope.RequestsReceived.Received;
-                        // console.log($scope.RequestsReceived.Received)
                     }
-                    console.log("rejecting " + name);
                 });
             }
         };
 
-        //Check for Pending Requests
-
-
         //Check for Unanswered Friend Requests
         function deamon() {
-            //console.log('Inside the great deamon');
             if (token !== undefined) {
                 $scope.RequestsSent.checkPending();
                 $scope.RequestsReceived.checkRequests();
-                $timeout(deamon, 30000);
             }
         }
-
         deamon();
     }
 });
@@ -143,17 +138,22 @@ MainPage.controller('AuthorizedController', function ($rootScope, $scope, $mdDia
             friends: []
         };
         //Does take consideration into friends coming online
-        $scope.init = function () {
+        WebsocketService.ShowView($scope,function(){
             $scope.mainPageInfo.friends = FriendsAndState.getfriends();
-        };
+        });
         $scope.SelectedUser = function (username) {
+            console.log('Yes it was summoned');
+            FriendsAndState.messageRead(username);
+            $scope.mainPageInfo.friends = FriendsAndState.getfriends();
             $scope.mainPageInfo.Selected = username;
             ChatUser = username;
             $rootScope.$emit('NewMessage');
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
         };
         $scope.delete = function () {
             var status;
-            console.log("About to delete " + $scope.mainPageInfo.Selected);
             var confirm = $mdDialog.confirm()
                 .clickOutsideToClose(true)
                 .title('Confirm')
@@ -168,14 +168,16 @@ MainPage.controller('AuthorizedController', function ($rootScope, $scope, $mdDia
                 function () {
                     //Delete users
                     AjaxServices.services.DeleteFriends($scope.mainPageInfo.Selected, function (result) {
-                        console.log('Here we are');
-                        for (var i = 0; i < $scope.mainPageInfo.friends.length; i++) {
-                            console.log($scope.mainPageInfo.friends[i].username);
-                            if ($scope.mainPageInfo.friends[i].username === $scope.mainPageInfo.Selected) {
-                                console.log('deleted ' + $scope.mainPageInfo.Selected);
-                                $scope.mainPageInfo.friends.splice(i, 1);
-                                break;
+                        if(result.data.message === 'Ok') {
+                            for (var i = 0; i < $scope.mainPageInfo.friends.length; i++) {
+                                console.log($scope.mainPageInfo.friends[i].username);
+                                if ($scope.mainPageInfo.friends[i].username === $scope.mainPageInfo.Selected) {
+                                    console.log('deleted ' + $scope.mainPageInfo.Selected);
+                                    $scope.mainPageInfo.friends.splice(i, 1);
+                                    break;
+                                }
                             }
+                            $scope.mainPageInfo.Selected = '';
                         }
                     })
                 },
@@ -184,28 +186,19 @@ MainPage.controller('AuthorizedController', function ($rootScope, $scope, $mdDia
                 });
 
         };
-        $scope.init();
 
         //Update the users state -> Async Function
         WebsocketService.refresh($scope, function () {
             $scope.mainPageInfo.friends = FriendsAndState.getfriends();
-            $scope.$apply();
+            if(!FriendsAndState.memeber($scope.mainPageInfo.Selected)){
+                $scope.mainPageInfo.Selected='';
+            }
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
         });
 
-        //This function goal is to update friends of a User real time
-        function FriendsDeamon() {
-            if (token !== undefined) {
-                var message = {
-                    type: 'update',
-                    source: my_name,
-                    token: token
-                };
-                ws.send(JSON.stringify(message));
-                $timeout(FriendsDeamon, 15000);
-            }
-        }
 
-        $timeout(FriendsDeamon, 1000);
     }
 });
 
@@ -250,10 +243,11 @@ MainPage.controller('ChatController', function (AjaxServices, ChatServices, $tim
 
 
     ChatServices.refresh($scope, function () {
+
         $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
         //Ask from Server if empty array
         if ($scope.messages.arrayofMessages) {
-            if ($scope.messages.arrayofMessages.length === 0) {
+            if (ChatServices.getFlag(ChatUser) ===false  ) {
                 console.log('Going to ask Chat from: ' + ChatUser);
                 AjaxServices.services.GetChat(ChatUser, function (result) {
                     var SavedMessages = result.data.message;
@@ -261,6 +255,7 @@ MainPage.controller('ChatController', function (AjaxServices, ChatServices, $tim
                         ChatServices.NewMessage(ChatUser, SavedMessages[i].message, SavedMessages[i].direction, SavedMessages[i].uuid);
                     }
                     $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
+                    ChatServices.setFlag(ChatUser);
                 });
             }
         }
@@ -374,9 +369,8 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
         $timeout(function () {
                 if ($scope.videoInfo.HowVideoWasClosedFlag === false)
                     closeScreen()
-            }
-            , 5000);
-
+                }
+        ,5000);
     });
     $rootScope.$on('busy', function () {
         $scope.videoInfo.message = 'Sorry ' + $scope.videoInfo.target + ' is busy!';

@@ -4,14 +4,32 @@ angular.module('Openhealth').service('FriendsAndState',function(){
     return {
         getfriends: function () {
             return friends;
-        }
-        ,
-        addfriends: function (name, state) {
+        },
+        messageRead: function(username){
+            for ( i = 0; i < friends.length; i++) {
+                if(friends[i].username === username){
+                    friends[i].unread =0;
+                    break;
+                }
+            }
+        },
+        addfriends: function (name, state,unread) {
+            console.log(unread+' messages from: '+name);
             var newUser = {
                 username: name,
-                state: state
+                state: state,
+                undread: unread
             };
             friends.push(newUser);
+        },
+        newmessage:function(name){
+            var i;
+            for ( i = 0; i < friends.length; i++) {
+                if(friends[i].username === name){
+                    friends[i].unread = friends[i].unread=1;
+                    break;
+                }
+            }
         }
         ,
         printFriends: function () {
@@ -263,6 +281,7 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
         if (MyPeerConnection)
             MyPeerConnection.close();
         MyPeerConnection = null;
+        SDPCandiates = null;
         //reset flags
         PeerDisconnectedWhileInCall = false;
         PeerCancelledCall = false;
@@ -305,12 +324,16 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
         var localVideo = document.getElementById("local_video");
            if (remoteVideo.srcObject) {
                console.log('Remote is killed');
-                remoteVideo.srcObject.getTracks()[1].stop();
-                remoteVideo.srcObject.getTracks()[0].stop();
+               remoteVideo.srcObject.getAudioTracks()[0].stop();
+               remoteVideo.srcObject.getVideoTracks()[0].stop();
+               remoteVideo.srcObject.getTracks()[1].stop();
+               remoteVideo.srcObject.getTracks()[0].stop();
                 remoteVideo.srcObject = null;
            }
            if (localVideo.srcObject) {
                 console.log('Local is killed');
+                localVideo.srcObject.getAudioTracks()[0].stop();
+                localVideo.srcObject.getVideoTracks()[0].stop();
                 localVideo.srcObject.getTracks()[0].stop();
                 localVideo.srcObject.getTracks()[1].stop();
                 localVideo.srcObject = null;
@@ -318,7 +341,7 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
             closePeer();
             console.log('Ok video is closed');
     }
-    function handleAddStreamEvent(event) { // It is called only when remote stream has arrived 
+    function handleAddStreamEvent(event) { // It is called only when remote stream has arrived
         console.log("Received incoming stream");
         document.getElementById("received_video").srcObject = event.stream;
     }
@@ -358,29 +381,6 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
             }
         }
     }
-
-    // Probably this function is usefull if Video is interrupted for a reason different from user disconnection
-
-    // function handleICEConnectionStateChangeEvent(event) {
-    //     switch(MyPeerConnection.iceConnectionState) {
-    //         //
-    //         case "closed":
-    //           // console.log('case closed');
-    //             MyPeerConnection = null;
-    //             break;
-    //         case "failed":
-    //             // console.log('case failed');
-    //             break;
-    //         case "disconnected":
-    //             MyPeerConnection = null;
-    //
-    //             console.log('case disconnected');
-    //             break;
-    //     }
-    // }
-
-
-
 
 
     services = {};   // Visible to the outside word function in order to set the object
@@ -486,10 +486,6 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
         MyPeerConnection.setRemoteDescription(desc).then(function () {
             return navigator.mediaDevices.getUserMedia(mediaConstraints);
         })
-            // .then(function (stream) {
-            //     document.getElementById("received_video").srcObject = stream;
-            //     return MyPeerConnection.addStream(stream);
-            // })
     };
     services.ResetTarget = function(){
         target = null;
@@ -539,14 +535,16 @@ angular.module('Openhealth').service('ChatServices',function($rootScope,FriendsA
 
     var services = {};
     var ArraysofTexts= [];
-    services.createArray = function(){
+    services.createArray = function() {
         var friends = FriendsAndState.getfriends();
-        for (var i=0;i<friends.length;i++){
+        for (var i = 0; i < friends.length; i++) {
             var object = {
                 name: friends[i].username,
+                askedServer: false,
                 Chat: []
             };
             ArraysofTexts.push(object);
+
         }
     };
     services.newfriend = function(username){
@@ -557,13 +555,29 @@ angular.module('Openhealth').service('ChatServices',function($rootScope,FriendsA
         console.log('New friend was added');
         ArraysofTexts.push(object);
     };
-    services.SelectUser = function(username){
+    services.SelectUser = function(username,callback){
         for(var i=0;i<ArraysofTexts.length;i++){
             if(ArraysofTexts[i].name === username) {
                 return ArraysofTexts[i].Chat;
             }
         }
     };
+    services.setFlag= function(username){
+        for(var i=0;i<ArraysofTexts.length;i++){
+            if(ArraysofTexts[i].name === username) {
+                ArraysofTexts[i].askedServer = true;
+                break;
+            }
+        }
+    };
+    services.getFlag= function(username){
+        for(var i=0;i<ArraysofTexts.length;i++){
+            if(ArraysofTexts[i].name === username) {
+                return ArraysofTexts[i].askedServer;
+            }
+        }
+    };
+
     services.Delete= function(username,uuid){
         var i;
         for(i=0;i<ArraysofTexts.length;i++) {
@@ -612,13 +626,9 @@ angular.module('Openhealth').service('ChatServices',function($rootScope,FriendsA
         ArraysofTexts = [];
     };
     return services;
-
-
-
-
 });
 
-angular.module('Openhealth').service('WebsocketService',function(VideoServices,ChatServices, $timeout, $rootScope, FriendsAndState, $window){
+angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoServices,ChatServices, $timeout, $rootScope, FriendsAndState, $window){
     var services = {};
     services.makeVideoCall = function (message) {
         message = JSON.stringify(message);
@@ -632,7 +642,7 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices,C
                     console.log('Received Websocket message type ' + data.type);
                 switch (data.type) {
 
-                    //General Purpose
+                    //General Purpose(Friend Requests -
 
                     case 'onlineUsers':
                         console.log('Online Users : ');
@@ -642,6 +652,7 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices,C
                             FriendsAndState.changeState(data.online[ii], 'active');
                         }
                         $rootScope.$emit('WebsocketNews');
+                        $rootScope.$emit('ShowView');
                         break;
                     case 'UserGotOnline':
                         FriendsAndState.changeState(data.name, 'active');
@@ -655,40 +666,58 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices,C
                             $rootScope.$emit('Offline');
                         $rootScope.$emit('WebsocketNews');
                         break;
-                    case 'update':{
-                        //So here we have our information
-                        //console.log(data);
 
-                        //Create a function that update the view
-                        var friends = data.friends;
-                        var online =  data.online;
-                        for(var j=0; j<friends.length; j++){
-                            var name = friends[j];
-                            var flag = FriendsAndState.memeber(name);
-                            for(var jj=0;jj<online.length;jj++) {
-                                //friend is online
-                                if (name === online[jj] ) {
-                                    if(flag)
-                                        FriendsAndState.changeState(name, 'active');
-                                    else {
-                                        //new User
-                                        ChatServices.newfriend(name);
-                                        FriendsAndState.addfriends(name, 'active');
-                                    }
-                                    break;
-                                }
-                            }
-                            //New friend or not online
-                            if(jj===online.length && flag )
-                                FriendsAndState.changeState(name, 'inactive');
-                            else if(jj===online.length  && !flag ) {
-                                FriendsAndState.addfriends(name, 'inactive');
-                                ChatServices.newfriend(name);
-                            }
 
+                    // Friends and Requests Messages so we are in no need of polling
+
+                    case 'NewRequest':{
+                        console.log(data);
+                        requests.push(data.source);
+                        $rootScope.$emit('UpdateRequest');
+                        document.getElementById("RequestInfo").classList.add('md-warn');
+                        break;
+                    }
+                    case 'RequestCancelled':{ // Get global Variable requests and remove this particular user
+                        var i;
+                        for(i=0;i<requests.length;i++){
+                            if(requests[i] === data.source)
+                              break;
                         }
-                        //Update Chat
-                        //console.log('done with update');
+                        requests.splice(i,1);
+                        $rootScope.$emit('UpdateRequest');
+                        break;
+                    }
+                    case 'RequestReply':{
+                        if(data.decision === 'reject') {
+                            console.log(data);
+                            var k=0;
+                            for (k = 0; k < Pending.length; k++) {
+                                if (Pending[k] === data.source)
+                                    break;
+                            }
+                            Pending.splice(k, 1);
+                            $rootScope.$emit('UpdateRequest');
+                        }
+                        else if (data.decision === 'accept') {
+                            var string = data.source + ' has accepted your Request';
+                            showReason(string);
+                            //Friend&State & Chat Room
+                            console.log('new friend is in state: '+ data.state);
+                            ChatServices.newfriend(data.source);
+                            FriendsAndState.addfriends(data.source,data.state);
+                            $rootScope.$emit('WebsocketNews');
+                        }
+                        break;
+                    }
+                    case 'NewFriend':{
+
+                        ChatServices.newfriend(data.source);
+                        FriendsAndState.addfriends(data.source,data.state);
+                        $rootScope.$emit('WebsocketNews');
+                        return;
+                    }
+                    case 'FriendDelete':{
+                        FriendsAndState.removefromlist(data.source);
                         $rootScope.$emit('WebsocketNews');
                         break;
                     }
@@ -772,6 +801,7 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices,C
                     // Chat App
                     case 'Chat' :{
                         ChatServices.NewMessage(data.source,data.data,data.source,data.uuid); // Username of Friend/Message/and Direction
+                        FriendsAndState.newmessage(data.source);
                         $rootScope.$emit('NewMessage');
                         console.log('Message was added and signal was emmited');
                         break;
@@ -803,8 +833,24 @@ angular.module('Openhealth').service('WebsocketService',function(VideoServices,C
         }; };
 
 
-
+    function showReason(string){
+        string = string.toUpperCase();
+        $mdToast.show(
+            $mdToast.simple()
+                .textContent(string)
+                .capsule(true)
+                .position('top left')
+        );
+    }
     //Services responsible for event handling for Video functions
+    services.UpdateRequest =function($scope,callback){
+        var handler = $rootScope.$on('UpdateRequest',callback);
+        $scope.$on('$destroy', handler);
+    };
+    services.ShowView =function($scope,callback){
+        var handler = $rootScope.$on('ShowView',callback);
+        $scope.$on('$destroy', handler);
+    };
     services.Multiple = function($scope,callback){
         var handler = $rootScope.$on('multipleUsers',callback);
         $scope.$on('$destroy', handler);

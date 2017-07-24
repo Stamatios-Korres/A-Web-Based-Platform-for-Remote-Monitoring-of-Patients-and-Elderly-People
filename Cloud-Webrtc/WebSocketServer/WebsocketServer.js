@@ -31,7 +31,7 @@ exports.delete = function(source,Userid,uuid,target){
         targetId:Userid
     };
     onlineList.sendAllOthers(message2);
-};
+}; // Delete a Chat message Realt time
 exports.initialize = function (server) {
     wss = new Wss({
         httpServer: server
@@ -72,40 +72,6 @@ exports.initialize = function (server) {
                                         }
                                     });
                                 }
-                            });
-                        break;
-                    }
-                    case 'update': {  // User asks frequently about State of users
-                        findbyToken(data.token,
-                            function (err, result) {
-                                //Something went wrong with the user - Disconnect User
-                                if (err) {
-                                    console.log('Some error finding the user');
-                                }
-                                //Side effect of the friendsOnline function is that update also the other users -> Do I want this ??
-                                onlineList.friendsOnline(result, 'no', function (error, result2) {
-                                    if (error) {
-                                        console.log('Error occured');
-                                        connection.send(JSON.stringify({message: error}));
-                                    }
-                                    else {
-                                        console.log(result2);
-                                        relationship.findOne({user: data.source}, function (err, result) {
-                                            if (err)
-                                                connection.send(JSON.stringify({message: err}));
-                                            else {
-                                                var message = {
-                                                    type: 'update',
-                                                    online: result2,
-                                                    friends: result.friends
-                                                };
-                                                connection.send(JSON.stringify(message)); // for each online user send that this particular user has come online
-                                            }
-
-                                        });
-
-                                    }
-                                });
                             });
                         break;
                     }
@@ -186,7 +152,64 @@ exports.initialize = function (server) {
         })
     })
 };
+exports.SentRequest = function(sender,target){
+    var msg ={
+        type:'NewRequest',
+        source: sender,
+        target:target
+    };
+    onlineList.SendtoAll(msg);
+};
+exports.RequestReply = function(target,source,decision){ // Must be sent to all online Users, so we are in need of name only
+        if(decision === 'accept'){
 
+            var stateSource = onlineList.CheckState(source);
+            var stateTarget = onlineList.CheckState(target);
+            console.log(stateSource);
+            console.log(stateTarget);
+            var msgTarget ={
+                type:'RequestReply',
+                target:target,
+                source:source,
+                decision:decision,
+                state:stateSource
+            };
+            var msgSource ={
+                type:'NewFriend',
+                target:source,
+                source:target,
+                decision:decision,
+                state:stateTarget
+            };
+            onlineList.SendtoAll(msgTarget);
+            onlineList.SendtoAll(msgSource);
+        }
+        else if(decision === 'reject'){
+            var msg ={
+                type:'RequestReply',
+                target:target,
+                source:source,
+                decision:decision
+            };
+            onlineList.SendtoAll(msg);
+        }
+};
+exports.CancelRequest = function(sender,target){
+    var msg ={
+        type:'RequestCancelled',
+        source:sender,
+        target:target
+    };
+    onlineList.SendtoAll(msg);
+};
+exports.FriendsDelete =function(source,target){
+    var msg = {
+        type:'FriendDelete',
+        source:source,
+        target:target
+    };
+    onlineList.SendtoAll(msg);
+};
 
 function findbyToken(id, callback) {
     var result;
@@ -414,6 +437,16 @@ OnlineList.prototype.sendAllOthers = function(message){
         if(this.list[j].username === username && this.list[j].Id !== UniqueId)
             this.list[j].PortIp.send(JSON.stringify(message));
     }
+};
+OnlineList.prototype.CheckState = function(name){
+    var flag = 'inactive';
+    for(var i=0;i<this.list.length;i++){
+        if(this.list[i].username === name) {
+            flag = 'active';
+            break;
+        }
+    }
+    return flag;
 };
 
 
