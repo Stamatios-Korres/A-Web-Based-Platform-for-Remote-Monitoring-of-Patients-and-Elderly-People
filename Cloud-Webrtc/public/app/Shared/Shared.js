@@ -676,7 +676,6 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
                         $rootScope.$emit('WebsocketNews');
                         break;
 
-
                     // Friends and Requests Messages so we are in no need of polling
 
                     case 'NewRequest':{
@@ -730,7 +729,6 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
                         $rootScope.$emit('WebsocketNews');
                         break;
                     }
-
 
                     //Cases for Video - WebRTC
 
@@ -806,8 +804,8 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
                         break;
                     }
 
-
                     // Chat App
+
                     case 'Chat' :{
                         ChatServices.NewMessage(data.source,data.data,data.source,data.uuid); // Username of Friend/Message/and Direction
                         FriendsAndState.newmessage(data.source);
@@ -851,7 +849,9 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
                 .position('top left')
         );
     }
-    //Services responsible for event handling for Video functions
+
+        //Services responsible for event handling for Video functions
+
     services.UpdateRequest =function($scope,callback){
         var handler = $rootScope.$on('UpdateRequest',callback);
         $scope.$on('$destroy', handler);
