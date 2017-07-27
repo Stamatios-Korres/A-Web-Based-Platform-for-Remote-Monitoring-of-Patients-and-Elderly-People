@@ -29,7 +29,7 @@ myApp.config(['$routeProvider',
 
 
 myApp.controller('SidenavController',function($scope,$location){
-    $scope.Selected =2;
+    $scope.Selected =1;
     $scope.changeClass=function(ev){
         console.log('we are inside');
         ev.target.style.background = 'grey'

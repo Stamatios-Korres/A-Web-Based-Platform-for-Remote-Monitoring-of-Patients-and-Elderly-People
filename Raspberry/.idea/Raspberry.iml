@@ -2,7 +2,17 @@
 <module type="WEB_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/.idea" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/bin" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/Controllers" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/public" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/public/OpenHealth" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/routes" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/Sensor" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/views" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$" />
       <excludeFolder url="file://$MODULE_DIR$/.tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/node_modules" />
       <excludeFolder url="file://$MODULE_DIR$/temp" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
     </content>

@@ -2,10 +2,10 @@ var noble = require('noble');
 
 var ble = {};
 
-var Pulse = null;
-var SpO2 = null;
-var Pi = null;
-var Date1 =null;
+var bufferPulse = [];
+var bufferSpO2 = [];
+var bufferPi = [];
+var bufferDate = [];
 var index = 0;
 var status = "";
 const BIO_BUFFER_SIZE = 10;
@@ -58,10 +58,6 @@ noble.on('discover', function (peripheral) {
         peripheral.once('disconnect', function () {
             console.log('disconnected');
             status = "Disconnected / Scanning";
-            Pulse = null;
-            SpO2 = null;
-            Pi = null;
-            Date1 =null;
             noble.startScanning(['cdeacb8052354c07884693a37ee6b86d'], true);
             connecting = false;
         });
@@ -69,24 +65,18 @@ noble.on('discover', function (peripheral) {
 });
 
 function bufferPush(pulse, spO2, pi, date) {
-    /*   if (index < BIO_BUFFER_SIZE) {
-     index++;
-     } else {
-     bufferPulse.splice(0, 1);
-     bufferSpO2.splice(0, 1);
-     bufferPi.splice(0, 1);
-     bufferDate.splice(0, 1);
-     }
-     */
-    Pulse = pulse;
-    SpO2 = spO2;
-    Pi = pi;
-    Date1 = date;
-    // bufferPulse.push(pulse);
-    // bufferSpO2.push(spO2);
-    // bufferPi.push(pi);
-    // bufferDate.push(date);
-
+    if (index < BIO_BUFFER_SIZE) {
+        index++;
+    } else {
+        bufferPulse.splice(0, 1);
+        bufferSpO2.splice(0, 1);
+        bufferPi.splice(0, 1);
+        bufferDate.splice(0, 1);
+    }
+    bufferPulse.push(pulse);
+    bufferSpO2.push(spO2);
+    bufferPi.push(pi);
+    bufferDate.push(date);
 }
 
 function processPpg(data) {
@@ -99,10 +89,10 @@ function processSpO2(data) {
     var pulse = data[1] & 0xff;
     var SpO2 = data[2] & 0xff;
     var pi = data[3] & 0xff;
-    /* console.log('pulse :' + pulse);
-     console.log('SpO2 :' + SpO2);
-     console.log('pi :' + pi);
-     */
+    console.log('pulse :' + pulse);
+    console.log('SpO2 :' + SpO2);
+    console.log('pi :' + pi);
+
     status = "Measuring";
 
     if (pulse != 255 && SpO2 != 127) {
@@ -114,11 +104,11 @@ function processSpO2(data) {
 
 ble.getData = function () {
     return {
-        'pulse': Pulse,
-        'SpO2': SpO2,
-        'pi': Pi,
+        'pulse': bufferPulse,
+        'SpO2': bufferSpO2,
+        'pi': bufferPi,
         'status': status,
-        'date': Date1
+        'date': bufferDate
     };
 };
 

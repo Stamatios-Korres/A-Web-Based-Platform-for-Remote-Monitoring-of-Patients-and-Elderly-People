@@ -1,13 +1,20 @@
 <div style="height: 100% "  layout="column" flex>
         <div ng-cloak>
-            <md-tabs>
+            <md-tabs md-dynamic-height md-border-bottom>
                 <md-tab label="Charts">
-
+                    <div class="Heart-Chart">
+                        <nvd3 config='config' options='options' data='data'></nvd3>
+                    </div>
+                    <div class="Blood-Saturation-Chart">
+                        <nvd3 options='options1' data='data1'></nvd3>
+                    </div>
                 </md-tab>
                 <md-tab label="Sensor">
-
                 </md-tab>
             </md-tabs>
         </div>
     </div>
 </div>
+
+</body>
+</html>

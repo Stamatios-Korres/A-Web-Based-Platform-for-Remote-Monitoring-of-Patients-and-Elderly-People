@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var sensor = require('./Sensor/Sensor');
+var biosignal = require('./routes/Oximeter');
 
 var app = express();
 
@@ -26,6 +27,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/main',main);
+app.use('/biosignal',biosignal);
 app.use(express.static(path.join(__dirname, 'public/OpenHealth')));
 
 
