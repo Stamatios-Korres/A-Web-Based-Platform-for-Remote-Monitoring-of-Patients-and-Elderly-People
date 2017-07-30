@@ -1,0 +1,118 @@
+<div style="height: 100% "  layout="column" flex>
+            <div ng-cloak>
+                <md-tabs md-dynamic-height md-border-bottom>
+
+                    <!-- 1st Tab-->
+                    <md-tab label="Charts" md-on-select='functions.refresh()'>
+                        <div layout="row">
+                            <div class="Heart-Chart" layout="row">
+                                <nvd3 class='Nothide' ng-show='ChartSelect === "heart_Rate"' config='heartRate.heart.config' options='heartRate.heart.options' api='heartRate.heart.api'events="heartRate.heart.events" data='heartRate.heart.data' on-ready="heartRate.heart.callback"></nvd3>
+                                <nvd3 config='bloodSaturation.bloodSaturation.config' options='bloodSaturation.bloodSaturation.options' api='bloodSaturation.bloodSaturation.api'events="bloodSaturation.bloodSaturation.events" data='bloodSaturation.bloodSaturation.data' ng-show='ChartSelect === "blood_Saturation"' ></nvd3>
+                            </div>
+                            <div  layout='column'>
+                                <md-radio-group ng-init='ChartSelect="heart_Rate"' ng-model="ChartSelect" >
+                                    <h3>Select category</h3>
+                                    <md-radio-button value="heart_Rate"  class="md-primary">Heart Rate</md-radio-button>
+                                    <md-radio-button value="blood_Saturation"  class="md-primary">Blood Saturation</md-radio-button>
+                                </md-radio-group>
+                                <div layout-margin  class='Nothide' style=" height: 30%; border-radius: 15px; padding-left: 30px ; width:250px;" md-whiteframe="2" ng-show="flag === true">
+                                    <small>Date of measurement :</small> {{heartRate.measurement.date}}<br>
+                                    <small>Heart Rate : </small> {{heartRate.measurement.value}}<br>
+                                    <input type="number" placeholder=" Update Value " ng-model="heartRate.newValue"><br>
+                                    <md-button class='md-primary md-raised' ng-disabled='heartRate.newValue === null 'ng-click="heartRate.updateHeart()">Update </md-button>
+                                    <md-button ng-click='heartRate.deleteHeart()' class='md-warn md-raised'">Delete
+                                </div>
+                            </div>
+                        </div>
+                    </md-tab>
+
+                    <!-- 2nd Tab-->
+                    <md-tab label="Sensor" >
+                        <div class="RealTimeChart">
+                            <nvd3 config='sensor.Chart.config' options='sensor.Chart.options' api='sensor.Chart.api'events="sensor.Chart.event" data='sensor.Chart.data' ></nvd3>
+                        </div>
+                    </md-tab>
+
+                    <!-- 3rd Tab -> I think it is done -->
+                    <md-tab label="Add Measurement">
+                        <div  layout="row"   layout-margin>
+                            <div>
+                                <md-radio-group ng-init="NewValue.selectedCategory='HeartRate'" ng-model="NewValue.selectedCategory" >
+                                    <h2>Select Category</h2>
+                                    <md-radio-button value="HeartRate"  class="md-primary">Heart Rate</md-radio-button>
+                                    <md-radio-button value="bloodSaturation"  class="md-primary">Blood Saturation</md-radio-button>
+                                </md-radio-group>
+                            </div>
+                            <div flex>
+
+                                <div class='NewValue' ng-show="NewValue.selectedCategory === 'HeartRate'" md-whiteframe="2"  layout-margin>
+                                    <div layout="row">
+                                        <h3 flex>Heart Rate </h3>
+                                        <div >
+                                            <md-radio-group  ng-init="NewValue.TimeDateType='Automatic'" ng-model="NewValue.TimeDateType" >
+                                                <md-radio-button value="Automatic"   class="md-primary">Automatic Date&Time</md-radio-button>
+                                                <md-radio-button value="Manual"  class="md-primary">Manual Date&Time</md-radio-button>
+                                            </md-radio-group>
+                                        </div>
+                                    </div>
+                                        <div layout="row" >
+                                            <div>
+                                                <label style="padding: 2px; margin:2px">Heart Rate</label><br>
+                                                    <input style="padding: 2px; margin:2px" type='number' ng-model="NewValue.heartRate" placeholder="Enter New Value" ><br>
+                                                <div ng-show="NewValue.TimeDateType === 'Automatic'" >
+                                                    <md-button  style="margin-left:2px;margin-top: 30px" ng-click="NewValue.InsertHeartRate('auto')" ng-disabled="!NewValue.checkNumber(NewValue.heartRate)" class='md-primary md-raised'">Save
+                                                </div>
+                                                <div  ng-show="NewValue.TimeDateType === 'Manual'">
+                                                    <md-button style="margin-left:2px;margin-top: 30px" ng-click="NewValue.InsertHeartRate('manual')" ng-disabled="!NewValue.checkNumber(NewValue.heartRate) || NewValue.DateHeartRate==='' || NewValue.timeTakenHeartRate==='' "  class='md-primary md-raised'">Save
+                                                </div>
+
+                                            </div>
+                                            <div  flex-offset="15"  ng-show="NewValue.TimeDateType==='Manual'">
+                                                <label style="padding: 2px; margin:2px" >Insert Date</label><br>
+                                                    <input style="padding: 2px; margin:2px" type="date" ng-model="NewValue.DateHeartRate" ><br>
+                                                <label style="padding: 2px; margin:2px">Time taken </label><br>
+                                                    <input style="padding: 2px; margin:2px"  type="time" ng-model="NewValue.timeTakenHeartRate" placeholder="Insert Time" ><br>
+                                            </div>
+                                        </div>
+
+                                </div>
+
+                                <div class='NewValue' ng-show="NewValue.selectedCategory === 'bloodSaturation'" md-whiteframe="2"  layout-margin>
+                                    <div layout="row">
+                                        <h3 flex>Blood Saturation </h3>
+                                        <div >
+                                            <md-radio-group  ng-init="NewValue.TimeDateTypeBlood='Automatic'" ng-model="NewValue.TimeDateTypeBlood" >
+                                                <md-radio-button value="Automatic"   class="md-primary">Automatic Date&Time</md-radio-button>
+                                                <md-radio-button value="Manual"  class="md-primary">Manual Date&Time</md-radio-button>
+                                            </md-radio-group>
+                                        </div>
+                                    </div>
+                                    <div layout="row" >
+                                        <div>
+                                            <label style="padding: 2px; margin:2px">Blood Saturation</label><br>
+                                            <input style="padding: 2px; margin:2px" type='number' ng-model="NewValue.bloodSaturation" placeholder="Enter New Value" ><br>
+                                            <div ng-show="NewValue.TimeDateTypeBlood === 'Automatic'" >
+                                                <md-button  style="margin-left:2px;margin-top: 30px" ng-click="NewValue.InsertOxygenSaturation('auto')" ng-disabled="!NewValue.checkNumber(NewValue.bloodSaturation)" class='md-primary md-raised'">Save
+                                            </div>
+                                            <div  ng-show="NewValue.TimeDateTypeBlood === 'Manual'">
+                                                <md-button style="margin-left:2px;margin-top: 30px" ng-click="NewValue.InsertOxygenSaturation('manual')" ng-disabled="!NewValue.checkNumber(NewValue.bloodSaturation) || NewValue.DateBloodSaturation==='' || NewValue.timeTakenBloodSaturation==='' "  class='md-primary md-raised'">Save
+                                            </div>
+
+                                        </div>
+                                        <div  flex-offset="15"  ng-show="NewValue.TimeDateTypeBlood==='Manual'">
+                                            <label style="padding: 2px; margin:2px" >Insert Date</label><br>
+                                            <input style="padding: 2px; margin:2px" type="date" ng-model="NewValue.DateBloodSaturation" ><br>
+                                            <label style="padding: 2px; margin:2px">Time taken </label><br>
+                                            <input style="padding: 2px; margin:2px"  type="time" ng-model="NewValue.timeTakenBloodSaturation" placeholder="Insert Time" ><br>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </md-tab>
+                </md-tabs>
+            </div>
+    </div>
+

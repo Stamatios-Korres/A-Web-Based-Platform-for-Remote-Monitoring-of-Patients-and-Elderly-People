@@ -1,0 +1,48 @@
+<div style="height: 100% "  layout="column" >
+                <div class="ToDo" flex="30"  style="width:700px; margin:15px; margin-top:40px;margin-left:100px;" md-whiteframe="4">
+                    <h3 flex-offset="35">Notifications</h3>
+                    <md-divider></md-divider>
+                    <md-list>
+
+                    </md-list>
+
+                </div>
+
+                <div class="NewNotification" flex="65"  style="width:600px;margin:15px ;margin-top:40px;margin-left:100px;" md-whiteframe="4">
+                    <div layout="row" layout-align="center center" >
+                        <h3 >New Notification</h3>
+                        <i class="material-icons">add_alert</i>
+                    </div>
+                    <md-divider></md-divider>
+                    <form name="NotificationForm" style="margin-top: 10px" layout="column">
+                        <md-input-container flex-offset="10" >
+                            <label>Description</label>
+                            <input  required ng-model="newNotification.description" name="description"style="width: 300px" >
+                            <div ng-messages="NotificationForm.description.$error">
+                                <div ng-message="required">This is required.</div>
+                            </div>
+                        </md-input-container>
+                        <md-input-container flex-offset="10" >
+                            <label>Enter Day </label>
+                            <input required ng-model="newNotification.date" name="date" type="date" style="width: 300px" >
+                            <div ng-messages="NotificationForm.date.$error">
+                                <div ng-message="required">This is required.</div>
+                            </div>
+                        </md-input-container>
+
+                        <md-input-container flex-offset="10" >
+                            <label  required>EnterTime</label>
+                            <input required    ng-model="newNotification.time" name="time" type="time" style="width: 300px">
+                            <div ng-messages="NotificationForm.time.$error">
+                                <div ng-message="required">This is required.</div>
+                            </div>
+
+                        </md-input-container>
+                        <md-button type="submit" flex-offset="80" ng-click="newNotification.addNotification(newNotification.description,newNotification.date,newNotification.time)"md-no-ink class="md-primary"><i class="material-icons">check</i></md-button>
+                    </form>
+
+                </div>
+
+
+
+</div>
