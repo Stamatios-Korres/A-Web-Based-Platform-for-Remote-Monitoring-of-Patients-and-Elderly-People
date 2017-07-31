@@ -19,7 +19,8 @@ SharedServices.service('Websocket',function($rootScope) {
                         }
                         break;
                     case 'ActiveNotification':
-                        console.log(data.notification);
+                        notification = data.notification;
+                        $rootScope.$emit('ActiveNotification');
                         break;
                     default:
                         console.log('Unknown option: '+data.type);
@@ -31,6 +32,10 @@ SharedServices.service('Websocket',function($rootScope) {
     };
     services.NewMeasurement =function($scope,callback){
         var handler = $rootScope.$on('NewMeasurement',callback);
+        $scope.$on('$destroy', handler);
+    };
+    services.ActiveNotification =function($scope,callback){
+        var handler = $rootScope.$on('ActiveNotification',callback);
         $scope.$on('$destroy', handler);
     };
     return services;

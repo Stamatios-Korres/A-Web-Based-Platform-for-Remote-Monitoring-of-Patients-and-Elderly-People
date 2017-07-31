@@ -1,14 +1,7 @@
-<div style="height: 100% "  layout="column" >
-                <div class="ToDo" flex="30"  style="width:700px; margin:15px; margin-top:40px;margin-left:100px;" md-whiteframe="4">
-                    <h3 flex-offset="35">Notifications</h3>
-                    <md-divider></md-divider>
-                    <md-list>
+<div style="height:100% "  layout="row" >
 
-                    </md-list>
 
-                </div>
-
-                <div class="NewNotification" flex="65"  style="width:600px;margin:15px ;margin-top:40px;margin-left:100px;" md-whiteframe="4">
+                <div class="NewNotification"  flex=50 style="height:70%;width:600px;margin:25px ;margin-top:40px;" md-whiteframe="4">
                     <div layout="row" layout-align="center center" >
                         <h3 >New Notification</h3>
                         <i class="material-icons">add_alert</i>
@@ -41,6 +34,22 @@
                         <md-button type="submit" flex-offset="80" ng-click="newNotification.addNotification(newNotification.description,newNotification.date,newNotification.time)"md-no-ink class="md-primary"><i class="material-icons">check</i></md-button>
                     </form>
 
+                </div>
+
+                <div class="ToDo" flex  style="height:500px;width:700px; margin:15px; margin-top:40px;" md-whiteframe="4">
+                    <h3 flex-offset="30">Notifications</h3>
+                    <md-divider></md-divider>
+                    <md-list flex>
+                        <md-list-item class="md-2-line" ng-repeat="ntf in notifications.notifications"  layout-margin>
+                            <i class="material-icons">send</i>
+                            <div class="md-list-item-text" layout="column">
+                                <h4>Description :  {{ntf.description}}</h4>
+                                <h4>Date: {{ntf.date}}</h4>
+                                <md-divider md-inset></md-divider>
+                            </div>
+
+                        </md-list-item>
+                    </md-list>
                 </div>
 
 

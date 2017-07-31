@@ -12,6 +12,9 @@ var notification = new Schema({
         type:"date",
         required:true
     },
+    repeat:{
+        type:'String'
+    },
     uniqueId:{
         type:'String',
         Required:'true'

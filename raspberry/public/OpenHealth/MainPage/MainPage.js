@@ -7,9 +7,8 @@
 var ws = new WebSocket('ws:localhost:4000'); //Websocket connections with the Server
 var Pulse  ;
 var SpO2 ;
-var bufferPi = [];
-var bufferDate = [];
 var status = "";
+var notification ;
 
 var myApp = angular.module("Openhealth", ['AngularMaterial','Notification','SharedServices','ngRoute','Online','Biosignals']);
 

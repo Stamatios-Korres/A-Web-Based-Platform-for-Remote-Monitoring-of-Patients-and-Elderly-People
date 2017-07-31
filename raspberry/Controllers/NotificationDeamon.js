@@ -1,6 +1,7 @@
 var notification = require('../models/NotificationModel');
 var notify = require('../WebsocketServer/Websocket').notification;
 exports.deamon = function(){
+        console.log('Starting to looking in DB ...');
         SearchDb();
 };
 
