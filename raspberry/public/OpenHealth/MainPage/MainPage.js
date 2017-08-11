@@ -8,7 +8,8 @@ var ws = new WebSocket('ws:localhost:4000'); //Websocket connections with the Se
 var Pulse  ;
 var SpO2 ;
 var status = "";
-var notification ;
+var notification = [] ;
+var Activenotification ='';
 
 var myApp = angular.module("Openhealth", ['AngularMaterial','Notification','SharedServices','ngRoute','Online','Biosignals']);
 

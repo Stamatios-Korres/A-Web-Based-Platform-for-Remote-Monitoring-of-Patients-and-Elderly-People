@@ -19,7 +19,7 @@ SharedServices.service('Websocket',function($rootScope) {
                         }
                         break;
                     case 'ActiveNotification':
-                        notification = data.notification;
+                        Activenotification = data.notification;
                         $rootScope.$emit('ActiveNotification');
                         break;
                     default:

@@ -1,21 +1,20 @@
 <md-dialog aria-label="Notification">
     <form>
-        <md-toolbar>
-            <div class="md-toolbar-tools">
-                <h2>Reminder</h2>
+        <md-toolbar style="height: 25px">
+            <div class="md-toolbar-tools md-accent">
+                <i class="material-icons">alarm</i>
+                <div >
+                    Notification - Right now
+                </div>
                 <span flex></span>
             </div>
         </md-toolbar>
-        <h2>Hey man !</h2>
-        <h2>{{$scope.ActiveNotification}}</h2>
-        <md-dialog-actions layout="row">
-            <span flex></span>
-            <md-button ng-click="answer('Ok')" >
-                Ok
-            </md-button>
-            <md-button ng-click="answer('Remind me Later')" style="margin-right:20px;" >
-              Remind me Later
-            </md-button>
-        </md-dialog-actions>
+        <div layout="column" flex>
+            <h3 flex-offset="10" flex="60">{{ActiveNotification}} </h3>
+            <md-dialog-actions layout="row">
+                <md-button ng-click="answer('Ok')">Ok</md-button>
+                <md-button ng-click="answer('Later')" style="margin-right:20px;">Remind me in 10 minutes</md-button>
+            </md-dialog-actions>
+        </div>
     </form>
 </md-dialog>

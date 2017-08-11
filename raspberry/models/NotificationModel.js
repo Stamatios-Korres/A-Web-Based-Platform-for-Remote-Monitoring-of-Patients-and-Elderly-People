@@ -17,7 +17,22 @@ var notification = new Schema({
     },
     uniqueId:{
         type:'String',
-        Required:'true'
+        required:'true'
+    },
+    remindFlag:{
+        type:'bool',
+        required:'true'
+    },
+    remindDate:{
+        type:'date',
+        required:'true'
+    },
+    show:{
+        type:'String',
+        enum:[
+            'yes',
+            'no'
+        ]
     }
 
 });
