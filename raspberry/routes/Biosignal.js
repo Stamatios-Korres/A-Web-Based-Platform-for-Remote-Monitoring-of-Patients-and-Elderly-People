@@ -119,4 +119,8 @@ router.get('/bloodSaturationbiosignals',function(req,res,next){
         console.log(e);
     }
 });
+
+router.put('/BloodSaturation',function(req,res,next){
+   res.send({message:"Ok"});
+});
 module.exports = router;

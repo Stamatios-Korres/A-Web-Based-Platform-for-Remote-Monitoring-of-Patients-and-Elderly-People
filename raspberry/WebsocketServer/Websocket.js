@@ -18,8 +18,6 @@ exports.initialize =function (server) {
                         ourConnectionIp = connection;
                         console.log('Connection was set');
                     }
-
-
                 }
             } catch (e) {
                 console.log(e);

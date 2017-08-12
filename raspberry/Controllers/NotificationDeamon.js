@@ -20,7 +20,8 @@ function SearchDb(nowDate) {
                 var tempDate = result[i].date;
                 var updateTime = result[i].remindDate;
 
-                if (Math.abs(tempDate - nowDate) <= 60000 &&  result[i].show === 'yes') { //Inform the User about the notification
+
+                if (Math.abs(tempDate - nowDate) <= 50000 &&  result[i].show === 'yes') { //Inform the User about the notification
                     console.log('going to show now');
                     notify(result[i]);
                     notification.update({uniqueId: result[i].uniqueId}, {show: 'no'}, function (err, res) {

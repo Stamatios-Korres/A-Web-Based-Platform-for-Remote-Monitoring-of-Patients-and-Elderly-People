@@ -43,6 +43,25 @@ Biosignals.service('BiosignalService', function ($http) {
             callback(response.data.message);
         });
     };
+    OnlineServices.getHeart = function (callback) {
+        $http({
+            method: 'get',
+            url: '/biosignal/heartbiosignals'
+        }).then(function successCallback(response) {
+            callback(response.data);
+        });
+    };
+
+    OnlineServices.updateBloodSaturation = function (newvalue, uniqueId, callback) {
+        $http({
+            method: 'put',
+            url: '/biosignal/BloodSaturation',
+            data: {newvalue: newvalue, uniqueId: uniqueId}
+        }).then(function successCallback(response) {
+            console.log(response);
+            callback(response.data.message);
+        });
+    };
     OnlineServices.insertBloodSaturation = function (value, callback) {
         $http({
             method: 'post',
@@ -51,14 +70,6 @@ Biosignals.service('BiosignalService', function ($http) {
         }).then(function successCallback(response) {
             console.log(response);
             callback(response.data.message);
-        });
-    };
-    OnlineServices.getHeart = function (callback) {
-        $http({
-            method: 'get',
-            url: '/biosignal/heartbiosignals'
-        }).then(function successCallback(response) {
-            callback(response.data);
         });
     };
     OnlineServices.getBloodSaturation = function (callback) {
@@ -315,19 +326,19 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
         dataServer: [],
         newValue: null,
         updateBloodSaturation: function () {
-            BiosignalService.OnlineServices.updateHeart($scope.heartRate.newValue, $scope.heartRate.measurement.uniqueId, function (result) {
+            BiosignalService.OnlineServices.updateBloodSaturation($scope.heartRate.newValue, $scope.heartRate.measurement.uniqueId, function (result) {
                 if (result === 'Ok') {
                     for (var i = 0; i < $scope.heartRate.heart.data[0].values.length; i++) {
-                        if ($scope.heartRate.heart.data[0].values[i][2] === $scope.heartRate.measurement.uniqueId) {
-                            $scope.heartRate.heart.data[0].values[i][0] = $scope.heartRate.newValue;
+                        if ($scope.bloodSaturation.bloodSaturation.data[0].values[i][2] === $scope.bloodSaturation.measurement.uniqueId) {
+                            $scope.bloodSaturation.bloodSaturation.data[0].values[i][0] = $scope.bloodSaturation.newValue;
                             break;
                         }
                     }
                     console.log('update form');
-                    $scope.heartRate.heart.api.update();
+                    $scope.bloodSaturation.bloodSaturation.api.update();
                     $scope.flag = false;
-                    $scope.heartRate.newValue = '';
-                    $scope.heartRate.measurement = {
+                    $scope.bloodSaturation.newValue = '';
+                    $scope.bloodSaturation.measurement = {
                         value: '',
                         date: '',
                         uniqueId: ''
@@ -486,13 +497,12 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                             },
                             elementClick: function (e) {
 
-                                $scope.heartRate.measurement.value = e.data[0];
+                                $scope.bloodSaturation.measurement.value = e.data[0];
                                 var temp = new Date(e.data[1]);
                                 console.log('Unique id is: ' + e.data[2]);
-                                $scope.heartRate.measurement.uniqueId = e.data[2];
-                                console.log(typeof temp.getMonth());
+                                $scope.bloodSaturation.measurement.uniqueId = e.data[2];
                                 var month = temp.getMonth() + 1;
-                                $scope.heartRate.measurement.date = month + '/' + temp.getDate() + '/' + temp.getFullYear();
+                                $scope.bloodSaturation.measurement.date = month + '/' + temp.getDate() + '/' + temp.getFullYear();
 
                                 $scope.flag = true;
                                 $scope.$apply();
@@ -628,6 +638,7 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
 
     //3rd Tab - Insert Manually Measurements
     $scope.NewValue = {
+
         //Global Variables for Radio Buttons
 
         selectedCategory: null,

@@ -116,9 +116,11 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
         time: null,
         reset: function () {
             console.log('Function was called');
-            $scope.newNotification.description = '';
+            $scope.newNotification.description = null;
             $scope.newNotification.date = null;
             $scope.newNotification.time = null;
+            if (!$scope.$digest)
+                $scope.$apply();
         },
         addNotification: function (description, date, time) {
             if (description && date && time) {
@@ -141,7 +143,11 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
                         }
 
                     });
+                    $scope.newNotification.reset();
                  $location.path('Notifications');
+            }
+            else{
+                $scope.functions.showResult('Please fill out all fields');
             }
         }
     };    // Functions for when user adds a new Nofitication to the App

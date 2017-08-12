@@ -23,6 +23,7 @@ router.post('/',function(req,res,next){
        }
    })
 });
+
 router.get('/',function(req,res,next){
     notification.find({},function(err,result){
         if(err)
@@ -56,6 +57,7 @@ router.get('/',function(req,res,next){
         res.send({message:'Ok',Result:Result});
     })
 });
+
 router.put('/',function(req,res,next){
     console.log(req.body);
     switch (req.body.field){
@@ -93,6 +95,7 @@ router.put('/',function(req,res,next){
             console.log('Uknown option');
     }
 });
+
 router.delete('/',function(req,res,next){
     var uniqueId = req.body.uniqueId;
     notification.remove({uniqueId:uniqueId},function(err,result){
@@ -105,6 +108,8 @@ router.delete('/',function(req,res,next){
     })
 
 });
+
+
 
 // Functions for manipulating dates
 

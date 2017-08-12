@@ -10,6 +10,7 @@ var SpO2 ;
 var status = "";
 var notification = [] ;
 var Activenotification ='';
+var Username = null;
 
 var myApp = angular.module("Openhealth", ['AngularMaterial','Notification','SharedServices','ngRoute','Online','Biosignals']);
 

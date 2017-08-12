@@ -357,9 +357,15 @@ OnlineList.prototype.Removeuser = function (connection) {
     for (var i = 0; i < this.list.length; i++) {
         if (this.list[i].PortIp === connection) {
             userLeft = this.list[i];
-            Username = userLeft.username;
-            console.log('Found the user you have been asking for');
-            this.list.splice(i, 1);
+            if(userLeft) {
+                Username = userLeft.username;
+                console.log('Found the user you have been asking for');
+                this.list.splice(i, 1);
+            }
+            else{
+                console.log('Not a valid User something uknown');
+                return;
+            }
             break;
         }
     }

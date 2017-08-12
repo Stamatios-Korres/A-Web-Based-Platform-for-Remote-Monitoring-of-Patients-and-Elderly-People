@@ -10,22 +10,22 @@
                     <form name="NotificationForm" style="margin-top: 10px" layout="column">
                         <md-input-container flex-offset="10" >
                             <label>Description</label>
-                            <input  required ng-model="newNotification.description" name="description"style="width: 300px" >
+                            <input   ng-model="newNotification.description" name="description"style="width: 300px" >
                             <div ng-messages="NotificationForm.description.$error">
                                 <div ng-message="required">This is required.</div>
                             </div>
                         </md-input-container>
                         <md-input-container flex-offset="10" >
                             <label>Enter Day </label>
-                            <input required ng-model="newNotification.date" name="date" type="date" style="width: 300px" >
+                            <input  ng-model="newNotification.date" name="date" type="date" style="width: 300px" >
                             <div ng-messages="NotificationForm.date.$error">
                                 <div ng-message="required">This is required.</div>
                             </div>
                         </md-input-container>
 
                         <md-input-container flex-offset="10" >
-                            <label  required>EnterTime</label>
-                            <input required    ng-model="newNotification.time" name="time" type="time" style="width: 300px">
+                            <label  >EnterTime</label>
+                            <input   ng-model="newNotification.time" name="time" type="time" style="width: 300px">
                             <div ng-messages="NotificationForm.time.$error">
                                 <div ng-message="required">This is required.</div>
                             </div>
