@@ -73,6 +73,7 @@
         </div>
     </md-toolbar>
     <!-- Side Navigation of the App (Fixed) -->
+
     <div layout="row" class="md-whiteframe-5dp" flex ng-controller="SidenavController">
         <div flex="15" class="md-whiteframe-1dp" >
             <md-list flex >
@@ -116,7 +117,7 @@
                 </md-list-item>
             </md-list>
         </div>
-        <div  flex ng-view ></div>
+         <div  flex ng-view ng-controller="NotificationController"></div>
     </div>
 
 

@@ -1,0 +1,34 @@
+<md-dialog aria-label="Notification">
+    <form>
+        <md-toolbar style="height: 25px">
+            <div class="md-toolbar-tools md-accent">
+                <i class="material-icons">alarm</i>
+                <div >
+                    Update Notification
+                </div>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <div layout="column">
+
+            <md-input-container>
+                <h4 flex-offset="10">Description</h4>
+                <input  aria-label="ShowHideAccountant" flex-offset="20"style="width: 250px" ng-model ='CrudOperations.Updatingdescription'>
+            </md-input-container>
+
+            <md-input-container >
+                <h4 flex-offset="10" >Date</h4>
+                <input     aria-label="ShowHideAccountant" flex-offset="20"style="width: 250px" ng-model ='CrudOperations.Updatingdate'>
+            </md-input-container>
+        </div>
+
+        <div layout="column" flex>
+            <h3 flex-offset="10" flex="60"></h3>
+            <md-dialog-actions layout="row">
+                <md-button ng-click="answer('Cancel')" style="margin-right:20px;" class=" md-warn  md-raised">Cancel</md-button>
+                <md-button ng-click="answer('Delete')" class="md-primary md-raised" style="margin-right:20px;">Delete</md-button>
+                <md-button ng-click="answer('Update')" class="md-primary md-raised" style="margin-right:20px;">Ok</md-button>
+            </md-dialog-actions>
+        </div>
+    </form>
+</md-dialog>

@@ -42,7 +42,6 @@ router.get('/',function(req,res,next){
                     Result.push(msg);
                 }
                 else if (result[i].remindDate && result[i].remindDate.getTime() >= new Date().getTime() && result[i].remindFlag === true) {
-                    console.log('we are in here');
                     var msgUpdate = {
                         description: result[i].description,
                         date: convertToString(result[i].date),
@@ -57,15 +56,14 @@ router.get('/',function(req,res,next){
         res.send({message:'Ok',Result:Result});
     })
 });
-
-
 router.put('/',function(req,res,next){
     console.log(req.body);
     switch (req.body.field){
         case 'date':
             console.log('updating Date');
-            var date =  new Date(new Date().getTime() +6000000);
-            notification.update({uniqueId:req.body.id},{remindDate:date, show:'yes',remindFlag:true},function(err,result){
+            var date = new Date();
+            date.setMinutes(date.getMinutes() + 1);
+            notification.update({uniqueId:req.body.id},{remindDate:date,  remindFlag:true},function(err,result){
                 if(err)
                     res.send({message:err});
                 else {
@@ -74,13 +72,41 @@ router.put('/',function(req,res,next){
                 }
             });
             break;
+        case 'Both':
+            var Converteddate = convertStringtoDate(req.body.date);
+            var uniqueId = req.body.uniqueId;
+            var newdescription = req.body.description;
+            notification.update({uniqueId:uniqueId},
+                {
+                    date:Converteddate,
+                    description:newdescription
+                },function(err,result){
+                    if(err)
+                        res.send({message:err});
+                    else {
+                        console.log(result);
+                        res.send({message:'Ok'})
+                    }
+                });
+            break;
         default:
             console.log('Uknown option');
     }
 });
+router.delete('/',function(req,res,next){
+    var uniqueId = req.body.uniqueId;
+    notification.remove({uniqueId:uniqueId},function(err,result){
+        if(err)
+            res.send({message:err});
+        else {
+            console.log(result);
+            res.send({message: "Ok"})
+        }
+    })
 
+});
 
-
+// Functions for manipulating dates
 
 function converttoDate(time,date){
     time = new Date(time);
@@ -109,6 +135,12 @@ function convertToString(date){
     var String2 = day+'/'+month +'/'+year;
     return  String2  +' '+ String1 ;
 }
+function convertStringtoDate(string){
+ var array = string.split(' ');
+ var date = array[0].split('/');
+ var hour = array[1].split(':');
+ return new Date(date[2],date[1],date[0],hour[0],hour[1]);
+}
 
 
-module.exports = router
+module.exports = router;

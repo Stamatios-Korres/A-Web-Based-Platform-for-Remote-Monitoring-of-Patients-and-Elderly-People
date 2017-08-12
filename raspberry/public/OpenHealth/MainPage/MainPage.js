@@ -36,8 +36,8 @@ myApp.config(['$routeProvider',
                 controller: 'BiosignalsController'
             })
             .when('/Notifications',{
-                templateUrl:'Notifications/Notifications.html',
-                controller: 'NotificationController'
+                templateUrl:'Notifications/Notifications.html'
+                // controller: 'NotificationController'
             })
             .otherwise({
             redirectTo: '/Notifications'

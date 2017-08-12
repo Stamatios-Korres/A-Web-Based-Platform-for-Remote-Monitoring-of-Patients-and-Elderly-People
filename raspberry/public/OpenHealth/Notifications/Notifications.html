@@ -29,7 +29,6 @@
                             <div ng-messages="NotificationForm.time.$error">
                                 <div ng-message="required">This is required.</div>
                             </div>
-
                         </md-input-container>
                         <md-button type="submit" flex-offset="80" ng-click="newNotification.addNotification(newNotification.description,newNotification.date,newNotification.time)"md-no-ink class="md-primary"><i class="material-icons">check</i></md-button>
                     </form>
@@ -40,16 +39,22 @@
                     <h3 flex-offset="30">Notifications</h3>
                     <md-divider></md-divider>
                     <md-list flex>
+                        <!--No available data yet-->
                         <md-list-item   ng-if ='notifications.notifications.length === 0 '> <h3 flex-offset="10">No Active notifications</h3></md-list-item>
-                        <md-list-item class="md-2-line" ng-repeat="ntf in notifications.notifications"  layout-margin>
-                            <i class="material-icons">send</i>
-                            <div class="md-list-item-text" layout="column">
-                                <h4>Description :  {{ntf.description}}</h4>
-                                <h4>Date: {{ntf.date}}</h4><i ng-if="ntf.reminder === true" class="material-icons">replay_10</i>
+
+                        <md-list-item  ng-click='CrudOperations.showmenu(ntf.description,ntf.date,ntf.uniqueId)' class="md-2-line" ng-repeat="ntf in notifications.notifications"  layout-margin flex>
+                                <md-icon ><i class="material-icons">send</i></md-icon>
+                                <div class="md-list-item-text" layout="column">
+                                    <h4>
+                                        Description: {{ntf.description}}
+                                    </h4>
+                                    <h4>
+                                        Date: {{ntf.date}}
+                                        <i ng-if="ntf.reminder === true" class="material-icons">replay_10</i>
+                                    </h4>
+                                </div>
 
                                 <md-divider md-inset></md-divider>
-                            </div>
-
                         </md-list-item>
                     </md-list>
                 </div>
