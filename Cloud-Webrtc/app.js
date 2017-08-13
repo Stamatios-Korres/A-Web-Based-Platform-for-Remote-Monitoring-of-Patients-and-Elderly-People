@@ -31,7 +31,10 @@ app.use('/tokens',token);
 app.use('/',login);
 app.use('/subscribe',subscribe);
 app.use('/messages',message);
-mongoose.connect('mongodb://127.0.0.1/Webrtc');
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://127.0.0.1/Webrtc',{
+    useMongoClient: true
+}   );
 // catch 404 and forward to error handler
 
 app.use(function(req, res, next) {

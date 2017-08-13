@@ -48,7 +48,6 @@ passport.use(new ClientPasswordStrategy(
             if (client_secret !== client.Client_Secret) {
                 return done(null, false,{message: 'incorrect password'});
             }
-            console.log('Client has been found');
             return done(null, client);
         })
     }));

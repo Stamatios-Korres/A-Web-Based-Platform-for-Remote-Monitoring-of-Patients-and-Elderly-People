@@ -44,10 +44,11 @@ exports.initialize = function (server) {
             var data = message.utf8Data;
             try {
                 data = JSON.parse(data);
-                console.log(' Websocket received ' + data.type);
+                console.log('Websocket received ' + data.type);
                 switch (data.type) {
 
                     //General Perspose Websocket's Job
+
                     case 'init': {
                         findbyToken(data.token,
                             function (err, result) {
@@ -56,19 +57,19 @@ exports.initialize = function (server) {
                                     console.log('Some error finding the user');
                                 }
                                 else {
-                                     var id = onlineList.push(result, connection, data.token); // Save (1) User (2) Ip (3) Token to distinct the users
-                                    onlineList.friendsOnline(result, 'yes', function (error, result2) {
+                                    var id = onlineList.push(result.username, connection, data.token,result.category); // Save (1) User (2) Ip (3) Token to distinct the users
+                                    onlineList.friendsOnline(result.username, 'yes', function (error, result2) {
                                         if (error) {
                                             console.log('Error occured');
                                             connection.send(JSON.stringify({message: error}));
                                         }
                                         else {
-                                            console.log('Result outside Callback :');
-                                            console.log(result2);
+                                            //console.log('Result outside Callback :');
+                                            //console.log(result2);
                                             var message = {type: 'onlineUsers',id:id,online: result2};
                                             message = JSON.stringify(message);
+                                            console.log('I did send the Online Users');
                                             connection.send(message); // for each online user send that this particular user has come online
-                                            console.log('sent');
                                         }
                                     });
                                 }
@@ -77,6 +78,7 @@ exports.initialize = function (server) {
                     }
 
                     // About Video Calls
+
                     case 'video-start': {
                         data.sourceId = onlineList.findUser(connection);
                         console.log(data);
@@ -139,8 +141,6 @@ exports.initialize = function (server) {
                     }
                     default :
                         console.log("unknown type");
-
-
                 }
             } catch (e) {
                 console.log(e);
@@ -226,9 +226,9 @@ function findbyToken(id, callback) {
                             callback({reason: 'NoUser'}, null)
                         }
                         else {
-                            result = user_found.username;
+                            result ={username:user_found.username,category:user_found.category};
                             callback(null, result);
-                            console.log(result + ' is now Online');
+                            console.log(result.username + ' is now Online');
                         }
                     }
                 );
@@ -310,12 +310,12 @@ OnlineList.prototype.SendtoAll = function (message) {   // Send to alla User's w
     console.log('Sending message to: ' + message.target);
     for (var i = 0; i < this.list.length; i++) {
         if (this.list[i].username === message.target) {
-            message.targetId = this.list[i].Id;         // Add the Uuid of the Specific user
+            message.targetId = this.list[i].Id; // Add the Uuid of the Specific user
             this.list[i].PortIp.send(JSON.stringify(message));
         }
     }
 };                                  // Video-offer is sent to all devices which are logged in as the same User
-OnlineList.prototype.push = function (username, portIp, token) {
+OnlineList.prototype.push = function (username, portIp, token,category) {
     var Same = 0;
     for (var j = 0; j < this.list.length; j++) {
         if (this.list[j].username === username) {
@@ -331,7 +331,8 @@ OnlineList.prototype.push = function (username, portIp, token) {
         PortIp: portIp,
         token: token,
         SameAccount: Same,
-        Id: id
+        Id: id,
+        category:category
     };
     this.list.push(OnlineUser);
     return id;
@@ -369,39 +370,41 @@ OnlineList.prototype.Removeuser = function (connection) {
             break;
         }
     }
-    console.log(Username + ' is now offline');
-    var _this = this;
-    if (userLeft.SameAccount > 0) {
-        console.log('more than one users online'); // Decrease online users on the same account by 1
-        for (var j = 0; j < this.list.length; j++) {
-            if (Username === this.list[j].username)
-                this.list[j].SameAccount--;
-        }
-    }
-    else {                       // SameAccount is 0 , there is not another User online to the same account
-        console.log('Only 1 user online');
-        relationship.findOne({user: Username}, function (err, result) {
-            //results = All friends of user who left
-            if (err) {
-                console.log('Some error occured')
+    if(Username) {  // Special Case if error occur during disconnection of Users
+        console.log(Username + ' is now offline');
+        var _this = this;
+        if (userLeft.SameAccount > 0) {
+            console.log('more than one users online'); // Decrease online users on the same account by 1
+            for (var j = 0; j < this.list.length; j++) {
+                if (Username === this.list[j].username)
+                    this.list[j].SameAccount--;
             }
-            //User has no current Friends
-            else if (!result)
-                return;
-            //Find which of user's friends are online
-            else {
-                for (var i = 0; i < _this.list.length; i++) {
-                    //this.list -> Online Users
-                    //Result -> Friends of user who disconnected
-                    for (var j = 0; j < result.friends.length; j++) {
-                        if (_this.list[i].username === result.friends[j] && _this.list[i].username !== Username) {
-                            _this.list[i].PortIp.send(JSON.stringify({type: 'UserGotOffLine', name: Username}));
-                            break;
+        }
+        else {                       // SameAccount is 0 , there is not another User online to the same account
+            console.log('Only 1 user online');
+            relationship.findOne({user: Username}, function (err, result) {
+                //results = All friends of user who left
+                if (err) {
+                    console.log('Some error occured')
+                }
+                //User has no current Friends
+                else if (!result)
+                    return;
+                //Find which of user's friends are online
+                else {
+                    for (var i = 0; i < _this.list.length; i++) {
+                        //this.list -> Online Users
+                        //Result -> Friends of user who disconnected
+                        for (var j = 0; j < result.friends.length; j++) {
+                            if (_this.list[i].username === result.friends[j] && _this.list[i].username !== Username) {
+                                _this.list[i].PortIp.send(JSON.stringify({type: 'UserGotOffLine', name: Username}));
+                                break;
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 };
 OnlineList.prototype.friendsOnline = function (username, option, callback) {

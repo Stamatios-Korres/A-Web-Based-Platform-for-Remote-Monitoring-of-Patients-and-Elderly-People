@@ -142,6 +142,7 @@ MainPage.controller('AuthorizedController', function ($rootScope, $scope, $mdDia
         WebsocketService.ShowView($scope,function(){
             $scope.mainPageInfo.friends = FriendsAndState.getfriends();
         });
+
         $scope.SelectedUser = function (username) {
             console.log('Yes it was summoned');
             FriendsAndState.messageRead(username);

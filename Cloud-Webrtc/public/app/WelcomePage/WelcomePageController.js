@@ -2,6 +2,9 @@
  * Created by timoskorres on 1/6/2017.
  */
 
+//var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
+var CloudWebsocketUrl ='ws:localhost:3000';
+
 angular.module('Openhealth').controller('WelcomePageController', function (ChatServices,FriendsAndState, $mdToast, $mdDialog, WebsocketService, AjaxServices, $scope, $http, $window, $location, $timeout) {
 
 
@@ -19,8 +22,6 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
                 .closeTo(angular.element(document.querySelector('#right')))
         );
     };
-
-
 
     $scope.login = {
         username: null,
@@ -49,30 +50,30 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
                     console.log("Setting Token");
 
                     // Global Variables Probably unseen by my controller
-                    localStorage.setItem('token', response.data.access_token);
-                    token = localStorage.getItem('token');
-                    my_name = $scope.login.username;
-                    //AjaxServices.services.GetRequests();
-                    ws = new WebSocket('wss://healthcloud.menychtas.com/sockets');
-                   // ws = new WebSocket('ws:localhost:3000');
-                    AjaxServices.services.GetFriends(function (response) {
-                        for (var i = 0; i < response.length; i++) {
-                            FriendsAndState.addfriends(response[i], 'inactive',0);
-                        }
-                        WebsocketService.InitWebsocket();
-                        ChatServices.createArray();
-                    });
-                    ws.onopen = function InitWebsocket(e) {
-                        console.log('Initializing Connection with Server ' + my_name);
-                        message = {
-                            type: 'init',
-                            token: localStorage.getItem('token')
-                        };
-                        message = JSON.stringify(message);
-                        ws.send(message);
+                    if(response.data.access_token){
+                        localStorage.setItem('token', response.data.access_token);
+                        token = localStorage.getItem('token');
+                        my_name = $scope.login.username;
+                        ws = new WebSocket(CloudWebsocketUrl);
+                        AjaxServices.services.GetFriends(function (response) {
+                            for (var i = 0; i < response.length; i++) {
+                                FriendsAndState.addfriends(response[i], 'inactive', 0);
+                            }
+                            WebsocketService.InitWebsocket();
+                            ChatServices.createArray();
+                        });
+                        ws.onopen = function InitWebsocket(e) {
+                            console.log('Initializing Connection with Server ' + my_name);
+                            message = {
+                                type: 'init',
+                                token: localStorage.getItem('token')
+                            };
+                            message = JSON.stringify(message);
+                            ws.send(message);
 
-                    };
-                    $location.path('main-page');
+                        };
+                        $location.path('main-page');
+                    }
                 }, //Succesfull Login
                     function errorCallback(response) {
                     console.log(response);
@@ -110,15 +111,14 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
                         grant_type: 'password',
                         client_id: 'myApp',
                         client_secret: 'hmmy1994',
+                        category:'NormalUser',
                         username: $scope.subscribe.username,
                         password: $scope.subscribe.password,
-                        email: $scope.subscribe.email
+                        email: $scope.subscribe.email,
+                        category:'NormalUser'
                     }
                 }).then(function succesCallback(response) {
                     console.log(response);
-                    // if (response.data.errors)  // Some kind of error
-                    //     $scope.openToast();
-                    // else {
                     if (response.data.code === 11000) {
                         //Username Already exists
                         alert('Username-Already exists');
@@ -129,9 +129,7 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
                         token = localStorage.getItem('token');
                         console.log(token);
                         my_name = $scope.subscribe.username;
-                       // ? AjaxServices.services.GetRequests();
-                        ws = new WebSocket('wss://healthcloud.menychtas.com/sockets');
-                        // ws = new WebSocket('ws:localhost:3000');
+                        ws = new WebSocket(CloudWebsocketUrl);
 
                         AjaxServices.services.GetFriends(function (response) {
                             for (var i = 0; i < response.length; i++) {

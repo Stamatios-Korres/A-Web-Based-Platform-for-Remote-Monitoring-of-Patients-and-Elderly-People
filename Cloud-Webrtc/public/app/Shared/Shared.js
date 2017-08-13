@@ -18,7 +18,8 @@ angular.module('Openhealth').service('FriendsAndState',function(){
             var newUser = {
                 username: name,
                 state: state,
-                unread: unread
+                unread: unread,
+                category:null
             };
             console.log(typeof newUser.unread);
             friends.push(newUser);

@@ -1,3 +1,105 @@
-<div>
+<div ng-cloak style="height: 100%">
 
+
+    <!--User uses Online Services for the first time-->
+
+    <div  class="md-whiteframe-11dp" ng-show="UserInformation.FirstTimeOnline===true"  layout-margin layout="column" style="margin: 10% ;height: 300px ;width: 700px" >
+
+        <!--Title-->
+        <h1 flex-offset="10">Subscribe to OpenHealth</h1>
+
+
+        <!--Subscribe Form -> Username,Password,email -->
+
+        <form name="SubsrcibeForm">
+            <div layout-margin>
+                <md-input-container >
+                    <input name='Username' ng-model="UserInformation.username" required  placeholder="Pick a username">
+                    <div ng-messages="SubscribeForm.Username.$error" >
+                        <div ng-message="required">This is required.</div>
+                    </div>
+                </md-input-container>
+                <md-input-container>
+                    <input name='Password' type="password" ng-model="UserInformation.password" required placeholder="Password">
+                    <div ng-messages="SubscribeForm.Password.$error" >
+                        <div ng-message="required">This is required.</div>
+                    </div>
+                </md-input-container>
+                <h4>*In order to use Opeanhealth's Online Service you have to subsribe</h4>
+            </div>
+
+            <!--Hit button subscribe -->
+
+            <div layout-margin  md-disable-backdrop="true">
+                <md-button  type="submit" style="margin-left: 85%; margin-top: 5%" ng-click="UserInformation.SendRequest()" flex-offset="50" md-no-ink class="md-raised  md-primary"  >Subscribe</md-button>
+            </div>
+
+        </form>
+    </div>
+
+        <!--View after user is subscribed to the Service-->
+
+        <div  id="MainPage" style="height: 100%;" layout="row" flex ng-show="UserInformation.FirstTimeOnline===false">
+
+            <!--Online Friends and their State-->
+            <div id="OnlineFriends" flex="20" layout="column" class="md-whiteframe-4dp">
+                <h3 flex-offset="20" > friends</h3>
+                <md-divider  ng-if="!$last"></md-divider>
+                <md-list  layout="column">
+                    <md-list-item style="float:left;" class='md-primary' ng-repeat="temp in UserOnline.friends" flex layout="row">
+                        <md-button  class="active" ng-click="functions.SelectedUser(temp.username)" md-auto-focus layout-margin layout="row">
+                            <span ng-if="temp.unread !==0">{{temp.unread}}</span>
+                            <i class="material-icons">perm_identity</i>
+                            <span>{{temp.username}}</span>
+                        </md-button>
+                        <span ng-if="temp.state=='inactive' "></span>
+                        <span ng-if="temp.state=='active'"><i class="material-icons">cloud_done</i></span>
+
+                    </md-list-item>
+
+                </md-list>
+            </div>
+
+            <!--Information about a Particular User -->
+
+            <div id="UserInfo " flex md-whiteframe="1" layout="column"   ng-show="UserOnline.Selected!=''">
+                <div class="Diagrams" flex></div>
+                <div class='UserOptions' flex="15"  layout-margin  layout="row" >
+                    <div  layout="row">
+                        <md-button ng-click="videoInfo.call(UserOnline.Selected)" md-no-ink  layout-margin class=" md-fab md-accent md-raised btnInfo">
+                            <p><i  class="material-icons">call</i></p>
+                        </md-button>
+                        <md-button md-no-ink  layout-margin  class="md-fab md-accent md-raised btnInfo">
+                            <p><i class="material-icons">equalizer</i></p>
+                        </md-button>
+                    </div>
+                    <div flex></div>
+                    <div layout="row" layout-margin >
+                        <md-button  md-no-ink layout-margin ng-click='delete()' class="md-accent  md-raised btnInfo md-fab" ><p><i class="material-icons"  >delete_forever</i></p></md-button>
+                    </div>
+                </div>
+            </div>
+            <!--Chat with a user -->
+            <div id=Chat flex="25" layout="column"  ng-show="UserOnline.Selected!=''">
+                <md-toolbar style="margin: 1%" md-whiteframe="3"  >
+                    <h1  flex-offset="20"> {{UserOnline.Selected}}</h1>
+                </md-toolbar>
+                <div   style="overflow-x: auto;overflow-y: auto;"  flex id="ChatPlace">
+                    <md-list>
+                        <md-list-item flex ng-repeat="message in messages.arrayofMessages  track by $index" ng-click="messages.show(message.uuid)">
+                            <div class=" md-accent md-list-item-text" layout="column" ng-show="message.direction === 'me' " >
+                                <h1  class="md-subhead">Me:<br><em>{{message.message}}</em></h1>
+                            </div>
+                            <div class=" md-list-item-text"  flex-offset="100" layout="row" ng-show="message.direction !== 'me' " >
+                                <h3  class="md-subhead">{{mainPageInfo.Selected}}:<br><em>{{message.message}}</em></h3>
+                            </div>
+                            <md-divider ></md-divider>
+                        </md-list-item>
+                    </md-list>
+                </div>
+                <input  ng-model='messages.currentMessage' placeholder="Type your message" style="margin: 2%">
+                <md-button class="md-primary md-raised" ng-click='messages.addText(mainPageInfo.Selected)'>Hit me</md-button>
+            </div>
+            <!--ng-controller="ChatController"-->
+        </div>
 </div>

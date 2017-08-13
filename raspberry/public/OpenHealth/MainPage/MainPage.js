@@ -4,13 +4,31 @@
 
 //Global Variables of my App
 
-var ws = new WebSocket('ws:localhost:4000'); //Websocket connections with the Server
+var ws = new WebSocket('ws:localhost:4000'); //Websocket connections with the Local Server
+var wsCloud;
 var Pulse  ;
 var SpO2 ;
 var status = "";
 var notification = [] ;
 var Activenotification ='';
-var Username = null;
+// var Username = null;
+var requests = [];            // Requests that the user hasn't still answered
+var Pending = [];             // Requests that the user has send and haven't been accepted or rejected
+var MultpleUsersResult;
+var ChatUser = '';            // Every Time one User will be available for sending messages. ChatUser defines the Username of this Users
+var Myid;
+var token = null;
+var hasSubscribed =false;
+var my_name;
+
+// A global socket URL  //var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
+var CloudWebsocketUrl ='ws:localhost:3000';
+
+// A global Https URL   // var CloudHttpUrl = 'wss://healthcloud.menychtas.com/node';
+
+var CloudHttpUrl = 'http://localhost:3000';
+
+
 
 var myApp = angular.module("Openhealth", ['AngularMaterial','Notification','SharedServices','ngRoute','Online','Biosignals']);
 
@@ -47,18 +65,26 @@ myApp.config(['$routeProvider',
 ]);
 
 
-myApp.controller('SidenavController',function($scope,$location){
+myApp.controller('SidenavController',function($scope,$location,$rootScope){
     $scope.Selected =1;
+    $scope.OnlinePart = false;
+    $rootScope.$on('Subsribed',function(){
+            console.log('summoned');
+            $scope.OnlinePart = true;
+        });
+
     if($scope.Selected ===1)
         $location.path('Notifications');
 
     $scope.changeClass=function(ev){
         ev.target.style.background = 'grey'
     };
-    $scope.changeNGview= function(number,string){
-        $scope.Selected =number;
+    $scope.changeNGview= function(number,string) {
+        $scope.Selected = number;
+        $scope.OnlinePart =(number === 4 && hasSubscribed);
         $location.path(string);
-
     }
+
 });
+
 

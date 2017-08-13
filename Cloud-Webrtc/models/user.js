@@ -20,6 +20,14 @@ var user = new Schema({
     email:{
         type: String,
         required:true
+    },
+    category:{
+        type:String,
+        enum:[
+            'NormalUser',
+            'RaspberryUser'
+        ],
+        required:true
     }
 });
 

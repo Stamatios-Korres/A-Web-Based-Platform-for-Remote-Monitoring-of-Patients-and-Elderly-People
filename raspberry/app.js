@@ -12,7 +12,7 @@ var notificationDeamon = require('./Controllers/NotificationDeamon').deamon;
 var online = require('./routes/Online');
 var app = express();
 notificationDeamon();
-
+mongoose.Promise = global.Promise; // WTF is this Problem ??
 mongoose.connect('mongodb://127.0.0.1/Raspberry', {
     useMongoClient: true
 });

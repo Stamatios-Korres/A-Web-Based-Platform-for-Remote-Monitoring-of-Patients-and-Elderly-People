@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>OpenHealth</title>
@@ -20,7 +21,7 @@
     <link rel="shortcut icon" type="image/png" href="MainPage/favicon.png"/>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
-
+    <link rel="stylesheet" href="css/GlobalFile.css">
 
 
     <!--DEFINED ON HEADER OTHERWISE SITE GETS PRETTY UNGLY-->
@@ -40,8 +41,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
     <script src="../Biosignals/nv.d3.js"></script>
     <!--<script src="../Biosignals/d3.js"></script>-->
-    <script src="../Biosignals/angular-nvd3.js"> </script>
-
+    <script src="../Biosignals/angular-nvd3.js"></script>
 
 
     <link rel="stylesheet" href="Biosignals/nv.d3.css">
@@ -58,76 +58,195 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-resource.js"></script>
 
 
-
-
-    <!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.min.js"></script>-->
+    <script>
+        $(function () {
+            $("#draggable").draggable({});
+        });
+    </script>
+    <link href="MainPage/mainPage.css" rel="stylesheet">
 </head>
 
-<body ng-app="Openhealth" ng-cloak>
+<body ng-app="Openhealth" ng-cloak ng-controller="OnlineCtrl">
 
-    <div style="height: 100%"  layout="column"  >
-    <!--Toolbar of the App (Fixed)-->
-    <md-toolbar  class="md-whiteframe-10dp" >
-        <div class="md-toolbar-tools" layout-margin layout="row" flex>
-            <div flex>OpenHealth</div>
+    <div style="height: 100%" layout="column"  ng-controller="SidenavController">
+
+     <!--Toolbar of the App (Fixed)-->
+
+    <md-toolbar class="md-whiteframe-9dp" >
+        <div class="md-toolbar-tools" >
+            <i  class="material-icons">favorite_border</i>
+            <div flex="20">
+                <p flex="100" class="md-display-1">OpenHealth</p>
+            </div>
+            <div  ng-show=" OnlinePart === true " flex-offset="20"  layout-align="space-around center" layout="row">
+                <input class="input2 md-whiteframe-2dp" placeholder=" Search for Friends"
+                       ng-model='RequestsSent.target' flex="35" >
+                <md-button id='add' ng-click="RequestsSent.sendRequest()" class="md-raised md-primary">add</md-button>
+
+                <!--Requests Management -->
+                <div layout="row" flex="40" layout-margin>
+                    <md-menu>
+                        <md-button id='RequestInfo' ng-click="$mdMenu.open($event); removeClass();"><i
+                                style='margin-top: 5px' class="material-icons">supervisor_account</i>Requests
+                        </md-button>
+                        <md-menu-content width="4" layout="column">
+
+                            <!--Friend Requests Received-->
+                            <div layout-align="space-around" layout="row">
+                                <i style="margin-left: 5%" class="material-icons">accessibility</i>
+                                <span style="margin:1% " flex-offset="50">New Requests</span>
+                            </div>
+                            <md-divider md-inset></md-divider>
+
+                            <span ng-show='RequestsReceived.Received.length === 0' style="margin: 5%">You have no friend Requests</span>
+                            <md-list>
+                                <md-list-item ng-repeat="newRequest in RequestsReceived.Received">
+                                    <div layout="row" layout-margin layout-align="space-around">
+                                        <strong>{{newRequest}}</strong>
+                                        <md-button ng-click="RequestsReceived.accept(newRequest)"
+                                                   class="md-accent md-raised">Accept
+                                        </md-button>
+                                        <md-button ng-click="RequestsReceived.reject(newRequest)"
+                                                   class="md-accent md-raised ">Reject
+                                        </md-button>
+                                    </div>
+
+                                </md-list-item>
+                            </md-list>
+
+                            <!--Pending Friend Requests-->
+                            <div layout-align="space-around" layout="row">
+                                <i class="material-icons">accessibility</i>
+                                <span style="margin:1% " flex-offset="50">Pending</span>
+                            </div>
+                            <md-divider md-inset></md-divider>
+                            <span ng-show='RequestsSent.sent.length === 0' style="margin: 5%">No Requests Pending</span>
+                            <md-list>
+                                <md-list-item ng-repeat="pending in RequestsSent.sent">
+                                    <div layout-align="space-around" layout="row" layout-margin>
+                                        <div style="margin-right: 10%"> {{pending}}</div>
+                                        <md-button ng-click="RequestsSent.cancel(pending)" style='margin-left: 20%'
+                                                   class="md-accent md-raised">Cancel
+                                        </md-button>
+                                    </div>
+
+                                </md-list-item>
+                            </md-list>
+                        </md-menu-content>
+                    </md-menu>
+                </div>
+
+                <div layout="column">
+                    <md-menu>
+                        <md-button ng-click="$mdMenu.open($event)"><i class="material-icons">account_circle</i>{{username}}
+                        </md-button>
+                        <md-menu-content width="3">
+                            <md-menu-item md-autofocus>
+                                <md-button class="md-primary" md-no-ink md-autofocus layout="row">
+                                    <i class="material-icons">build</i>
+                                    Settings
+                                </md-button>
+                            </md-menu-item>
+                            <md-menu-item>
+                                <md-button ng-click='logout.clean()' class="md-primary" md-no-ink md-autofocus>
+                                    <i class="material-icons">power_settings_new</i>
+                                    Logout
+                                </md-button>
+
+                            </md-menu-item>
+                        </md-menu-content>
+                    </md-menu>
+                </div>
+                <!--User's Account-->
+            </div>
         </div>
     </md-toolbar>
-    <!-- Side Navigation of the App (Fixed) -->
 
-    <div layout="row" class="md-whiteframe-5dp" flex ng-controller="SidenavController">
-        <div flex="15" class="md-whiteframe-1dp" >
-            <md-list flex >
-                <md-list-item >
-                    <h3 >Menu</h3>
-                    <md-divider ></md-divider>
-                </md-list-item>
-                <md-list-item   md-no-ink ng-class="Selected === 1 ? 'Selected':''" ng-click="changeNGview(1,'Notifications')">
-                    <div  class="md-list-item-text" layout="row"  layout-align="space-around center"  >
-                        <i class="material-icons">alarm</i>
-                        <div >
-                            Notifications
-                         </div>
-                    </div>
-                    <md-divider ></md-divider>
-                </md-list-item>
-                <md-list-item ng-class="Selected === 2 ? 'Selected':''" md-no-ink ng-click="changeNGview(2,'Biosignals')">
-                    <div  class="md-list-item-text" layout="row"  layout-align="space-around center" >
-                        <i class="material-icons">favorite_border</i>
-                        <div>
-                            Biosignals
-                        </div>
-                    </div>
-                    <md-divider ></md-divider>
-                </md-list-item>
+        <!-- Side Navigation of the App (Fixed) -->
 
-                <md-list-item ng-class="Selected === 4 ? 'Selected':''"  md-no-ink ng-click="changeNGview(4,'Online')">
-                    <div class="md-list-item-text" layout="row"  layout-align="space-around center" >
-                        <i class="material-icons">accessibility</i>
-                        <div>Server-Online</div>
-                    </div>
-                    <md-divider ></md-divider>
-                </md-list-item>
-                <md-list-item   ng-class="Selected === 5 ? 'Selected':''"md-no-ink  ng-click="changeNGview(5,'')">
-                    <div  class="md-list-item-text" layout="row"  layout-align="space-around center" >
-                        <i class="material-icons">settings</i>
-                        <div>
-                            Settings</div>
+        <div layout="row" class="md-whiteframe-5dp" flex   ng-controller="Video-Controller">
+
+            <div flex="15" class="md-whiteframe-1dp">
+                <md-list flex>
+                    <md-list-item>
+                        <h3>Menu</h3>
+                        <md-divider></md-divider>
+                    </md-list-item>
+                    <md-list-item md-no-ink ng-class="Selected === 1 ? 'Selected':''"
+                                  ng-click="changeNGview(1,'Notifications')">
+                        <div class="md-list-item-text" layout="row" layout-align="space-around center">
+                            <i class="material-icons">alarm</i>
+                            <div>
+                                Notifications
+                            </div>
                         </div>
-                    <md-divider ></md-divider>
-                </md-list-item>
-            </md-list>
+                        <md-divider></md-divider>
+                    </md-list-item>
+                    <md-list-item ng-class="Selected === 2 ? 'Selected':''" md-no-ink
+                                  ng-click="changeNGview(2,'Biosignals')">
+                        <div class="md-list-item-text" layout="row" layout-align="space-around center">
+                            <i class="material-icons">favorite_border</i>
+                            <div>
+                                Biosignals
+                            </div>
+                        </div>
+                        <md-divider></md-divider>
+                    </md-list-item>
+
+                    <md-list-item ng-class="Selected === 4 ? 'Selected':''" md-no-ink ng-click="changeNGview(4,'Online')">
+                        <div class="md-list-item-text" layout="row" layout-align="space-around center">
+                            <i class="material-icons">accessibility</i>
+                            <div>Server-Online</div>
+                        </div>
+                        <md-divider></md-divider>
+                    </md-list-item>
+                    <md-list-item ng-class="Selected === 5 ? 'Selected':''" md-no-ink ng-click="changeNGview(5,'')">
+                        <div class="md-list-item-text" layout="row" layout-align="space-around center">
+                            <i class="material-icons">settings</i>
+                            <div>
+                                Settings
+                            </div>
+                        </div>
+                        <md-divider></md-divider>
+                    </md-list-item>
+                </md-list>
+             </div>
+
+            <!--Video floating div-->
+
+            <div md-whiteframe="15" id='draggable'  class="ui-widget-content"  ng-cloak ng-show=" videoInfo.status === 'open' ">
+                <div   class="flexChild" id="camera-container" layout="column"  >
+
+                    <div class="camera-box"   flex >
+                        <video id="local_video"  autoplay muted></video>
+                        <video id="received_video" autoplay ></video>
+                    </div>
+                    <md-toolbar  style="height: 15px"  layout="row" layout-align="space around" >
+                        <md-button    ng-show='videoInfo.Type === "Outgoing"  &&  videoInfo.InCall === false ' ng-click="videoInfo.cancelCall()" layout-margin class=" md-raised md-primary"> Cancel </md-button>
+                        <md-button    ng-show='videoInfo.Type === "Closed"    &&  videoInfo.InCall === false ' ng-click="videoInfo.closeScreen()"   layout-margin class="md-raised md-primary">Close Screen</md-button>
+                        <md-button    ng-show='videoInfo.Type === "Incoming"  &&  videoInfo.InCall === false' ng-click="videoInfo.acceptCall()" layout-margin style='background-color: #4cae4c' class=" md-raised ">Accept </md-button>
+                        <md-button    ng-show='videoInfo.Type === "Incoming"  &&  videoInfo.InCall === false' ng-click="videoInfo.rejectCall()" layout-margin class="md-warn md-raised">Reject</md-button>
+                        <md-button    ng-show='videoInfo.InCall === true' ng-click="videoInfo.hangUp()" layout-margin class=" md-raised md-primary">Hang-up</md-button>
+                        <h1 class="md-title" >{{videoInfo.message}}</h1>
+                    </md-toolbar>
+                </div>
+            </div>
+
+            <div flex ng-view ng-controller="NotificationController"></div>
         </div>
-         <div  flex ng-view ng-controller="NotificationController"></div>
+
+
     </div>
 
 
-</div>
+
+
     <script src="/MainPage/MainPage.js"></script>
     <script src="Online/OnlineController.js"></script>
     <script src="Biosignals/BiosignalsController.js"></script>
     <script src="/javascripts/AngularMaterial.js"></script>
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="MainPage/mainPage.css" rel="stylesheet">
-<script src='/javascripts/bootstrap.min.js'></script>
+
+    <script src='/javascripts/bootstrap.min.js'></script>
 </body>
 </html>

@@ -7,16 +7,18 @@ var router = express.Router();
 var user = require('../models/user');
 var relationship = require('../models/friends');
 var getToken = require('../controllers/oauth2orize').token;
+
 /* GET home page. */
 
 
 router.post('/', function (req, res, next) {
-    console.log('Successfully received subscribe');
+    console.log('Received Subscribe Application ');
         var newUser = new user(
             {
                 username: req.body.username,
                 password: req.body.password,
-                email:req.body.email
+                email:req.body.email,
+                category: req.body.category
             });
         console.log(newUser);
         var Relationship = new relationship({
@@ -37,9 +39,7 @@ router.post('/', function (req, res, next) {
                     })
                 }
             });
-        //console.log('Ready to create Token ');
-        }
-    ,getToken);
+        },getToken);
 
 
 module.exports = router;
