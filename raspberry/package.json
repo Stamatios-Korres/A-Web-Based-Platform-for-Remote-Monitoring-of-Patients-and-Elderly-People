@@ -9,6 +9,7 @@
     "angular-nvd3": "^1.0.9",
     "body-parser": "~1.17.1",
     "cookie-parser": "~1.4.3",
+    "cors": "^2.8.4",
     "d3": "^4.10.0",
     "debug": "~2.6.3",
     "express": "~4.15.2",

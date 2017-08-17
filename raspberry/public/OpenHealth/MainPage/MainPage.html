@@ -21,7 +21,6 @@
     <link rel="shortcut icon" type="image/png" href="MainPage/favicon.png"/>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
-    <link rel="stylesheet" href="css/GlobalFile.css">
 
 
     <!--DEFINED ON HEADER OTHERWISE SITE GETS PRETTY UNGLY-->
@@ -42,7 +41,6 @@
     <script src="../Biosignals/nv.d3.js"></script>
     <!--<script src="../Biosignals/d3.js"></script>-->
     <script src="../Biosignals/angular-nvd3.js"></script>
-
 
     <link rel="stylesheet" href="Biosignals/nv.d3.css">
     <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -162,9 +160,11 @@
         </div>
     </md-toolbar>
 
-        <!-- Side Navigation of the App (Fixed) -->
+
 
         <div layout="row" class="md-whiteframe-5dp" flex   ng-controller="Video-Controller">
+
+            <!-- Side Navigation of the App (Fixed) -->
 
             <div flex="15" class="md-whiteframe-1dp">
                 <md-list flex>
@@ -177,7 +177,7 @@
                         <div class="md-list-item-text" layout="row" layout-align="space-around center">
                             <i class="material-icons">alarm</i>
                             <div>
-                                Notifications
+                                Reminders
                             </div>
                         </div>
                         <md-divider></md-divider>
@@ -218,6 +218,10 @@
                 <div   class="flexChild" id="camera-container" layout="column"  >
 
                     <div class="camera-box"   flex >
+                        <div id='RealTime' ng-show='RealTime.show === true' class="ui-widget-content ">
+                            Heart Rate: {{RealTime.heart}}<br>
+                            Blood Saturation:{{RealTime.blood}}<br>
+                        </div>
                         <video id="local_video"  autoplay muted></video>
                         <video id="received_video" autoplay ></video>
                     </div>

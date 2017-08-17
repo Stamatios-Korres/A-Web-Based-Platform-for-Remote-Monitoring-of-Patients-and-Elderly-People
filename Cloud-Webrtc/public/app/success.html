@@ -5,6 +5,7 @@
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href='css/main-page.css'/>
+    <meta charset="utf-8">
     <!-- jQuerry -->
     <script src="js/jquery.js"></script>
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
@@ -51,6 +52,20 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-route.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-resource.js"></script>
 
+    <!--Libraries for Charts (nvd3 module will be Used) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
+    <script src="../Libraries/nv.d3.js"></script>
+    <!--<script src="../Biosignals/d3.js"></script>-->
+    <script src="../Libraries/angular-nvd3.js"></script>
+
+    <link rel="stylesheet" href="Libraries/nv.d3.css">
+    <script src=" https://code.highcharts.com/highcharts.js "></script>
+    <!---->
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.min.css"/>-->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>-->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.min.js"></script>-->
+    <!--<script src="https://rawgit.com/krispo/angular-nvd3/v1.0.4/dist/angular-nvd3.js"></script>-->
+
 
 </head>
 
@@ -59,10 +74,14 @@
 <body ng-app="Openhealth" ng-controller="Video-Controller" ng-cloak>
 
 <!--Video floating div-->
-<div md-whiteframe="15" id='draggable'  class="ui-widget-content"  ng-cloak ng-show="videoInfo.status === 'open' ">
-    <div   class="flexChild" id="camera-container" layout="column"  >
+<div md-whiteframe="15" id='draggable'    class="ui-widget-content"   ng-cloak ng-show="videoInfo.status === 'open' ">
+       <div   class="flexChild" id="camera-container" layout="column"  >
 
-        <div class="camera-box"   flex >
+           <div class="camera-box"   flex >
+               <div id='RealTime' ng-show='RealTime.show === true' class="ui-widget-content ">
+                   Heart Rate: {{RealTime.heart}}<br>
+                   Blood Saturation:{{RealTime.blood}}<br>
+               </div>
             <video id="local_video"  autoplay muted></video>
             <video id="received_video" autoplay ></video>
         </div>
@@ -76,6 +95,7 @@
         </md-toolbar>
 
     </div>
+
 </div>
 
 <div id="myView"  ng-view  ></div>

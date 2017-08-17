@@ -11,6 +11,8 @@ var notification = require('./routes/Notifications');
 var notificationDeamon = require('./Controllers/NotificationDeamon').deamon;
 var online = require('./routes/Online');
 var app = express();
+const cors = require('cors');
+
 notificationDeamon();
 mongoose.Promise = global.Promise; // WTF is this Problem ??
 mongoose.connect('mongodb://127.0.0.1/Raspberry', {
@@ -34,7 +36,6 @@ app.use('/biosignal', biosignal);
 app.use('/notification', notification);
 app.use('/online', online);
 app.use(express.static(path.join(__dirname, 'public/OpenHealth')));
-
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

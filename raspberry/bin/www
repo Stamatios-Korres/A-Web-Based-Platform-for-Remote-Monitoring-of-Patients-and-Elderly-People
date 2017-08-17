@@ -8,7 +8,6 @@ var app = require('../app');
 var debug = require('debug')('raspberry:server');
 var http = require('http');
 var wss = require('../WebsocketServer/Websocket').initialize;
-var wssClient = require('../WebsocketServer/ClientWebsocket').initialize;
 
 /**
  * Get port from environment and store in Express.

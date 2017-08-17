@@ -1,7 +1,7 @@
 <div  layout="column" style="height:100%; width: 100%;">
 
     <!--ToolBar of mainPage ToolbarController is Responsible-->
-    <md-toolbar class="md-whiteframe-9dp"  color="primary" ng-controller="ToolbarController" layout-align="space-around center">
+    <md-toolbar class="md-whiteframe-9dp"  ng-controller="ToolbarController" layout-align="space-around center">
         <div class="md-toolbar-tools" layout-margin layout="row">
             <i flex-offset="15" class="material-icons">favorite_border</i>
             <div  flex="20">
@@ -89,14 +89,13 @@
             <h3 flex-offset="20" md-title > friends</h3>
             <md-divider  ng-if="!$last"></md-divider>
             <md-list  layout="column">
-                <md-list-item style="float:left;" class='md-primary' ng-repeat="temp in mainPageInfo.friends" flex layout="row">
-                    <md-button  class="active" ng-click="SelectedUser(temp.username)" md-auto-focus layout-margin layout="row">
+                <md-list-item style="float:left;" class='md-primary' ng-repeat="temp in mainPageInfo.friends" ng-click="SelectedUser(temp.username)"  ng-class="mainPageInfo.Selected === temp.username ? 'Selected':''" flex layout="row"  layout-align="space-around center" md-no-ink>
+                    <div style='left: 0;width:70px' class="md-list-item-text" layout="row" layout-align="space-around center">
                         <span ng-if="temp.unread !==0">{{temp.unread}}</span>
                         <i class="material-icons">perm_identity</i>
                             <span>{{temp.username}}</span>
-                    </md-button>
-                    <span ng-if="temp.state=='inactive' "></span>
-                    <span ng-if="temp.state=='active'"><i class="material-icons">cloud_done</i></span>
+                    </div>
+                    <div  flex-offset="50" ng-class="temp.state=='active'?'Online':''"></div>
 
                 </md-list-item>
 
@@ -105,13 +104,29 @@
 
         <!--Information about a Particular User -->
         <div id="UserInfo " flex md-whiteframe="1" layout="column" ng-show="mainPageInfo.Selected!=''">
-            <div class="Diagrams" flex></div>
+
+            <!--Here will the Charts will appear-->
+            <div flex style="margin-top:10%" layout="column">
+                <nvd3   options='chart.options' api='chart.api' events="chart.event" data='chart.data' ></nvd3>
+                <div style="padding: 20px">
+                    <md-input-container ng-show="Biosignals.dataArrived === true">
+                        <md-select flex-offset="90" placeholder="Select Range" ng-init="Biosignals.range = 24 " md-on-close="Biosignals.refresh()"  ng-model="Biosignals.range"  style="min-width: 200px;">
+                            <md-option ng-value=24>24Hours</md-option>
+                            <md-option ng-value=3*24>Last 3 Days</md-option>
+                            <md-option ng-value=7*24>Last Week</md-option>
+                            <md-option ng-value=30*24>Last Month</md-option>
+                            <md-option ng-value="All">All</md-option>
+                        </md-select>
+                    </md-input-container>
+                </div>
+            </div>
+
             <div class='UserOptions' flex="15"  layout-margin  layout="row" >
                 <div  layout="row">
                     <md-button ng-click="videoInfo.call(mainPageInfo.Selected)" md-no-ink  layout-margin class=" md-fab md-accent md-raised btnInfo">
                         <p><i  class="material-icons">call</i></p>
                     </md-button>
-                    <md-button md-no-ink  layout-margin  class="md-fab md-accent md-raised btnInfo">
+                    <md-button ng-disabled="Biosignals.Requesting === true" md-no-ink ng-click="requestBiosignals(mainPageInfo.Selected)" layout-margin  class="md-fab md-accent md-raised btnInfo">
                         <p><i class="material-icons">equalizer</i></p>
                     </md-button>
                 </div>
@@ -125,11 +140,11 @@
         <!--Chat with a user -->
         <div id=Chat flex="25" layout="column" ng-controller="ChatController" ng-show="mainPageInfo.Selected!=''">
             <md-toolbar style="margin: 1%" md-whiteframe="3"  >
-                <h1 md-title flex-offset="20"> {{mainPageInfo.Selected}}</h1>
+                <h3  flex-offset="20"> {{mainPageInfo.Selected}}</h3>
             </md-toolbar>
-            <div   style="overflow-x: auto;overflow-y: auto;"  flex id="ChatPlace">
+            <div   style="overflow-x: auto;overflow-y: auto;"  flex id="mydiv">
                     <md-list>
-                        <md-list-item flex ng-repeat="message in messages.arrayofMessages  track by $index" ng-click="messages.show(message.uuid)">
+                        <md-list-item flex ng-repeat="message in messages.arrayofMessages  track by $index"  ng-click="Dialog.showConfirm(message.uuid)">
                             <div class=" md-accent md-list-item-text" layout="column" ng-show="message.direction === 'me' " >
                                 <h1  class="md-subhead">Me:<br><em>{{message.message}}</em></h1>
                             </div>
@@ -140,9 +155,12 @@
                         </md-list-item>
                     </md-list>
             </div>
-             <input  ng-model='messages.currentMessage' placeholder="Type your message" style="margin: 2%">
-            <md-button class="md-primary md-raised" ng-click='messages.addText(mainPageInfo.Selected)'>Hit me</md-button>
+            <div layout="row">
+             <input id="TextBoxId" flex ng-model='messages.currentMessage' placeholder="  Insert your message"  style="margin: 2%">
+            <md-button id='linkadd' ng-show="" class="md-primary md-raised" ng-click='messages.addText(mainPageInfo.Selected)'>Hit me</md-button>
+            </div>
         </div>
     </div>
+
 
 </div>

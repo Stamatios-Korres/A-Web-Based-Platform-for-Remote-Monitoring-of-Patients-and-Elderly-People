@@ -26,14 +26,10 @@ angular.module('Openhealth').service('FriendsAndState',function(){
         },
         newmessage:function(name){
             var i;
-            console.log("Let's see the problem");
             for ( i = 0; i < friends.length; i++) {
                 if(friends[i].username === name){
-                    console.log("Ok found the User");
                     var times = friends[i].unread;
-                    console.log(typeof times);
                         if(typeof times === 'number'){
-                            console.log('Ok it has increased since then');
                             times++;
                             friends[i].unread = times;
                         }
@@ -159,6 +155,24 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             console.log(response.data)
         }
     };
+    services.GetBiosignals = function(name,callback){
+        var string = 'Bearer ' + token;
+        var message = {
+            sender: my_name,
+            target: name
+        };
+        $http({
+            headers: {
+                'Authorization': string
+            },
+            method: 'get',
+            url: 'biosignals',
+            params: message
+        }).then(function successCallback(response) {
+            console.log(response.data);
+            callback(response.data);
+        })
+    };
     services.requestReply = function (name, type, callback) {
         var string = 'Bearer ' + token;
         var message = {
@@ -242,7 +256,7 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
     return {services: services, requests: requests};
 });
 
-angular.module('Openhealth').service('VideoServices',function($rootScope){
+angular.module('Openhealth').service('VideoServices',function($timeout,$rootScope){
     var response;
     var mediaConstraints = {
         audio: true, // We want an audio track
@@ -266,6 +280,7 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
     var Incall = false;
     var PeerDisconnectedWhileInCall = false;
     var busy ='';
+    var bufferIcecandidates =[];
 
     //Should get rid of those -> Problem with spd !!
     var i = 0;
@@ -298,6 +313,7 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
         MuteFlag = false;
         Incall = false;
         target = null;
+        bufferIcecandidates =[];
         flag=false;
         i=0;
     }
@@ -415,7 +431,22 @@ angular.module('Openhealth').service('VideoServices',function($rootScope){
         CloseVideo();
     };
     services.addIceCandiate = function(IceCandidate){
-        MyPeerConnection.addIceCandidate(IceCandidate);
+        console.log('Adding new Ice candidate');
+            if(MyPeerConnection.remoteDescription) {
+                if(bufferIcecandidates.length>0){ // Make sure Remote and Local Description have been set
+                    for(var candidates=0;candidates<bufferIcecandidates.length;candidates++) {
+                        MyPeerConnection.addIceCandidate(bufferIcecandidates[candidates]);
+                        bufferIcecandidates.splice(candidates,1);
+                    }
+                    MyPeerConnection.addIceCandidate(IceCandidate);
+                }
+                else{
+                    MyPeerConnection.addIceCandidate(IceCandidate);
+                }
+            }
+            else{
+                bufferIcecandidates.push(IceCandidate);
+            }
     };
     services.getPeer = function () {
         return !!MyPeerConnection; // Auto Changed by compiler
@@ -560,9 +591,9 @@ angular.module('Openhealth').service('ChatServices',function($rootScope,FriendsA
     services.newfriend = function(username){
         var object = {
             name: username,
+            askedServer: false,
             Chat: []
         };
-        console.log('New friend was added');
         ArraysofTexts.push(object);
     };
     services.SelectUser = function(username,callback){
@@ -610,8 +641,6 @@ angular.module('Openhealth').service('ChatServices',function($rootScope,FriendsA
                     direction:Sender,
                     uuid:uuid
                 };
-                if(Sender  !== 'me')
-                    console.log(msg);
                 ArraysofTexts[i].Chat.push(msg);
                 break;
             }
@@ -638,7 +667,26 @@ angular.module('Openhealth').service('ChatServices',function($rootScope,FriendsA
     return services;
 });
 
-angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoServices,ChatServices, $timeout, $rootScope, FriendsAndState, $window){
+angular.module('Openhealth').service('RealTimeService',function(){
+    var services = {};
+    var Measurement ={
+        heart:null,
+        blood:null
+    };
+    services.getMeasurement = function(){
+        return Measurement;
+    };
+    services.setMeasurement = function(heart,blood){
+        Measurement.heart = heart;
+        Measurement.blood = blood;
+    };
+    return services;
+
+});
+
+
+
+angular.module('Openhealth').service('WebsocketService',function(RealTimeService,BiosignalsService,$mdToast,VideoServices,ChatServices, $timeout, $rootScope, FriendsAndState, $window){
     var services = {};
     services.makeVideoCall = function (message) {
         message = JSON.stringify(message);
@@ -698,14 +746,7 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
                     }
                     case 'RequestReply':{
                         if(data.decision === 'reject') {
-                            console.log(data);
-                            var k=0;
-                            for (k = 0; k < Pending.length; k++) {
-                                if (Pending[k] === data.source)
-                                    break;
-                            }
-                            Pending.splice(k, 1);
-                            $rootScope.$emit('UpdateRequest');
+                            console.log('Impossible')
                         }
                         else if (data.decision === 'accept') {
                             var string = data.source + ' has accepted your Request';
@@ -716,6 +757,14 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
                             FriendsAndState.addfriends(data.source,data.state,0);
                             $rootScope.$emit('WebsocketNews');
                         }
+                        for (var k = 0; k < Pending.length; k++) {
+                            if (Pending[k] === data.source) {
+                                Pending.splice(k, 1);
+                                break;
+                            }
+                        }
+                        $rootScope.$emit('UpdateRequest');
+
                         break;
                     }
                     case 'NewFriend':{
@@ -762,8 +811,6 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
                         }
                         break;
                     case 'video-response': // With video response we define if we accept call or reject it
-                        console.log("Answer is:");
-                        console.log(data);
                         VideoServices.setTargetId(data.sourceId);
                         VideoServices.setMyId(data.targetId);
                         //console.log('his response was ' + data.answer);
@@ -771,11 +818,11 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
                         $rootScope.$emit('Video-Response');
                         break;
                     case 'video-offer':
-                        console.log(data.sdp);
                         VideoServices.SetSdp(data.sdp);
                         $rootScope.$emit('Video-offer');
                         break;
                     case 'new-ice-candidate':
+                        console.log(data.candidate);
                         var candidate = new RTCIceCandidate(data.candidate);
                         VideoServices.addIceCandiate(candidate);
 
@@ -793,6 +840,7 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
                         $rootScope.$emit('busy');
                         break;
                     case 'cancel':
+
                         if(VideoServices.getTarget() === data.source) { // Just for safety reasons
 
                                 console.log('Ok we are here ');
@@ -831,6 +879,17 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
                         $rootScope.$emit('NewMessage');
                         break;
                     }
+
+                    // Online - Biosignals
+                    case 'BiosingalAnswer':
+                        BiosignalsService.addNewUser(data.source,data.data.blood_saturation,data.data.heart_rate);
+                        $rootScope.$emit('BiosignalAnswer');
+                        break;
+                    case 'RealTime':
+                        console.log(data.data.heart,data.data.blood);
+                        RealTimeService.setMeasurement(data.data.heart,data.data.blood);
+                        $rootScope.$emit('RealTime');
+                        break;
                     default:
                         console.log('Unkown message');
                 }
@@ -852,7 +911,14 @@ angular.module('Openhealth').service('WebsocketService',function($mdToast,VideoS
     }
 
         //Services responsible for event handling for Video functions
-
+    services.RealTime = function($scope,callback){
+        var handler = $rootScope.$on('RealTime',callback);
+        $scope.$on('$destroy', handler);
+    };
+    services.BiosignalAnswer = function($scope,callback){
+        var handler = $rootScope.$on('BiosignalAnswer',callback);
+        $scope.$on('$destroy', handler);
+    };
     services.UpdateRequest =function($scope,callback){
         var handler = $rootScope.$on('UpdateRequest',callback);
         $scope.$on('$destroy', handler);

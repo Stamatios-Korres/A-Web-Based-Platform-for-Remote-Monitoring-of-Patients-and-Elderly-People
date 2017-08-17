@@ -5,12 +5,14 @@
 //Global Variables of my App
 
 var ws = new WebSocket('ws:localhost:4000'); //Websocket connections with the Local Server
-var wsCloud;
 var Pulse  ;
 var SpO2 ;
 var status = "";
 var notification = [] ;
 var Activenotification ='';
+var hasSubscribed =false;
+
+
 // var Username = null;
 var requests = [];            // Requests that the user hasn't still answered
 var Pending = [];             // Requests that the user has send and haven't been accepted or rejected
@@ -18,11 +20,11 @@ var MultpleUsersResult;
 var ChatUser = '';            // Every Time one User will be available for sending messages. ChatUser defines the Username of this Users
 var Myid;
 var token = null;
-var hasSubscribed =false;
 var my_name;
+var wsCloud;
 
 // A global socket URL  //var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
-var CloudWebsocketUrl ='ws:localhost:3000';
+var CloudWebsocketUrl = 'ws:localhost:3000';
 
 // A global Https URL   // var CloudHttpUrl = 'wss://healthcloud.menychtas.com/node';
 

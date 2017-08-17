@@ -4,12 +4,12 @@
 
 var express = require('express');
 var router = express.Router();
-module.exports = router;
+var user = require('../models/user');
 var passport = require('passport');
+
 var getToken = require('../controllers/oauth2orize').token;
 var path = require('path');
 var login = require('../controllers/Strategies').login;
-var user = require('../models/user');
 var relationship = require('../models/friends');
 var message = require('../models/messages');
 var conversation = require('../models/conversation');
@@ -18,7 +18,6 @@ var wwsSentRequest = require('../WebSocketServer/WebsocketServer').SentRequest;
 var wwsCancelRequest = require('../WebSocketServer/WebsocketServer').CancelRequest;
 var wwsRequestReply = require('../WebSocketServer/WebsocketServer').RequestReply;
 var wwsFriendsDelete = require('../WebSocketServer/WebsocketServer').FriendsDelete;
-
 
 //Main page of my SPA
 router.get('/login', function (req, res, next) {
@@ -57,18 +56,19 @@ router.post('/requestReply', passport.authenticate('bearer', {session: false}), 
 
 //Return friends of user
 router.get('/GetFriends', passport.authenticate('bearer', {session: false}), function (req, res, next) {
-    // console.log(req.user);
     relationship.findOne({user: req.user.username}, function (err, result) {
         if (err)
             res.send({'message': err});
-        else
+        else {
+            // var friendsCategory = FindCategoryForEachFriend(result.friends);
             res.send(result.friends);
+        }
 
     });
 });
 
 //User gives credential and I return a bearer token
-router.post('/login', getToken);
+router.post('/login',getToken);
 
 //Send back to user the requests he has not got any answer
 router.get('/Pending', passport.authenticate('bearer', {session: false}), function (req, res, next) {
@@ -382,3 +382,5 @@ function CreateConversation(sender,target,answer,callback) {
         }
     })
 }
+
+module.exports = router;

@@ -43,7 +43,8 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
                         client_id: 'myApp',
                         client_secret: 'hmmy1994',
                         username: $scope.login.username,
-                        password: $scope.login.password
+                        password: $scope.login.password,
+                        category:'NormalUser'
                     }
                 }).then(
                     function (response) {
@@ -54,25 +55,27 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
                         localStorage.setItem('token', response.data.access_token);
                         token = localStorage.getItem('token');
                         my_name = $scope.login.username;
-                        ws = new WebSocket(CloudWebsocketUrl);
+
                         AjaxServices.services.GetFriends(function (response) {
                             for (var i = 0; i < response.length; i++) {
                                 FriendsAndState.addfriends(response[i], 'inactive', 0);
                             }
+                            ws = new WebSocket(CloudWebsocketUrl);
                             WebsocketService.InitWebsocket();
                             ChatServices.createArray();
-                        });
-                        ws.onopen = function InitWebsocket(e) {
-                            console.log('Initializing Connection with Server ' + my_name);
-                            message = {
-                                type: 'init',
-                                token: localStorage.getItem('token')
+                            ws.onopen = function InitWebsocket(e) {
+                                console.log('Initializing Connection with Server ' + my_name);
+                                message = {
+                                    type: 'init',
+                                    token: localStorage.getItem('token')
+                                };
+                                message = JSON.stringify(message);
+                                ws.send(message);
                             };
-                            message = JSON.stringify(message);
-                            ws.send(message);
+                        });
 
-                        };
                         $location.path('main-page');
+
                     }
                 }, //Succesfull Login
                     function errorCallback(response) {
@@ -111,7 +114,6 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
                         grant_type: 'password',
                         client_id: 'myApp',
                         client_secret: 'hmmy1994',
-                        category:'NormalUser',
                         username: $scope.subscribe.username,
                         password: $scope.subscribe.password,
                         email: $scope.subscribe.email,
@@ -158,6 +160,14 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
                 console.log("We have some kind of problem");
 
         }
-    }
+    };
+
+    $(document).ready(function(){
+        $('#password').keypress(function(e){
+            if(e.keyCode===13) {
+                $('#login').click();
+            }
+        });
+    });
 
 });

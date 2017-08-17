@@ -33,9 +33,7 @@ exports.delete = function(source,Userid,uuid,target){
     onlineList.sendAllOthers(message2);
 }; // Delete a Chat message Realt time
 exports.initialize = function (server) {
-    wss = new Wss({
-        httpServer: server
-    });
+    wss = new Wss({ httpServer: server });
     console.log("creating new list");
     wss.on('request', function (request) {
         var connection = request.accept(null, request.origin);
@@ -64,12 +62,9 @@ exports.initialize = function (server) {
                                             connection.send(JSON.stringify({message: error}));
                                         }
                                         else {
-                                            //console.log('Result outside Callback :');
-                                            //console.log(result2);
                                             var message = {type: 'onlineUsers',id:id,online: result2};
-                                            message = JSON.stringify(message);
                                             console.log('I did send the Online Users');
-                                            connection.send(message); // for each online user send that this particular user has come online
+                                            connection.send(JSON.stringify(message)); // for each online user send that this particular user has come online
                                         }
                                     });
                                 }
@@ -139,6 +134,19 @@ exports.initialize = function (server) {
                         });
                         break;
                     }
+
+                    //Biosignals - messages
+
+                    case 'RequestBiosignals':
+                        data.sourceId = onlineList.findUser(connection);
+                        onlineList.Send(data);
+                        break;
+                    case'BiosingalAnswer':
+                        onlineList.SendBasedonId(data);
+                        break;
+                    case 'RealTime':
+                        onlineList.SendBasedonId(data);
+                        break;
                     default :
                         console.log("unknown type");
                 }
@@ -273,7 +281,6 @@ OnlineList.prototype.findUser = function (connection) {
             break;
         }
     }
-    console.log(User.Id);
     return User.Id;
 };
 OnlineList.prototype.SendResultToAll = function (connection, forwardedMessage) {

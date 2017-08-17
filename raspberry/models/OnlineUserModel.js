@@ -11,11 +11,7 @@ var User = new Schema({
         type:'String',
         required:true
     },
-    ApprovedUsers:[{
-        username:{
-            type:'String'
-        }
-    }]
+    ApprovedUsers:[]
 });
 
 module.exports= mongoose.model('User',User);

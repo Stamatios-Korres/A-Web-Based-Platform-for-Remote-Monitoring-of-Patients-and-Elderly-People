@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var biosignal = require('../models/biosignal');
 const uuidv1 = require('uuid/v1');
+var user = require('../models/OnlineUserModel');
 
 
 router.post('/heartUpdate',function(req,res,next){
@@ -51,24 +52,107 @@ router.delete('/heartdelete',function(req,res,next){
    })
 });
 
-router.get('/heartbiosignals',function(req,res,next){
+router.get('/bloodSaturationbiosignals',function(req,res,next){
     var Result = [];
+    var hours =req.query.range;
     try {
-        biosignal.find({type: 'heart_rate'}, function (err, result) {
-            if(err)
-                res.send({message:err});
-            else {
-                if(!result){
-                    res.send({message:'Empty Db'});
+        if(isNaN(hours)) {
+            biosignal.find({$query: {type: 'blood_saturation'}, $orderby: {date_taken: 1}}, function (err, result) {
+                if (err) {
+                    console.log('Εrror blood is ' + err);
+                    res.send({message: err});
                 }
                 else {
-                    for (var i = 0; i < result.length; i++) {
-                        Result.push([result[i].measurement.value, result[i].date_taken.getTime(),result[i].uniqueId, result[i].source]);
+                    if (!result) {
+                        res.send({message: 'Empty Db'});
                     }
-                    res.send({message: 'Ok', Result: Result});
+                    else {
+                        var i;
+                        for (i = 0; i < result.length; i++) {
+                            Result.push([result[i].measurement.value, result[i].date_taken.getTime(), result[i].uniqueId, result[i].source]);
+                        }
+                        res.send({message: 'Ok', Result: Result});
+                    }
                 }
-            }
-        })
+            })
+        }
+        else {
+            console.log("We have number");
+            var newDate = new Date().getTime();
+            var acceptedValues = newDate -(parseInt(hours)  * 60000 *60);
+            biosignal.find({$query: {type: 'blood_saturation',date_taken:{$gte : new Date(acceptedValues)}}, $orderby: {date_taken: 1}}, function (err, result) {
+                if (err) {
+                    console.log('Εrror blood is ' + err);
+                    res.send({message: err});
+                }
+                else {
+                    if (!result) {
+                        res.send({message: 'Empty Db'});
+                    }
+                    else {
+                        var i;
+                        for (i = 0; i < result.length; i++) {
+                            Result.push([result[i].measurement.value, result[i].date_taken.getTime(), result[i].uniqueId, result[i].source]);
+                        }
+                        res.send({message: 'Ok', Result: Result});
+                    }
+                }
+
+            })
+
+        }
+    }
+    catch(e){
+        console.log(e);
+    }
+});
+
+router.get('/heartbiosignals',function(req,res,next){
+    var Result = [];
+    var hours =req.query.range;
+    try {
+        if (isNaN(hours)) {
+            biosignal.find({$query: {type: 'heart_rate'}, $orderby: {date_taken: 1}}, function (err, result) {
+                if (err) {
+                    console.log('Εrror heart is ' + err);
+                    res.send({message: err});
+                }
+                else {
+                    if (!result) {
+                        res.send({message: 'Empty Db'});
+                    }
+                    else {
+                        for (var i = 0; i < result.length; i++) {
+                            Result.push([result[i].measurement.value, result[i].date_taken.getTime(), result[i].uniqueId, result[i].source]);
+                        }
+                        res.send({message: 'Ok', Result: Result});
+                    }
+                }
+            })
+        }
+        else {
+            var newDate = new Date().getTime();
+            var acceptedValues = newDate -(parseInt(hours)  * 60000 *60);
+            biosignal.find({$query: {type: 'heart_rate',date_taken:{$gte : new Date(acceptedValues)}}, $orderby: {date_taken: 1}}, function (err, result) {
+                if (err) {
+                    console.log('Εrror heart_rate is ' + err);
+                    res.send({message: err});
+                }
+                else {
+                    if (!result) {
+                        res.send({message: 'Empty Db'});
+                    }
+                    else {
+                        var i;
+                        for (i = 0; i < result.length; i++) {
+                            Result.push([result[i].measurement.value, result[i].date_taken.getTime(), result[i].uniqueId, result[i].source]);
+                        }
+                        res.send({message: 'Ok', Result: Result});
+                    }
+                }
+
+            })
+        }
     }
     catch(e){
         console.log(e);
@@ -96,31 +180,36 @@ router.post('/BloodSaturationInsert',function(req,res,next){
     });
 });
 
-router.get('/bloodSaturationbiosignals',function(req,res,next){
-    var Result = [];
-    try {
-        biosignal.find({type: 'blood_saturation'}, function (err, result) {
-            if(err)
-                res.send({message:err});
-            else {
-                if(!result){
-                    res.send({message:'Empty Db'});
-                }
-                else {
-                    for (var i = 0; i < result.length; i++) {
-                        Result.push([result[i].measurement.value, result[i].date_taken.getTime(),result[i].uniqueId, result[i].source]);
-                    }
-                    res.send({message: 'Ok', Result: Result});
-                }
-            }
-        })
-    }
-    catch(e){
-        console.log(e);
-    }
-});
+
 
 router.put('/BloodSaturation',function(req,res,next){
    res.send({message:"Ok"});
+});
+
+
+router.post('/AcceptedUsers',function(req,res,next){
+    var newUser = req.body.user;
+    var me  = req.body.myself;
+    user.update({Username:me},{$push: {ApprovedUsers: newUser}},function(err,result){
+        if(err) {
+            console.log(err);
+            res.send({message:err});
+        }
+        else
+            res.send({message:'Ok'});
+    });
+});
+
+router.get('/AcceptedUsers',function(req,res,next){
+    var myself =req.query.myself;
+    console.log(myself);
+    user.findOne({Username:myself},function(err,result){
+        if(err)
+            res.send({message:err});
+        else if(!result)
+            res.send({message:'Ok',users:[]});
+        else
+            res.send({message:'Ok',users:result.ApprovedUsers});
+    })
 });
 module.exports = router;

@@ -43,15 +43,24 @@ Biosignals.service('BiosignalService', function ($http) {
             callback(response.data.message);
         });
     };
-    OnlineServices.getHeart = function (callback) {
+    OnlineServices.getHeart = function (range,callback) {
         $http({
             method: 'get',
-            url: '/biosignal/heartbiosignals'
+            url: '/biosignal/heartbiosignals',
+            params:{range:range}
         }).then(function successCallback(response) {
             callback(response.data);
         });
     };
-
+    OnlineServices.getBloodSaturation = function (range,callback) {
+        $http({
+            method: 'get',
+            url: '/biosignal/bloodSaturationbiosignals',
+            params:{range:range}
+        }).then(function successCallback(response) {
+            callback(response.data);
+        });
+    };
     OnlineServices.updateBloodSaturation = function (newvalue, uniqueId, callback) {
         $http({
             method: 'put',
@@ -70,14 +79,6 @@ Biosignals.service('BiosignalService', function ($http) {
         }).then(function successCallback(response) {
             console.log(response);
             callback(response.data.message);
-        });
-    };
-    OnlineServices.getBloodSaturation = function (callback) {
-        $http({
-            method: 'get',
-            url: '/biosignal/bloodSaturationbiosignals'
-        }).then(function successCallback(response) {
-            callback(response.data);
         });
     };
     return {services: services, OnlineServices: OnlineServices};
@@ -100,7 +101,7 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                         }
                     }
                     console.log('update form');
-                    $scope.heartRate.heart.api.update();
+                    $scope.heartRate.heart.api.refresh();
                     $scope.flag = false;
                     $scope.heartRate.newValue = '';
                     $scope.heartRate.measurement = {
@@ -122,7 +123,7 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                         }
                     }
                     console.log('update form');
-                    $scope.heartRate.heart.api.update();
+                    $scope.heartRate.heart.api.refresh();
                     $scope.flag = false;
                     $scope.heartRate.measurement = {
                         value: '',
@@ -140,7 +141,6 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
         },
         //Heart Chart implementatiom
         heart: {
-
             callback: {},
             events: {},
             api: {},
@@ -305,15 +305,9 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
             },
             data:
                 [
-                    //     {
-                    //     color: 'red',
-                    //     "key": "Heart Rate",
-                    //     "bar": true,
-                    //     "values": []
-                    // },
 
                     {
-                        color: 'grey',
+                        color: 'red',
                         key: "Heart Rate",
                         bar: true,
                         values: []
@@ -335,7 +329,7 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                         }
                     }
                     console.log('update form');
-                    $scope.bloodSaturation.bloodSaturation.api.update();
+                    $scope.bloodSaturation.bloodSaturation.api.refresh();
                     $scope.flag = false;
                     $scope.bloodSaturation.newValue = '';
                     $scope.bloodSaturation.measurement = {
@@ -357,7 +351,7 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                         }
                     }
                     console.log('update form');
-                    $scope.heartRate.heart.api.update();
+                    $scope.heartRate.heart.api.refresh();
                     $scope.flag = false;
                     $scope.heartRate.measurement = {
                         value: '',
@@ -542,14 +536,17 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
             data:
                 [
                     {
-                        color: 'grey',
-                        key: "Heart Rate",
+                        color: 'blue',
+                        key: "Blood Saturation",
                         bar: true,
                         values: []
                     }
                 ]
         }
     };        //Oxygen-Saturation Chart
+
+    $scope.range = '';
+    $scope.previousValue ='';  // Flag used to check if elements have changed
 
     // 2nd Tab
     $scope.sensor = {
@@ -598,7 +595,7 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                 },
                 title: {
                     enable: true,
-                    text: 'Title for Line Chart'
+                    text: 'Sensor Chart'
                 },
                 subtitle: {
                     enable: true,
@@ -783,8 +780,8 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
         appearHeart: function () {
             $scope.heartRate.heart.config.visible = true;
         },
-        getHeart: function () {
-            BiosignalService.OnlineServices.getHeart(function (result) {
+        getHeart: function (range) {
+            BiosignalService.OnlineServices.getHeart(range,function (result) {
                 if (result.message === 'Ok') {
                     $scope.heartRate.heart.data[0].values = result.Result;
                     $scope.heartRate.heart.api.refresh();
@@ -794,8 +791,8 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
 
             })
         },
-        getBloodSaturation: function () {
-            BiosignalService.OnlineServices.getBloodSaturation(function (response) {
+        getBloodSaturation: function (range) {
+            BiosignalService.OnlineServices.getBloodSaturation(range,function (response) {
                 if (response.message === 'Ok') {
                     $scope.bloodSaturation.bloodSaturation.data[0].values = response.Result;
                     $scope.bloodSaturation.bloodSaturation.api.refresh();
@@ -804,8 +801,11 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
             })
         },
         refresh: function () {
-            $scope.functions.getHeart();
-            $scope.functions.getBloodSaturation();
+            if($scope.previousValue === $scope.range)
+                return;
+            $scope.previousValue = $scope.range;
+            $scope.functions.getHeart($scope.range);
+            $scope.functions.getBloodSaturation($scope.range);
         }
     };
     Websocket.NewMeasurement($scope,function(){

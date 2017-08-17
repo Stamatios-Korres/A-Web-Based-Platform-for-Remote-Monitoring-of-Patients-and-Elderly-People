@@ -2,11 +2,57 @@
  * Created by timoskorres on 21/6/2017.
  */
 
-var MainPage = angular.module('MainPage', ['ngRoute', 'ngResource', 'ngMaterial']);
+var MainPage = angular.module('MainPage', ['ngRoute', 'ngResource', 'ngMaterial','nvd3']);
+
+MainPage.service('BiosignalsService',function(){
+   var services ={};
+   var Users = [];
+   services.getTarget = function(username){
+       for(var i =0;i<Users.length;i++){
+           if(Users[i].username === username){
+               return Users[i];
+           }
+       }
+       return null;
+   };
+   services.addNewUser = function(username,blood,heart){
+       var user = {
+            username:username,
+            heart_rate:[],
+            blood_saturation:[]
+       };
+       for(var i=0;i<heart.length;i++){
+           var mes = {
+               x: heart[i][1],
+               y: heart[i][0]
+           };
+           user.heart_rate.push(mes);
+       }
+       for(var j=0;j<blood.length;j++){
+           var mes1 = {
+               x: blood[j][1],
+               y: blood[j][0]
+           };
+           user.blood_saturation.push(mes1);
+       }
+       for(var k=0;k<Users.length;k++){
+           if(Users[k].username === user.username){
+               Users[k] = user;
+               return;
+           }
+       }
+       Users.push(user);
+   };
+   return services;
+});
+
 
 MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $timeout, $location, $scope,VideoServices, FriendsAndState, WebsocketService, AjaxServices) {
     if (token !== undefined) {
+
         $scope.username = my_name;
+
+
         //Hit the logout button
         $scope.logout = {
             clean: function () {
@@ -27,18 +73,14 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
 
             }
         };
+
         $scope.removeClass = function(){
             console.log('Lets Change the class');
             document.getElementById('RequestInfo').classList.remove('md-warn');
-        };
-        WebsocketService.UpdateRequest($scope,function(){
-            console.log('About to Change the requests');
-            $scope.RequestsReceived.Received = requests;
-            $scope.RequestsSent.sent = Pending;
-            if (!$scope.$$phase) {
-                $scope.$apply();
-            }
-        });
+        }; // Function which updates the requests colour
+
+
+        //The requests the user has sent - received
         $scope.RequestsSent = {
 
             //These are about sending new requests
@@ -88,7 +130,6 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
 
 
         };
-
         $scope.RequestsReceived = {
             Received: [],
             checkRequests: function () {
@@ -117,19 +158,27 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
                 });
             }
         };
-
+        WebsocketService.UpdateRequest($scope,function(){
+            console.log('About to Change the requests');
+            $scope.RequestsReceived.Received = requests;
+            $scope.RequestsSent.sent = Pending;
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
+        });
         //Check for Unanswered Friend Requests
         function deamon() {
             if (token !== undefined) {
                 $scope.RequestsSent.checkPending();
                 $scope.RequestsReceived.checkRequests();
+
             }
         }
         deamon();
     }
 });
 
-MainPage.controller('AuthorizedController', function ($rootScope, $scope, $mdDialog, $timeout, $location, FriendsAndState, WebsocketService, AjaxServices) {
+MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast,$rootScope, $scope, $mdDialog, $timeout, $location, FriendsAndState, WebsocketService, AjaxServices) {
     if (token === undefined)
         $location.path('login');
     else {
@@ -138,20 +187,48 @@ MainPage.controller('AuthorizedController', function ($rootScope, $scope, $mdDia
             Selected: '',
             friends: []
         };
+        $scope.showResult= function (string) {
+            string = string.toUpperCase();
+            $mdToast.show(
+                $mdToast.simple()
+                    .textContent(string)
+                    .capsule(true)
+                    .position('top left')
+            )
+        };
         //Does take consideration into friends coming online
         WebsocketService.ShowView($scope,function(){
             $scope.mainPageInfo.friends = FriendsAndState.getfriends();
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
         });
 
         $scope.SelectedUser = function (username) {
-            console.log('Yes it was summoned');
-            FriendsAndState.messageRead(username);
-            $scope.mainPageInfo.friends = FriendsAndState.getfriends();
-            $scope.mainPageInfo.Selected = username;
-            ChatUser = username;
-            $rootScope.$emit('NewMessage');
-            if (!$scope.$$phase) {
-                $scope.$apply();
+            if(username !== $scope.mainPageInfo.Selected){       //Check if different user has been selected
+                // al?ert('Changed');
+                FriendsAndState.messageRead(username);
+                $scope.mainPageInfo.friends = FriendsAndState.getfriends();
+                $scope.mainPageInfo.Selected = username;
+                ChatUser = username;
+                $scope.Biosignals.target = username;
+
+                //Function connected only to Biosignals
+                $scope.chart.data[1].values = [];
+                $scope.chart.data[0].values = [];
+                $scope.chart.api.refresh();
+                $scope.Biosignals.dataArrived = false;
+                $scope.Biosignals.Requesting = false;
+                $scope.Biosignals.local = null;
+                $scope.chart.options.title.text =  'No data received ';
+                $scope.chart.options.subtitle.text = 'Press the button and ask for data ';
+                $scope.chart.options.subtitle.enable = true;
+                $scope.chart.options.title.enable = true;
+                $scope.Biosignals.showdata();
+                $rootScope.$emit('NewMessage');
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                }
             }
         };
         $scope.delete = function () {
@@ -190,6 +267,7 @@ MainPage.controller('AuthorizedController', function ($rootScope, $scope, $mdDia
         };
 
         //Update the users state -> Async Function
+
         WebsocketService.refresh($scope, function () {
             $scope.mainPageInfo.friends = FriendsAndState.getfriends();
             if(!FriendsAndState.memeber($scope.mainPageInfo.Selected)){
@@ -201,80 +279,186 @@ MainPage.controller('AuthorizedController', function ($rootScope, $scope, $mdDia
         });
 
 
-    }
-});
 
-MainPage.controller('ChatController', function (AjaxServices, ChatServices, $timeout, $scope) {
-
-    //Trial Chat Controller
-    $scope.messages = {
-        currentMessage: '',
-        arrayofMessages: [],
-        SelectedUser: '',
-        addText: function (Someone) {
-            console.log($scope.messages.currentMessage);
-            $scope.messages.SelectedUser = Someone;
-            if ($scope.messages.currentMessage !== '') {
-                ChatServices.NewMessage(Someone, $scope.messages.currentMessage, 'me', null);
-                $scope.messages.arrayofMessages = ChatServices.SelectUser(Someone);
-                var message = {                                     //Send the message back to server
-                    type: 'Chat',
-                    target: Someone,
-                    data: $scope.messages.currentMessage,
-                    source: my_name
+        $scope.Biosignals = {
+            Requesting:false,
+            target:null,
+            range:24,
+            local:null,
+            dataArrived:false,
+            refresh:function(){
+                if($scope.Biosignals.range === $scope.Biosignals.local)
+                    return;
+                $scope.Biosignals.local = $scope.Biosignals.range;
+                var message = {
+                    type: 'RequestBiosignals',
+                    target: $scope.mainPageInfo.Selected,
+                    source: my_name,
+                    range:$scope.Biosignals.range
                 };
+                $scope.Biosignals.Requesting = true;
                 ws.send(JSON.stringify(message));
-            }
-            $scope.messages.currentMessage = '';
-        },
-        show: function (uuid) {
-            AjaxServices.services.DeleteMessage(uuid, ChatUser, function (response) {
-                //Update the messages
-                console.log(response);
-                if (response.data.message === 'Message was deleted') {
-                    ChatServices.Delete(ChatUser, uuid);
-                    $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
+            },
+            showdata:function(){
+
+                // Set New title and Subtile
+                var User = BiosignalsService.getTarget($scope.Biosignals.target);
+                if(User) {
+                    $scope.chart.options.subtitle.enable = false;
+                    $scope.chart.options.title.text = 'Biosignals from: ' + $scope.Biosignals.target;
+                    $scope.Biosignals.dataArrived = true;
+                    //Ask and show the data you received
+
+
+                    $scope.chart.data[1].values = User.heart_rate;
+                    $scope.chart.data[0].values = User.blood_saturation;
+                    $scope.chart.api.refresh();
+
+                    // User can now ask for more data
+                    $scope.Biosignals.Requesting = false;
+                    if (!$scope.$$phase) {
+                        $scope.$apply();
+                    }
                 }
+             }
+        };
+
+
+        WebsocketService.BiosignalAnswer($scope,$scope.Biosignals.showdata);
+        $scope.requestBiosignals = function(username){
+            if(!$scope.Biosignals.Requesting) {
+                $scope.Biosignals.Requesting = true;
+                if($scope.Biosignals.range === $scope.Biosignals.local) {
+                    $scope.Biosignals.Requesting = false;
+                    return;
+                }
+                $scope.Biosignals.local = $scope.Biosignals.range;
+                AjaxServices.services.GetBiosignals(username, function (response) {
+                    // $scope.Biosignals.target = username;
+                    if (response.message !== 'Ok'){
+                        $scope.showResult(response.message);
+                        $scope.Biosignals.Requesting = false;
+                    }
+                    else { // Throught Websockets request the raspberry User about the Biosignal request
+                        $scope.chart.options.subtitle.text = 'Please wait. Asking data from ' + username;
+                        var message = {
+                            type: 'RequestBiosignals',
+                            target: username,
+                            source: my_name,
+                            sourceId: null,
+                            range:$scope.Biosignals.range
+                        };
+                        ws.send(JSON.stringify(message));
+                    }
+                });
                 if (!$scope.$$phase) {
                     $scope.$apply();
                 }
-
-            });
-        }
-    };
-
-
-    ChatServices.refresh($scope, function () {
-
-        $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
-        //Ask from Server if empty array
-        if ($scope.messages.arrayofMessages) {
-            if (ChatServices.getFlag(ChatUser) ===false  ) {
-                console.log('Going to ask Chat from: ' + ChatUser);
-                AjaxServices.services.GetChat(ChatUser, function (result) {
-                    var SavedMessages = result.data.message;
-                    for (var i = 0; i < SavedMessages.length; i++) {
-                        ChatServices.NewMessage(ChatUser, SavedMessages[i].message, SavedMessages[i].direction, SavedMessages[i].uuid);
-                    }
-                    $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
-                    ChatServices.setFlag(ChatUser);
-                });
             }
-        }
-        if (!$scope.$$phase) {
-            $scope.$apply();
-        }
-    });
+        };
+
+
+        //The Chart which will show the result of the request
+        $scope.chart = {
+            callback: {},
+            events: {},
+            config: {visible: true},
+            api:{},
+            options : {
+                chart: {
+                    type: 'lineChart',
+                    height: 350,
+                    width:550,
+                    padData:true,
+                    forceY:([55,110]),
+                    margin : {
+                        top: 100,
+                        right: 20,
+                        bottom: 40,
+                        left: 55
+                    },
+                    x: function(d){ return d.x; },
+                    y: function(d){ return d.y; },
+                    useInteractiveGuideline: false,
+                    dispatch: {
+                        stateChange: function(e){ console.log("stateChange"); },
+                        changeState: function(e){ console.log("changeState"); },
+                        tooltipShow: function(e){ console.log("tooltipShow"); },
+                        tooltipHide: function(e){ console.log("tooltipHide"); }
+                    },
+                    xAxis: {
+                        axisLabel: 'Time',
+                        tickFormat:function(d) {
+                            return d3.time.format('%b %d %H:%M')(new Date(d));
+                        }
+                    },
+                    yAxis: {
+                        axisLabel: '',
+                        tickFormat: function(d){
+                            return d3.format('.02f')(d);
+                        },
+                        axisLabelDistance: -10
+                    },
+                    callback: function(chart){
+                        // console.log("!!! lineChart callback !!!");
+                    },
+                    "zoom": {
+                        "enabled": true,
+                        "scaleExtent": [
+                            1,
+                            10
+                        ],
+                        "useFixedDomain": false,
+                        "useNiceScale": false,
+                        "horizontalOff": false,
+                        "verticalOff": true,
+                        "unzoomEventType": "dblclick.zoom"
+                    }
+                },
+                title: {
+                    enable: true,
+                    text: 'No data received '
+                },
+                subtitle: {
+                    enable: true,
+                    text: 'Press the button and ask for data '  ,
+                    css: {
+                        'text-align': 'center',
+                        'margin': '10px 13px 0px 7px'
+                    }
+                },
+                caption: {
+                    enable: false,
+                    html: '<b>Figure 1.</b> Lorem ipsum dolor sit amet, at eam blandit sadipscing, <span style="text-decoration: underline;">vim adhuc sanctus disputando ex</span>, cu usu affert alienum urbanitas. <i>Cum in purto erat, mea ne nominavi persecuti reformidans.</i> Docendi blandit abhorreant ea has, minim tantas alterum pro eu. <span style="color: darkred;">Exerci graeci ad vix, elit tacimates ea duo</span>. Id mel eruditi fuisset. Stet vidit patrioque in pro, eum ex veri verterem abhorreant, id unum oportere intellegam nec<sup>[1, <a href="https://github.com/krispo/angular-nvd3" target="_blank">2</a>, 3]</sup>.',
+                    css: {
+                        'text-align': 'justify',
+                        'margin': '10px 13px 0px 7px'
+                    }
+                }
+            },
+            data:[
+                {
+                    key:'Blood Saturation',
+                    values:[],
+                    color: 'blue'
+
+                },
+                {
+                    key:'Heart Rate',
+                    values:[],
+                    color:'red'
+                }
+
+            ]
+        };
+
+    }
 });
 
-MainPage.controller('Video-Controller', function ($rootScope, VideoServices, WebsocketService, $scope, $timeout) {
-    function closeScreen() {
-        $scope.videoInfo.HowVideoWasClosedFlag = false;
-        $scope.videoInfo.status = 'Closed';  // Next time call is began do not show buttons by default
-        $scope.videoInfo.Type = null;
-        $scope.videoInfo.InCall = false;
-        $scope.videoInfo.target = '';
-    }
+
+
+MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, VideoServices, WebsocketService, $scope, $timeout) {
+
 
 
     $scope.videoInfo = {
@@ -357,7 +541,11 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
             closeScreen();
         }
     };  // Information shown in Video View
-
+    $scope.RealTime ={
+        blood:0,
+        heart:0,
+        show:false
+    };
 
     //Event handlers when new message arrives from Websockets
 
@@ -463,11 +651,129 @@ MainPage.controller('Video-Controller', function ($rootScope, VideoServices, Web
         VideoServices.ResetTarget();
 
         $timeout(closeScreen, 4000);
-    })
+    });
+    function closeScreen() {
+        $scope.videoInfo.HowVideoWasClosedFlag = false;
+        $scope.videoInfo.status = 'Closed';  // Next time call is began do not show buttons by default
+        $scope.videoInfo.Type = null;
+        $scope.videoInfo.InCall = false;
+        $scope.videoInfo.target = '';
+        $scope.RealTime.show = false;
+    }
 
+    // Handles Real Time Measurement
+    WebsocketService.RealTime($scope,function(){
+        var mes = RealTimeService.getMeasurement();
+        $scope.RealTime.blood = mes.blood.y;
+        $scope.RealTime.heart = mes.heart.y;
+        $scope.RealTime.show = true;
+        if (!$scope.$$phase) {
+            $scope.$apply();
+        }
+
+    });
 
 });
 
+MainPage.controller('ChatController', function ($mdDialog,AjaxServices, ChatServices, $timeout, $scope) {
+
+    //Trial Chat Controller
+    $scope.messages = {
+        currentMessage: '',
+        arrayofMessages: [],
+        SelectedUser: '',
+        addText: function (Someone) {
+            console.log($scope.messages.currentMessage);
+            $scope.messages.SelectedUser = Someone;
+            if ($scope.messages.currentMessage !== '') {
+                ChatServices.NewMessage(Someone, $scope.messages.currentMessage, 'me', null);
+                $scope.messages.arrayofMessages = ChatServices.SelectUser(Someone);
+                var message = {                                     //Send the message back to server
+                    type: 'Chat',
+                    target: Someone,
+                    data: $scope.messages.currentMessage,
+                    source: my_name
+                };
+                ws.send(JSON.stringify(message));
+            }
+            $scope.scrollDown();
+            $scope.messages.currentMessage = '';
+        },
+        show: function (uuid) {
+            AjaxServices.services.DeleteMessage(uuid, ChatUser, function (response) {
+                //Update the messages
+                console.log(response);
+                if (response.data.message === 'Message was deleted') {
+                    ChatServices.Delete(ChatUser, uuid);
+                    $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
+                }
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                }
+                $scope.scrollDown();
+
+            });
+        }
+    };
+
+    $scope.scrollDown = function(){
+        var mydiv =$('#mydiv');
+        mydiv.stop().animate({
+            scrollTop: mydiv[0].scrollHeight
+        }, 100);
+    };
+
+    $scope.scrollDown();
+
+
+    ChatServices.refresh($scope, function () {
+        $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
+        //Ask from Server if empty array
+        if ($scope.messages.arrayofMessages) {
+            if (ChatServices.getFlag(ChatUser) ===false  ) {
+                AjaxServices.services.GetChat(ChatUser, function (result) {
+                    var SavedMessages = result.data.message;
+                    for (var i = 0; i < SavedMessages.length; i++) {
+                        ChatServices.NewMessage(ChatUser, SavedMessages[i].message, SavedMessages[i].direction, SavedMessages[i].uuid);
+                    }
+                    $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
+                    ChatServices.setFlag(ChatUser);
+                    $scope.scrollDown();
+                });
+            }
+        }
+        if (!$scope.$$phase) {
+            $scope.$apply();
+        }
+        $scope.scrollDown();
+    });
+
+    $(document).ready(function(){
+        $('#TextBoxId').keypress(function(e){
+            if(e.keyCode===13) {
+                $('#linkadd').click();
+            }
+        });
+    });
+
+    $scope.Dialog={
+        status :'',
+        showConfirm : function(uuid) {
+            var confirm = $mdDialog.confirm()
+                .title('Would you like to delete the message?')
+                .textContent('If you delete the message you will not be able to recover it.')
+                .ariaLabel('Lucky day')
+                .ok('Yes')
+                .cancel('No');
+
+            $mdDialog.show(confirm).then(function() {
+                $scope.messages.show(uuid);
+            }, function() {
+            });
+        }
+    };
+
+});
 
 //Some global functions
 function deleteFromList(list, element) {

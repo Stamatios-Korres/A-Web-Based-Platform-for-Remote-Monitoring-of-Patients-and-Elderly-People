@@ -11,10 +11,11 @@ var token = require('./routes/tokens');
 var login = require('./routes/login');
 var subscribe = require('./routes/subscribe');
 var message = require('./routes/message');
+var biosignals = require('./routes/biosignalRoute');
 var app = express();
 var flash = require('connect-flash');
 var passport = require('passport');
-
+const cors = require('cors');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -27,15 +28,38 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public/app')));
+
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    next();
+});
+// app.use(function(req,res,next){
+//     res.header("Access-Control-Allow-Origin", "*");
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     next();
+// });
+
 app.use('/tokens',token);
 app.use('/',login);
 app.use('/subscribe',subscribe);
 app.use('/messages',message);
+app.use('/biosignals',biosignals);
+
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://127.0.0.1/Webrtc',{
     useMongoClient: true
 }   );
 // catch 404 and forward to error handler
+
+
+app.use(cors());
+app.options('*', cors());
+
+//enable cors
+
 
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

@@ -13,7 +13,7 @@ crypto = require('crypto');
 var Token = require('../models/token');
 
 server.exchange(oauth2orize.exchange.password(
-    function (client, username, password, scope, done) {
+    function (client, username, password,category, done) {
         users.findOne({username: username}, function (err, user_found) {
             if (err) {
                 return done(err);
@@ -27,7 +27,7 @@ server.exchange(oauth2orize.exchange.password(
                     return done(null, false);
                 else if (!isMatch)
                     return done(null, false);
-                console.log('confirmed password');
+                 //confirmed password now confirm category
                 //Create and save new token
                 var token_value = utils.uid(256);
                 var token = new Token({
@@ -48,6 +48,18 @@ server.exchange(oauth2orize.exchange.password(
 
 exports.token = [
     passport.authenticate('oauth2-client-password', {session: false}),
+    function(req,res,next){
+
+        users.findOne({username: req.body.username,category:req.body.category},function (err, user_found){
+            if(!user_found){
+                res.send(403);
+                console.log('Wrong category');
+            }
+            else
+                next();
+        })
+
+    },
     server.token(),
     server.errorHandler()
 ];

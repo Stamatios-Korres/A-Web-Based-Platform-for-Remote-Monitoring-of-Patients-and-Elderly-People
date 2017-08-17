@@ -20,13 +20,13 @@
             </div>
             <div layout="column" layout-margin >
                 <p  style="height:4px; width:50px" flex="15">Password</p>
-                <input class="input1"  flex="35" ng-model='login.password'  type="password">
+                <input id='password' class="input1"  flex="35" ng-model='login.password'  type="password">
             </div>
             </div>
         </div>
 
         <div>
-         <md-button ng-click='login.SendRequest()' class="md-raised md-primary" style="height:40% ;margin-top:5px" md-no-ink  >Log in</md-button>
+         <md-button id="login" ng-click='login.SendRequest()' class="md-raised md-primary" style="height:40% ;margin-top:5px" md-no-ink  >Log in</md-button>
         </div>
     </div>
     </md-toolbar>

@@ -2,7 +2,7 @@ var SharedServices = angular.module('SharedServices',[]);
 
 
 
-SharedServices.service('Websocket',function($rootScope) {
+SharedServices.service('Websocket',function($rootScope,RealTimeService) {
     services = {};
     services.InitWebsocket = function () {
         ws.onmessage = function (event) {
@@ -12,8 +12,9 @@ SharedServices.service('Websocket',function($rootScope) {
                     case'SensorMeasurement':
                         if(data.data) {
                             var oximeter = data.data;
-                            SpO2 = oximeter.Saturation;
+                            SpO2 = oximeter.Saturation;     // Almost ready to discard the Global Variables
                             Pulse = oximeter.HeartRate;
+                            RealTimeService.setMeasurement(Pulse,SpO2);
                             status = oximeter.status;
                             $rootScope.$emit('NewMeasurement');
                         }
@@ -22,6 +23,7 @@ SharedServices.service('Websocket',function($rootScope) {
                         Activenotification = data.notification;
                         $rootScope.$emit('ActiveNotification');
                         break;
+
                     default:
                         console.log('Unknown option: '+data.type);
                 }
