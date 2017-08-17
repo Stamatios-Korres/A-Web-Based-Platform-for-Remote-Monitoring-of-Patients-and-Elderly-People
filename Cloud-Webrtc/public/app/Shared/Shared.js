@@ -506,6 +506,9 @@ angular.module('Openhealth').service('VideoServices',function($timeout,$rootScop
         // myPeerConnection.onsignalingstatechange = handleSignalingStateChangeEvent;
         MyPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
     };
+    services.IsInCall = function() {
+        return Incall;
+    };
     services.SetSdp = function (sdp) {
         console.log('Spd was set');
         SDPCandiates = sdp;
@@ -696,8 +699,7 @@ angular.module('Openhealth').service('WebsocketService',function(RealTimeService
             ws.onmessage = function (event) {
             try {
                 var data = JSON.parse(event.data);
-                if(data.type !== 'update')
-                    console.log('Received Websocket message type ' + data.type);
+                    // console.log('Received Websocket message type ' + data.type);
                 switch (data.type) {
 
                     //General Purpose(Friend Requests -
@@ -840,11 +842,11 @@ angular.module('Openhealth').service('WebsocketService',function(RealTimeService
                         $rootScope.$emit('busy');
                         break;
                     case 'cancel':
-
-                        if(VideoServices.getTarget() === data.source) { // Just for safety reasons
-
-                                console.log('Ok we are here ');
-                                $rootScope.$emit('cancel');
+                        if(!VideoServices.IsInCall() && VideoServices.getTarget() === data.source){
+                            $rootScope.$emit('cancel');
+                        }
+                        else if(VideoServices.getTargetid() === data.sourceId){ // Just for safety reasons
+                            $rootScope.$emit('cancel');
                         }
                         break;
                     case 'multipleUsers':{

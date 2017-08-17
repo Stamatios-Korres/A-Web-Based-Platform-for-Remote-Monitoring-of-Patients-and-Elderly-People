@@ -36,7 +36,7 @@ h1 {
 
 #RealTime {
     width: 170px;
-    opacity:0.2;
+    opacity:0.4;
     height: 80px;
     position: absolute;
     z-index: 8;
@@ -49,6 +49,14 @@ h1 {
     overflow: hidden;
     position: absolute;
 }
+/*#hidden {opacity:0; position:absolute; width:0;}*/
+#close {
+    padding:2px 2px;
+    background-color:#fff;
+    cursor:pointer;}
+#close:before {content:'\00d7'; color:red; font-size:2em;}
+
+
 
 #local_video {
     float:top;

@@ -212,4 +212,23 @@ router.get('/AcceptedUsers',function(req,res,next){
             res.send({message:'Ok',users:result.ApprovedUsers});
     })
 });
+
+router.delete('/AcceptedUsers',function(req,res,next){
+    var myname = req.body.myself;
+    var UserToDelete = req.body.user;
+    console.log(UserToDelete);
+    user.update({Username:myname},{ $pull: { ApprovedUsers: UserToDelete}},function(err,result){
+        if(err) {
+            console.log(err);
+            res.send({message:err})
+        }
+        else if(result){
+            res.send({message:'Ok'})
+        }
+        else{
+            res.send('fail');
+            console.log(result);
+        }
+    })
+});
 module.exports = router;

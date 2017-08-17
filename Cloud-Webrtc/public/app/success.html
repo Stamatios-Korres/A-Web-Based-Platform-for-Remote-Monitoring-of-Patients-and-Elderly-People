@@ -81,6 +81,7 @@
                <div id='RealTime' ng-show='RealTime.show === true' class="ui-widget-content ">
                    Heart Rate: {{RealTime.heart}}<br>
                    Blood Saturation:{{RealTime.blood}}<br>
+                   <md-button id="close" flex-offset="60" ng-click="RealTime.hide()" md-no-ink></md-button>
                </div>
             <video id="local_video"  autoplay muted></video>
             <video id="received_video" autoplay ></video>

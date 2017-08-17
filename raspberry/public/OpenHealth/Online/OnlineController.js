@@ -434,7 +434,9 @@ angular.module('Online').service('VideoServices',function($rootScope){
             bufferIcecandidates.push(IceCandidate);
         }
     };
-
+    services.IsInCall = function() {
+        return Incall;
+    };
     services.getPeer = function () {
         return !!MyPeerConnection; // Auto Changed by compiler
     };
@@ -568,15 +570,12 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
         wsCloud.onmessage = function (event) {
             try {
                 var data = JSON.parse(event.data);
-                if(data.type !== 'update')
-                    console.log('Received Websocket message type ' + data.type);
+                console.log('Received Websocket message type ' + data.type);
                 switch (data.type) {
 
                     //General Purpose(Friend Requests -
 
                     case 'onlineUsers':
-                        // console.log('Online Users : ');
-                        // console.log(data.online);
                         Myid = data.id;
                         for (var ii = 0; ii < data.online.length; ii++) {
                             FriendsAndState.changeState(data.online[ii], 'active');
@@ -589,7 +588,6 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
                         $rootScope.$emit('WebsocketNews');
                         break;
                     case 'UserGotOffLine':
-                        console.log('he left us : ' + data.name);
                         FriendsAndState.changeState(data.name, 'inative');
                         var IstheTargetDisconnected = VideoServices.checkifUsed(data.name);                        //User got disconnected while still in call
                         if(IstheTargetDisconnected)
@@ -600,7 +598,6 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
                     // Friends and Requests Messages so we are in no need of polling
 
                     case 'NewRequest':{
-                        console.log(data);
                         requests.push(data.source);
                         $rootScope.$emit('UpdateRequest');
                         document.getElementById("RequestInfo").classList.add('md-warn');
@@ -622,9 +619,7 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
                         else if (data.decision === 'accept') {
                             var string = data.source + ' has accepted your Request';
                             showReason(string);
-                            //Friend&State & Chat Room
-
-                            ChatServices.newfriend(data.source);
+                            ChatServices.newfriend(data.source);                                        //Friend&State & Chat Room
                             FriendsAndState.addfriends(data.source,data.state,0);
                             $rootScope.$emit('WebsocketNews');
                         }
@@ -652,7 +647,6 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
                     //Cases for Video - WebRTC
 
                     case 'video-start':
-                        console.log(data);
                         var peer = VideoServices.getPeer();
                         var message = {
                             type: 'busy',
@@ -663,7 +657,6 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
                         };
                         if(!peer) {
                             if(VideoServices.getTarget()) {
-                                console.log('User has already a received call waiting');
                                 ws.send(JSON.stringify(message));
                             }
                             else {
@@ -674,16 +667,12 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
                             }
                         }
                         else {
-                            alert('New Call arrived while in call ');
                             ws.send(JSON.stringify(message));
                         }
                         break;
                     case 'video-response': // With video response we define if we accept call or reject it
-                        console.log("Answer is:");
-                        console.log(data);
                         VideoServices.setTargetId(data.sourceId);
                         VideoServices.setMyId(data.targetId);
-                        //console.log('his response was ' + data.answer);
                         VideoServices.SetResponse(data.answer);
                         $rootScope.$emit('Video-Response');
                         break;
@@ -692,7 +681,6 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
                         $rootScope.$emit('Video-offer');
                         break;
                     case 'new-ice-candidate':
-                        console.log(data.candidate);
                         var candidate = new RTCIceCandidate(data.candidate);
                         VideoServices.addIceCandiate(candidate);
 
@@ -710,9 +698,10 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
                         $rootScope.$emit('busy');
                         break;
                     case 'cancel':
-                        if(VideoServices.getTargetid() === data.sourceId){ // Just for safety reasons
-
-                            console.log('Ok we are here ');
+                        if(!VideoServices.IsInCall() && VideoServices.getTarget() === data.source){
+                            $rootScope.$emit('cancel');
+                        }
+                        else if(VideoServices.getTargetid() === data.sourceId){ // Just for safety reasons
                             $rootScope.$emit('cancel');
                         }
                         break;
@@ -728,18 +717,15 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
                         ChatServices.NewMessage(data.source,data.data,data.source,data.uuid); // Username of Friend/Message/and Direction
                         FriendsAndState.newmessage(data.source);
                         $rootScope.$emit('NewMessage');
-                        console.log('Message was added and signal was emmited');
                         break;
 
                     }
                     case 'updateUuid':{
-                        console.log(data);
                         ChatServices.updateUuid(data.uuid,data.User);
                         break;
                     }
                     case 'NewMessageFromOtherAccount':{
                         ChatServices.NewMessage(data.User,data.info,'me',data.uuid);
-                        console.log('new message was succesfully added');
                         $rootScope.$emit('NewMessage');
                         break;
                     }
@@ -1025,7 +1011,6 @@ Online.controller('OnlineCtrl',function(VideoServices,BiosignalsOnlineServices,F
                 params:{myself:my_name}
             }).then(function successCallback(response){
                 if(response.data.message ==='Ok') {
-                    console.log('Currently accepted Users are :' + response.data.users);
                     callback(response.data.users);
                 }
             })
@@ -1524,8 +1509,9 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
             ws.send(JSON.stringify(message));
             VideoServices.ResetTarget();
         }
-
-        $scope.$apply();
+        if (!$scope.$$phase) {
+            $scope.$apply();
+        }
     });
     WebsocketService.videoresponse($scope, function () {
         //Video start here
@@ -1537,7 +1523,9 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
             VideoServices.setPeer('Caller');
             $scope.videoInfo.InCall = true;
             $scope.videoInfo.message = '';
-            $scope.$apply();
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
         }
     });
     WebsocketService.videoAnswer($scope, function () {
@@ -1560,16 +1548,38 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
         $timeout(closeScreen, 4000);
     });
 
-    //Οline Measurements functions
+    //Real Time show  Measurements functions
+    $scope.RealTime ={
+        blood:0,
+        heart:0,
+        show:false,
+        hide:function(){
+            $scope.RealTime.show = false;
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
+        },
+        dataRefresh:function(blood,heart){
+          $scope.RealTime.blood = blood.y;
+          $scope.RealTime.heart = heart.y;
+          $scope.RealTime.show = true;
+          if (!$scope.$$phase) {
+              $scope.$apply();
+          }
+        }
+    };
     Websocket.NewMeasurement($scope,function(){
-        if(VideoServices.getTarget() && $scope.videoInfo.InCall) {
+        if(VideoServices.getTarget() && VideoServices.IsInCall()) {
+            var data = RealTimeService.getMeasurement();
             var message = {
                 type: 'RealTime',
                 source: my_name,
                 targetId: VideoServices.getTargetid(),
                 target:VideoServices.getTarget(),
-                data: RealTimeService.getMeasurement()
+                data: data
             };
+            console.log('ready');
+            $scope.RealTime.dataRefresh(data.blood,data.heart);
             wsCloud.send(JSON.stringify(message));
         }
     });
@@ -1691,7 +1701,6 @@ function deleteFromList(list, element) {
             break;
         }
     }
-    console.log(list);
     return list;
 }
 

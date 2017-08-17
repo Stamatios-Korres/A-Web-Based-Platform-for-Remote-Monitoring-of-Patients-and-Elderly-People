@@ -32,7 +32,7 @@ var CloudHttpUrl = 'http://localhost:3000';
 
 
 
-var myApp = angular.module("Openhealth", ['AngularMaterial','Notification','SharedServices','ngRoute','Online','Biosignals']);
+var myApp = angular.module("Openhealth", ['AngularMaterial','Setting','Notification','SharedServices','ngRoute','Online','Biosignals']);
 
 myApp.run(function (Websocket) {
     Websocket.InitWebsocket();
@@ -60,8 +60,12 @@ myApp.config(['$routeProvider',
                 templateUrl:'Notifications/Notifications.html'
                 // controller: 'NotificationController'
             })
+            .when('/Settings',{
+                templateUrl:'Settings/Settings.html',
+                controller: 'SettingController'
+            })
             .otherwise({
-            redirectTo: '/Notifications'
+            redirectTo: '/Settings'
         });
     }
 ]);

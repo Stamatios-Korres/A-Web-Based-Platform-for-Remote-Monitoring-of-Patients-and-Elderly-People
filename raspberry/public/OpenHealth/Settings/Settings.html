@@ -1,0 +1,26 @@
+<div style=" height:100%;" layout="row" flex>
+    <div layout="column">
+            <div style="margin:  20px;padding: 20px;height:150px; width: 500px" md-whiteframe="5" >
+                <h4>Change username/password</h4>
+            </div>
+            <div style="margin:  20px;padding: 20px; width: 500px" md-whiteframe="5" flex>
+                <h4> Users allowed to see your data </h4>
+                <md-list>
+                    <md-list-item  class="listItem" ng-repeat=" userA in acceptedFriends.Listof track by $index"  layout="row" >
+                        <div flex>
+                        {{userA}}
+                        </div>
+                        <md-button class="md-icon-button" id='select' ng-click="acceptedFriends.showConfirm(userA)">&#x2715;</md-button>
+                    </md-list-item>
+
+                </md-list>
+
+            </div>
+    </div>
+    <div flex>
+        <div style="margin:  20px;padding: 20px;height:150px; width: 200px" md-whiteframe="5" >
+            <h4> Change Way of login</h4>
+        </div>
+    </div>
+
+</div>

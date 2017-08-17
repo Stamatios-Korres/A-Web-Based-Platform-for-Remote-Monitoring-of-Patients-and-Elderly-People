@@ -27,6 +27,29 @@
    height:60px;
    width: 100px;
 }
+#RealTime {
+    width: 170px;
+    opacity:0.4;
+    height: 80px;
+    position: absolute;
+    z-index: 8;
+    overflow: hidden;
+    border-radius:2px;
+}
+#close {
+   padding:2px 2px;
+   background-color:#fff;
+   cursor:pointer;}
+#close:before {
+    content:'\00d7'; color:red; font-size:2em;}
+
+.listItem{
+    width: 450px;
+}
+.listItem:hover{
+    /*background-color: lightblue;*/
+
+}
 .input2{
 
    margin: 5px;

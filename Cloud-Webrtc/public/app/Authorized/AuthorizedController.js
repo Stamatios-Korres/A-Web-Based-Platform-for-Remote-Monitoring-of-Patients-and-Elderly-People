@@ -544,7 +544,13 @@ MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, Vi
     $scope.RealTime ={
         blood:0,
         heart:0,
-        show:false
+        show:false,
+        hide:function(){
+            $scope.RealTime.show = false;
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
+        }
     };
 
     //Event handlers when new message arrives from Websockets
@@ -553,9 +559,12 @@ MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, Vi
         console.log('The other peer closed');
         $scope.videoInfo.Type = 'Closed';
         $scope.videoInfo.InCall = false;
+        $scope.RealTime.show = false;
         $scope.videoInfo.message = 'Call Ended ';
         VideoServices.closeVideo();
-        $scope.$apply();
+        if (!$scope.$$phase) {
+            $scope.$apply();
+        }
         $timeout(function () {
                 if ($scope.videoInfo.HowVideoWasClosedFlag === false)
                     closeScreen()
@@ -566,6 +575,8 @@ MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, Vi
         $scope.videoInfo.message = 'Sorry ' + $scope.videoInfo.target + ' is busy!';
         $scope.videoInfo.Type = 'Closed';
         $scope.$apply();
+        $scope.RealTime.show = false;
+
         $scope.videoInfo.HowVideoWasClosedFlag = false;
         $timeout(function () {
                 if ($scope.videoInfo.HowVideoWasClosedFlag === false)
@@ -577,6 +588,8 @@ MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, Vi
         $scope.videoInfo.Total = false;
         $scope.videoInfo.message = VideoServices.getTarget() + ' has closed his phone';
         $scope.videoInfo.Type = 'Closed';
+        $scope.RealTime.show = false;
+
         $scope.$apply();
         console.log('Target was set to null because of cancelled call ');
         VideoServices.ResetTarget();
@@ -585,6 +598,8 @@ MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, Vi
     $rootScope.$on('Offline', function () {
         console.log('Oops users seems to be disconnected');
         $scope.videoInfo.Type = 'Closed';
+        $scope.RealTime.show = false;
+
         $scope.videoInfo.InCall = false;
         $scope.videoInfo.message = VideoServices.getTarget() + " was disconected";
         $scope.$apply();
