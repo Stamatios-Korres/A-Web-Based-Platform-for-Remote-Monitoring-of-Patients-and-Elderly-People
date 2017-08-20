@@ -211,6 +211,8 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
                 $scope.mainPageInfo.Selected = username;
                 ChatUser = username;
                 $scope.Biosignals.target = username;
+                $rootScope.$emit('NewMessage');
+
             if(username !== $scope.mainPageInfo.Selected){       //Check if different user has been selected
                 //Function connected only to Biosignals
                 $scope.chart.data[1].values = [];
@@ -224,7 +226,6 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
                 $scope.chart.options.subtitle.enable = true;
                 $scope.chart.options.title.enable = true;
                 $scope.Biosignals.showdata();
-                $rootScope.$emit('NewMessage');
                 if (!$scope.$$phase) {
                     $scope.$apply();
                 }
