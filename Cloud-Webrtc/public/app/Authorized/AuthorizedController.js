@@ -205,14 +205,13 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
         });
 
         $scope.SelectedUser = function (username) {
-            if(username !== $scope.mainPageInfo.Selected){       //Check if different user has been selected
-                // al?ert('Changed');
+
                 FriendsAndState.messageRead(username);
                 $scope.mainPageInfo.friends = FriendsAndState.getfriends();
                 $scope.mainPageInfo.Selected = username;
                 ChatUser = username;
                 $scope.Biosignals.target = username;
-
+            if(username !== $scope.mainPageInfo.Selected){       //Check if different user has been selected
                 //Function connected only to Biosignals
                 $scope.chart.data[1].values = [];
                 $scope.chart.data[0].values = [];
