@@ -1,9 +1,9 @@
-<div ng-cloak style="height: 100%">
+<div ng-cloak ng-show="ready === true" style="height: 100%">
 
 
     <!--User uses Online Services for the first time-->
 
-    <div  class="md-whiteframe-11dp" ng-show="UserInformation.FirstTimeOnline===true"  layout-margin layout="column" style="margin: 10% ;height: 300px ;width: 700px" >
+    <div  class="md-whiteframe-11dp"  ng-show=" UserInformation.FirstTimeOnline===true"  layout-margin layout="column" style="margin: 10% ;height: 300px ;width: 700px" >
 
         <!--Title-->
         <h1 flex-offset="10">Subscribe to OpenHealth</h1>
@@ -38,8 +38,7 @@
     </div>
 
         <!--View after user is subscribed to the Service-->
-
-        <div  id="MainPage" style="height: 100%;" layout="row" flex ng-show="UserInformation.FirstTimeOnline===false">
+        <div  id="MainPage" style="height: 100%;" layout="row" flex ng-show=" UserInformation.FirstTimeOnline===false && UserOnline.Online === true">
 
             <!--Online Friends and their State-->
             <div id="OnlineFriends" flex="20" layout="column" class="md-whiteframe-4dp">
@@ -80,7 +79,6 @@
             </div>
             <!--Chat with a user -->
 
-
             <div id=Chat flex="30" layout="column" ng-controller="ChatController" ng-show="UserOnline.Selected!=''">
                 <md-toolbar style="margin: 1%" md-whiteframe="3"  >
                     <h3  flex-offset="20"> {{UserOnline.Selected}}</h3>
@@ -107,5 +105,21 @@
             </div>
             <!--ng-controller="ChatController"-->
         </div>
+
+
+        <div ng-show=" UserInformation.FirstTimeOnline===false && UserOnline.Online === false"  class="NewNotification"  flex=50 style="height:40%;width:650px;margin:50px"  md-whiteframe="4" >
+                <div layout="column" layout-align="center center" >
+                    <h3 >Login</h3>
+
+                </div>
+                <md-divider></md-divider>
+                <div style="margin: 5%"  layout="row">
+                    <h4 style="margin: 5%" flex>If you want to connect press Login</h4>
+                    <md-button ng-click='functions.ManualLogin()' style="margin: 5%" md-no-ink class="md-primary md-raised">Login</md-button>
+                </div>
+            </div>
+
+     </div>
+
 </div>
 

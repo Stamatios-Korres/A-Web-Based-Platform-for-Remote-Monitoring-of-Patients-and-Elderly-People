@@ -6,7 +6,7 @@ var user = require('../models/OnlineUserModel');
 
 
 router.post('/heartUpdate',function(req,res,next){
-    console.log(req.body.value);
+    console.log(req.body.newvalue);
     var newValue = req.body.newvalue;
     var id = req.body.uniqueId;
     biosignal.update({uniqueId:id},{measurement:{value:newValue}},function(err,result){
@@ -110,6 +110,7 @@ router.get('/bloodSaturationbiosignals',function(req,res,next){
 router.get('/heartbiosignals',function(req,res,next){
     var Result = [];
     var hours =req.query.range;
+    console.log(hours);
     try {
         if (isNaN(hours)) {
             biosignal.find({$query: {type: 'heart_rate'}, $orderby: {date_taken: 1}}, function (err, result) {

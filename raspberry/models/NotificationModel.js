@@ -13,7 +13,22 @@ var notification = new Schema({
         required:true
     },
     repeat:{
-        type:'String'
+        type:'String',
+        enum:[
+            'Daily',
+            'Never',
+            'Weekly'
+        ]
+    },
+    showedToday:{
+        type:'bool',
+        required:true
+
+    },
+    readyTochange:{
+        type:'bool',
+        required:true
+
     },
     uniqueId:{
         type:'String',
@@ -32,7 +47,9 @@ var notification = new Schema({
         enum:[
             'yes',
             'no'
-        ]
+        ],
+        required:true
+
     }
 
 });

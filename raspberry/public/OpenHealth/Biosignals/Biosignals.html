@@ -43,8 +43,13 @@
 
                     <!-- 2nd Tab-->
                     <md-tab label="Sensor" >
+                        <div style="height: 100%" layout="row">
                         <div class="RealTimeChart">
-                            <nvd3 config='sensor.Chart.config' options='sensor.Chart.options' api='sensor.Chart.api'events="sensor.Chart.event" data='sensor.Chart.data' ></nvd3>
+                            <nvd3 config='sensor.Chart.config' options='sensor.Chart.options' api='sensor.Chart.api' events="sensor.Chart.event" data='sensor.Chart.data' ></nvd3>
+                        </div>
+                            <div ng-show='sensor.Text.show === true' md-whiteframe="2" style=" margin: 4px;width : 20%; height:11%;">
+                                <div style=" border:black 1px;  margin: 4px;"><small>{{sensor.Text.area}}</small></div>
+                            </div>
                         </div>
                     </md-tab>
 

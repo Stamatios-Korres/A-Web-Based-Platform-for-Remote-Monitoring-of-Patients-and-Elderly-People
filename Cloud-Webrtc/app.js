@@ -15,6 +15,7 @@ var biosignals = require('./routes/biosignalRoute');
 var app = express();
 var flash = require('connect-flash');
 var passport = require('passport');
+var settings = require('./routes/settings');
 const cors = require('cors');
 
 // view engine setup
@@ -32,16 +33,12 @@ app.use(express.static(path.join(__dirname, 'public/app')));
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+    res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,DELETE");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
     next();
 });
-// app.use(function(req,res,next){
-//     res.header("Access-Control-Allow-Origin", "*");
-//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     next();
-// });
 
+app.use('/settings',settings);
 app.use('/tokens',token);
 app.use('/',login);
 app.use('/subscribe',subscribe);

@@ -547,6 +547,7 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
 
     $scope.range = '';
     $scope.previousValue ='';  // Flag used to check if elements have changed
+    $scope.FirstTime = true;
 
     // 2nd Tab
     $scope.sensor = {
@@ -628,11 +629,14 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                 }
 
             ]
-            }
+            },
+        Text:{
+            area:'No data',
+            show:false,
+            stop:false
+        }
 
     };
-
-
     //3rd Tab - Insert Manually Measurements
     $scope.NewValue = {
 
@@ -782,7 +786,9 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
         },
         getHeart: function (range) {
             BiosignalService.OnlineServices.getHeart(range,function (result) {
+                console.log(result);
                 if (result.message === 'Ok') {
+                    console.log('we are ok');
                     $scope.heartRate.heart.data[0].values = result.Result;
                     $scope.heartRate.heart.api.refresh();
                     $scope.functions.appearHeart();
@@ -801,23 +807,47 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
             })
         },
         refresh: function () {
-            if($scope.previousValue === $scope.range)
-                return;
-            $scope.previousValue = $scope.range;
-            $scope.functions.getHeart($scope.range);
-            $scope.functions.getBloodSaturation($scope.range);
+            // if($scope.previousValue === $scope.range && !$scope.FirstTime)
+                console.log('First CAtegory');
+            // else {
+                $scope.FirstTime = false;
+                // $scope.previousValue = $scope.range;
+                $scope.functions.getHeart($scope.range);
+                $scope.functions.getBloodSaturation($scope.range);
+            // }
         }
     };
+
     Websocket.NewMeasurement($scope,function(){
-        if($scope.sensor.Chart.data[0].values.length ===10){
-            $scope.sensor.Chart.data[0].values.splice(0,1);
-            $scope.sensor.Chart.data[1].values.splice(0,1);
+        if(status !==  "Disconnected / Scanning") {
+            if ($scope.sensor.Chart.data[0].values.length === 10) {
+                $scope.sensor.Chart.data[0].values.splice(0, 1);
+                $scope.sensor.Chart.data[1].values.splice(0, 1);
+            }
+            $scope.sensor.Chart.data[0].values.push(SpO2);
+            $scope.sensor.Chart.data[1].values.push(Pulse);
+            $scope.sensor.Chart.api.update();
+            // $scope.sensor.Text.show = true;
+            // if(stable === 'Yes') {
+            //     $scope.sensor.Text.area = 'Sensor is now stable you can Remove ';
+            //     $scope.sensor.Text.stop = true;
+            // }
+            // else if(stable === 'No' &&  $scope.sensor.Text.stop === false) {
+            //     $scope.sensor.Text.area = 'Wait, still getting Data';
+            }
+        else {
+            $scope.sensor.Text.area = 'Sensor is disconnected';
+            $timeout(function(){
+                $scope.sensor.Text.show = false;
+                $scope.sensor.Text.stop = false;
+                $scope.sensor.Text.area = '';
+
+            },3000);
         }
-        $scope.sensor.Chart.data[0].values.push(SpO2);
-        $scope.sensor.Chart.data[1].values.push(Pulse);
+
         $scope.sensor.Chart.options.subtitle.text = 'State of Sensor: ' + status;
         if(!$scope.$digest)
             $scope.$apply();
-        $scope.sensor.Chart.api.update();
+
     });
 });

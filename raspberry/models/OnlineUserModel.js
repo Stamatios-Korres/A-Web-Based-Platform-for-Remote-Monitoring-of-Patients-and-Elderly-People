@@ -11,7 +11,16 @@ var User = new Schema({
         type:'String',
         required:true
     },
+    WayOfLogin:{
+      type:'String',
+      required: true,
+      enum :[
+          'auto',
+          'manual'
+      ]
+    },
     ApprovedUsers:[]
+
 });
 
 module.exports= mongoose.model('User',User);

@@ -1,25 +1,62 @@
 <div style=" height:100%;" layout="row" flex>
-    <div layout="column">
-            <div style="margin:  20px;padding: 20px;height:150px; width: 500px" md-whiteframe="5" >
-                <h4>Change username/password</h4>
-            </div>
-            <div style="margin:  20px;padding: 20px; width: 500px" md-whiteframe="5" flex>
-                <h4> Users allowed to see your data </h4>
-                <md-list>
-                    <md-list-item  class="listItem" ng-repeat=" userA in acceptedFriends.Listof track by $index"  layout="row" >
-                        <div flex>
-                        {{userA}}
-                        </div>
-                        <md-button class="md-icon-button" id='select' ng-click="acceptedFriends.showConfirm(userA)">&#x2715;</md-button>
-                    </md-list-item>
 
-                </md-list>
-
+    <div>
+    <div layout="column" style="margin:  20px;padding: 20px;height:75%; width: 500px"   md-whiteframe="5">
+            <div>
+                <h4>ChangePassword</h4>
             </div>
+        <md-divider></md-divider>
+            <form  style='margin:5% ;margin-top: 10px' name="PasswordForm"  layout="column">
+                <md-input-container flex-offset="10" >
+                    <label>Enter Old Password</label>
+                    <input  type="password" ng-model="Password.Old1" name="Old1" style="width: 300px" >
+                    <div ng-messages="PasswordForm.Old1.$error">
+                        <div ng-message="required">This is required.</div>
+                    </div>
+                </md-input-container>
+                <md-input-container flex-offset="10" >
+                    <label>Re-enter Old Password</label>
+                    <input  ng-model="Password.Old2" name="Old2" type="password" style="width: 300px" >
+                    <div ng-messages="PasswordForm.date.$error">
+                        <div ng-message="required">This is required.</div>
+                    </div>
+                </md-input-container>
+
+                <md-input-container flex-offset="10" >
+                    <label>Enter New Password</label>
+                    <input   ng-model="Password.New" name="new" type="password" style="width: 300px">
+                    <div ng-messages="PasswordForm.new.$error">
+                        <div ng-message="required">This is required.</div>
+                    </div>
+                </md-input-container>
+                <md-button  flex-offset="80" ng-click='Password.changePassword(Password.Old1,Password.Old2,Password.New)' md-no-ink class="md-primary"><i class="material-icons">check</i></md-button>
+            </form>
+            <small>*Please fill out all data </small>
     </div>
-    <div flex>
-        <div style="margin:  20px;padding: 20px;height:150px; width: 200px" md-whiteframe="5" >
+
+
+    </div>
+
+    <div layout="column">
+        <div style="margin:  20px;padding: 20px;height:165px; width: 245px" md-whiteframe="5" >
             <h4> Change Way of login</h4>
+            <md-divider></md-divider>
+            <md-switch ng-model="LoginSettings.WayofLogin" aria-label="Switch 2" ng-true-value="'Automatic Login'" ng-change="LoginSettings.updateWay(LoginSettings.WayofLogin)" ng-false-value="'Manual Login'" class="md-primary" md-no-ink>
+               {{ LoginSettings.WayofLogin }}
+            </md-switch>
+            <small>*If you are online this will take effect when you restart the device</small>
+        </div>
+        <div style="margin:  20px;padding: 20px; height:45%; width: 500px" md-whiteframe="5" >
+            <h4> Users allowed to see your data </h4>
+            <md-divider></md-divider>
+            <md-list>
+                <md-list-item  class="listItem" ng-repeat=" userA in acceptedFriends.Listof track by $index"  layout="row" >
+                    <div flex>
+                        {{userA}}
+                    </div>
+                    <md-button class="md-icon-button" id='select' ng-click="acceptedFriends.showConfirm(userA)">&#x2715;</md-button>
+                </md-list-item>
+            </md-list>
         </div>
     </div>
 

@@ -12,15 +12,20 @@ SharedServices.service('Websocket',function($rootScope,RealTimeService) {
                     case'SensorMeasurement':
                         if(data.data) {
                             var oximeter = data.data;
-                            SpO2 = oximeter.Saturation;     // Almost ready to discard the Global Variables
-                            Pulse = oximeter.HeartRate;
-                            RealTimeService.setMeasurement(Pulse,SpO2);
+                            if(oximeter.status !== "Disconnected / Scanning") {
+                                SpO2 = oximeter.Saturation;     // Almost ready to discard the Global Variables
+                                Pulse = oximeter.HeartRate;
+                                RealTimeService.setMeasurement(Pulse, SpO2);
+
+                            }
+                            stable = oximeter.stable;
                             status = oximeter.status;
                             $rootScope.$emit('NewMeasurement');
                         }
                         break;
                     case 'ActiveNotification':
                         Activenotification = data.notification;
+                        console.log(Activenotification);
                         $rootScope.$emit('ActiveNotification');
                         break;
 

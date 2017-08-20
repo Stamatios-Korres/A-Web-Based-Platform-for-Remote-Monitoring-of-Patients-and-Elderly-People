@@ -12,6 +12,8 @@ var bufferDate = [];
 var index = 0;
 var status = "";
 const BIO_BUFFER_SIZE = 10;
+var SLIDING_WINDOW = [];
+var SLIDING_WINDOW_MAX_LENGHT = 10;
 
 
 noble.on('stateChange', function (state) {
@@ -63,6 +65,8 @@ noble.on('discover', function (peripheral) {
         peripheral.once('disconnect', function () {
             console.log('disconnected');
             status = "Disconnected / Scanning";
+            SLIDING_WINDOW = [];
+            inform({Saturation:null, HeartRate: null, status: status,stable:'No'});
             noble.startScanning(['cdeacb8052354c07884693a37ee6b86d'], true);
             connecting = false;
             bufferPulse = [];
@@ -98,9 +102,10 @@ function processSpO2(data) {
     var pi = data[3] & 0xff;
     status = "Measuring";
     if (pulse !== 255 && SpO2 !== 127) {
+        bufferPush(pulse, SpO2, pi, d);
         var d = new Date();
         d.setMilliseconds(0);
-        bufferPush(pulse, SpO2, pi, d);
+
         var Saturation = {
             x: d.getTime(),
             y: SpO2
@@ -109,8 +114,9 @@ function processSpO2(data) {
             x: d.getTime(),
             y: pulse
         };
-        Save(SpO2, pulse);
-        inform({Saturation: Saturation, HeartRate: HeartRate, status: status});
+
+        proccess(SpO2, pulse);
+
     }
 }
 
@@ -129,6 +135,60 @@ ble.getDataSize = function () {
 };
 
 module.exports = ble;
+
+function proccess(Saturation, HeartRate){
+
+    var d = new Date();
+    d.setMilliseconds(0);
+
+    var SaturationMes = {
+        x: d.getTime(),
+        y: Saturation
+    };
+    var HeartRateMes = {
+        x: d.getTime(),
+        y: HeartRate
+    };
+
+    if(SLIDING_WINDOW.length < SLIDING_WINDOW_MAX_LENGHT){
+        var measurement ={
+            Saturation :Saturation,
+            HeartRate: HeartRate
+        };
+        SLIDING_WINDOW.push(measurement);
+        inform({Saturation: SaturationMes, HeartRate: HeartRateMes, status: status,stable:'No'});
+    }
+    else if(SLIDING_WINDOW.length === SLIDING_WINDOW_MAX_LENGHT){
+        var totalHeart = 0;
+        var totalBlood = 0;
+        var avgHeart ;
+        var avgBlood ;
+        for(var i = 0; i < SLIDING_WINDOW.length; i++) {
+            totalHeart += SLIDING_WINDOW[i].HeartRate;
+            totalBlood +=SLIDING_WINDOW[i].Saturation;
+        }
+        avgHeart = totalHeart / SLIDING_WINDOW.length;
+        avgBlood = totalBlood / SLIDING_WINDOW.length;
+
+
+        var mes ={
+            Saturation :Saturation,
+            HeartRate: HeartRate
+        };
+        SLIDING_WINDOW.splice(0,1);
+        SLIDING_WINDOW.push(mes);
+
+        //We have stable measurement
+        if(Math.abs(avgHeart-HeartRate) <=1 && Math.abs(avgBlood - Saturation) <=1){
+                console.log('Steady data');
+                Save(Saturation,HeartRate);
+            inform({Saturation: SaturationMes, HeartRate: HeartRateMes, status: status,stable:'Yes'});
+        }
+        else
+            inform({Saturation: SaturationMes, HeartRate: HeartRateMes, status: status,stable:'No'});
+
+    }
+}
 
 function Save(Saturation, HeartRate) {
     var BloodSaturation = new biosignal({

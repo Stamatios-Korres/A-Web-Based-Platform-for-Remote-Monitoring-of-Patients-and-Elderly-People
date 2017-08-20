@@ -52,4 +52,20 @@ user.pre('save',function(callback){
     });
 });
 
+
+user.pre('update',function(callback){
+    var user = this;
+    if (!user.isModified('password')) //What ?
+        return callback();
+    bcrypt.genSalt(SaltFactor,function(err,salt){
+        if(err) return callback(err);
+        console.log(user.password);
+        bcrypt.hash(user.password,salt,null,function(err,hash){
+            if(err) return callback(err);
+            user.password = hash;
+            callback();
+        })
+    });
+});
+
 module.exports = mongoose.model('user',user);

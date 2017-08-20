@@ -4,7 +4,7 @@
             <div class="md-toolbar-tools md-accent">
                 <i class="material-icons">alarm</i>
                 <div >
-                    Update Notification
+                    Update Reminder
                 </div>
                 <span flex></span>
             </div>
@@ -18,10 +18,17 @@
 
             <md-input-container >
                 <h4 flex-offset="10" >Date</h4>
-                <input     aria-label="ShowHideAccountant" flex-offset="20"style="width: 250px" ng-model ='CrudOperations.Updatingdate'>
+                <input     aria-label="ShowHideAccountant" flex-offset="20" style="width: 250px" ng-model ='CrudOperations.Updatingdate'>
             </md-input-container>
         </div>
-
+        <md-input-container >
+            <h4 flex-offset="10" >Repeat</h4>
+            <md-select  flex-offset="20" style="width: 250px"  placeholder="Select Range" ng-model="CrudOperations.UpdatingRepeat "  style="min-width: 200px;">
+                <md-option ng-value=' "Never"'>Never</md-option>
+                <md-option ng-value='"Daily" '>Daily</md-option>
+                <md-option ng-value='"Weekly"'>Once a  Week</md-option>
+            </md-select>
+        </md-input-container>
         <div layout="column" flex>
             <h3 flex-offset="10" flex="60"></h3>
             <md-dialog-actions layout="row">

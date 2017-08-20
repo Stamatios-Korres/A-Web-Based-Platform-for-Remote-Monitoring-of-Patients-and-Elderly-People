@@ -12,25 +12,33 @@
                             <label>Description</label>
                             <input   ng-model="newNotification.description" name="description"style="width: 300px" >
                             <div ng-messages="NotificationForm.description.$error">
-                                <div ng-message="required">This is required.</div>
                             </div>
                         </md-input-container>
-                        <md-input-container flex-offset="10" >
-                            <label>Enter Day </label>
-                            <input  ng-model="newNotification.date" name="date" type="date" style="width: 300px" >
-                            <div ng-messages="NotificationForm.date.$error">
-                                <div ng-message="required">This is required.</div>
-                            </div>
-                        </md-input-container>
+
+                        <!--<md-input-container flex-offset="10" >-->
+                            <!--<label>Enter Day </label>-->
+                            <!--<input  ng-model="newNotification.date" name="date" type="date" style="width: 300px" >-->
+                            <!--</div>-->
+                        <!--</md-input-container>-->
 
                         <md-input-container flex-offset="10" >
                             <label  >EnterTime</label>
                             <input   ng-model="newNotification.time" name="time" type="time" style="width: 300px">
-                            <div ng-messages="NotificationForm.time.$error">
-                                <div ng-message="required">This is required.</div>
-                            </div>
                         </md-input-container>
-                        <md-button type="submit" flex-offset="80" ng-click="newNotification.addNotification(newNotification.description,newNotification.date,newNotification.time)"md-no-ink class="md-primary"><i class="material-icons">check</i></md-button>
+
+                        <md-input-container flex-offset="10" style="width:300px">
+                            <md-datepicker   style="width: 300px" ng-model="newNotification.date" md-placeholder="Enter date" md-open-on-focus></md-datepicker>
+                        </md-input-container>
+
+                        <md-input-container style="margin-left: 15%">
+                            <label>Repeat</label>
+                            <md-select placeholder="Select Range" ng-init="newNotification.repeat = 'Never' " ng-model="newNotification.repeat"  style="width: 180px;">
+                                <md-option ng-value=' "Never"'>Never</md-option>
+                                <md-option ng-value='"Daily" '>Daily</md-option>
+                                <md-option ng-value='"Weekly"'>Once a  Week</md-option>
+                            </md-select>
+                        </md-input-container>
+                        <md-button flex-offset="80" ng-click="newNotification.addNotification(newNotification.description,newNotification.date,newNotification.time)"md-no-ink class="md-primary"><i class="material-icons">check</i></md-button>
                     </form>
 
                 </div>
@@ -42,7 +50,7 @@
                         <!--No available data yet-->
                         <md-list-item   ng-if ='notifications.notifications.length === 0 '> <h3 flex-offset="10">No Active notifications</h3></md-list-item>
 
-                        <md-list-item  ng-click='CrudOperations.showmenu(ntf.description,ntf.date,ntf.uniqueId)' class="md-2-line" ng-repeat="ntf in notifications.notifications"  layout-margin flex>
+                        <md-list-item  ng-click='CrudOperations.showmenu(ntf.description,ntf.date,ntf.uniqueId,ntf.type,ntf.repeat)' class="md-2-line" ng-repeat="ntf in notifications.notifications"  layout-margin flex>
                                 <md-icon ><i class="material-icons">send</i></md-icon>
                                 <div class="md-list-item-text" layout="column">
                                     <h4>
@@ -51,6 +59,7 @@
                                     <h4>
                                         Date: {{ntf.date}}
                                         <i ng-if="ntf.reminder === true" class="material-icons">replay_10</i>
+                                        <i ng-if="ntf.type === 'Periodical' && (ntf.repeat ==='Daily' || ntf.repeat ==='Weekly') " class="material-icons">autorenew</i>
                                     </h4>
                                 </div>
 

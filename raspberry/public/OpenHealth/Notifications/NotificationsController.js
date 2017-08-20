@@ -62,23 +62,34 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
                         if (notification[j].uniqueId === Newnotification.uniqueId) {
                             notification[j].description = Newnotification.description;
                             notification[j].date = Newnotification.date;
+                            notification[j].type = Newnotification.type;
+                            notification[j].repeat = Newnotification.repeat;
                             $scope.notifications.notifications = notification;
-                            if (!$scope.$digest)
-                                $scope.$apply();
                             break;
                         }
                     }
+                    if (!$scope.$digest)
+                        $scope.$apply();
                     break;
                 case 'RemindNotification':
                     for (var k = 0; k < notification.length; k++) {
-                        console.log(Newnotification);
                         if (notification[k].uniqueId === Newnotification.uniqueId) {
-                            console.log('Found what I was looking for');
                             notification[k].reminder = true;
                             $scope.notifications.notifications = notification;
                             if (!$scope.$digest)
                                 $scope.$apply();
-                            console.log('everything is done');
+                            console.log($scope.notifications.notifications);
+                            break;
+                        }
+                    }
+                    break;
+                case'backToRepeat':
+                    for (var l = 0; l < notification.length; l++) {
+                        if (notification[l].uniqueId === Newnotification.uniqueId) {
+                            notification[l].repeat = Activenotification.repeat;
+                            $scope.notifications.notifications = notification;
+                            if (!$scope.$digest)
+                                $scope.$apply();
                             break;
                         }
                     }
@@ -94,11 +105,12 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
                 data: {field: 'date', id: id}
             })
         },
-        updateNotification: function (uniqueId, date, description, callback) {
+        updateNotification: function (uniqueId, date, description,repeat, callback) {
             var UpdatedNotification = {
                 field: 'Both',
                 uniqueId: uniqueId,
                 date: date,
+                repeat:repeat,
                 description: description
             };
             $http({
@@ -107,6 +119,8 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
                 data: UpdatedNotification
             }).then(function successCallback(response) {
                 callback(response.data);
+            },function errorCallback(response){
+                console.log(response);
             })
         }
     };          // General functions needed bu the controller
@@ -114,6 +128,7 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
         description: null,
         date: null,
         time: null,
+        repeat:null,
         reset: function () {
             console.log('Function was called');
             $scope.newNotification.description = null;
@@ -127,15 +142,25 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
                 $http({
                     method: 'post',
                     url: '/notification',
-                    data: {description: description, date: date, time: time}
+                    data: {
+                        description: description,
+                        date: date,
+                        time: time,
+                        repeat:$scope.newNotification.repeat
+                    }
                 }).then(
                     function successCallback(response) {
                         if (response.data.message === 'Ok') {
                             $scope.functions.showResult('Notification was added');
+                            var type = 'Normal';
+                            if($scope.newNotification.repeat !== ' Never')
+                                 type ='Periodical';
                             $scope.functions.refreshTable('insert', {
                                 description: description,
                                 date: response.data.date,
-                                uniqueId: response.data.uniqueId
+                                uniqueId: response.data.uniqueId,
+                                type:type,
+                                repeat:$scope.newNotification.repeat
                             });
                         }
                         else {
@@ -144,7 +169,6 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
 
                     });
                     $scope.newNotification.reset();
-                 $location.path('Notifications');
             }
             else{
                 $scope.functions.showResult('Please fill out all fields');
@@ -169,7 +193,8 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
         Updatingdescription: null,
         Updatingdate: null,
         UpdatingUniqueId: null,
-        showmenu: function (description, date, uniqueID) {
+        UpdatingRepeat:null,
+        showmenu: function (description, date, uniqueID,type,repeat) {
             $mdDialog.show({
                 locals: {description: description, Date: date},
                 scope: $scope,
@@ -179,6 +204,7 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
                     $scope.CrudOperations.Updatingdescription = description;
                     $scope.CrudOperations.Updatingdate = date;
                     $scope.CrudOperations.UpdatingUniqueId = uniqueID;
+                    $scope.CrudOperations.UpdatingRepeat = repeat;
                     $scope.answer = function (answer) {
                         $mdDialog.hide(answer);
                     };
@@ -189,14 +215,25 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
             })
                 .then(function (answer) {
                     if (answer === 'Update') {
-                        $scope.functions.updateNotification($scope.CrudOperations.UpdatingUniqueId, $scope.CrudOperations.Updatingdate, $scope.CrudOperations.Updatingdescription,
-                            function (response) {
+                        $scope.functions.updateNotification($scope.CrudOperations.UpdatingUniqueId, $scope.CrudOperations.Updatingdate, $scope.CrudOperations.Updatingdescription,$scope.CrudOperations.UpdatingRepeat,
+                        function (response) {
                                 if (response.message === 'Ok') {
-                                    $scope.functions.refreshTable('update', {
+                                    console.log($scope.CrudOperations.UpdatingRepeat);
+                                    var flag = ($scope.CrudOperations.UpdatingRepeat === 'Never');
+                                    var type;
+                                    if(flag)
+                                        type = 'Normal';
+                                    else
+                                        type = 'Periodical';
+                                    var notification = {
                                         uniqueId: $scope.CrudOperations.UpdatingUniqueId,
                                         date: $scope.CrudOperations.Updatingdate,
-                                        description: $scope.CrudOperations.Updatingdescription
-                                    })
+                                        description: $scope.CrudOperations.Updatingdescription,
+                                        type:type,
+                                        repeat:$scope.CrudOperations.UpdatingRepeat
+                                    };
+                                    console.log(notification);
+                                    $scope.functions.refreshTable('update', notification);
                                 }
 
                             }
@@ -209,15 +246,17 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
                             }
                         })
                     }
+                },function errorCallback(){
+
                 });
         }
     };     // CRUD operations on existed notifications
+
 
     // Functions used for the md-Dialog to work as expected
 
     $scope.showTabDialog = function (ev) {
         $scope.ActiveNotification = Activenotification.description;
-        console.log($scope.ActiveNotification);
         $mdDialog.show({
             locals: {ActiveNotification: $scope.ActiveNotification},
             controller: ['$scope', 'ActiveNotification', function ($scope, ActiveNotification) {
@@ -228,16 +267,23 @@ Notifications.controller('NotificationController', function (Websocket, $mdDialo
             }],
             templateUrl: 'Notifications/NotificationTemplate.html',
             parent: angular.element(document.body),
-            clickOutsideToClose: true
+            clickOutsideToClose: false
         })
             .then(function (answer) {
-                if (answer === 'Ok') {
-                    $scope.functions.refreshTable('delete', Activenotification)
-                }
-                else if (answer === 'Later') {
-                    $scope.functions.RemindLater(Activenotification.uniqueId);
-                    $scope.functions.refreshTable('RemindNotification', {uniqueId: Activenotification.uniqueId});
-                }
+                    if (answer === 'Ok') {
+                        // Active Notification Comes the way it is saved at the DB
+                        if(Activenotification.repeat === 'Never') {
+                            $scope.functions.refreshTable('delete', Activenotification);
+                            console.log('In here1');
+                        }
+                        else {
+                            $scope.functions.refreshTable('backToRepeat', Activenotification)
+                        }
+                    }
+                    else if (answer === 'Later') {
+                        $scope.functions.RemindLater(Activenotification.uniqueId);
+                        $scope.functions.refreshTable('RemindNotification', {uniqueId: Activenotification.uniqueId});
+                    }
             });
     };
     $scope.answer = function (answer) {

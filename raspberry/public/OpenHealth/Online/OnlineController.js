@@ -1,10 +1,12 @@
 /**
  * Created by timos on 25/7/2017.
  */
+
 var Online = angular.module('Online',[]);
 
 angular.module('Online').service('FriendsAndState',function(){
     var friends = [];
+    var Selected= null;
     return {
         getfriends: function () {
             return friends;
@@ -76,6 +78,12 @@ angular.module('Online').service('FriendsAndState',function(){
                 }
             }
             return false;
+        },
+        getSelected:function(){
+            return Selected;
+        },
+        setSelected:function(name){
+            Selected = name;
         },
         clean: function () {
             friends = [];
@@ -737,6 +745,7 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
 
                     case 'RequestBiosignals':
                         BiosignalsOnlineServices.setRequester(data.source,data.sourceId,data.range);
+                        alert('Got One');
                         $rootScope.$emit('RequestBiosignals');
                         break;
                     default:
@@ -948,12 +957,19 @@ angular.module('Online').service('BiosignalsOnlineServices',function($rootScope,
         }
     };
     services.IsInAcceptedUsers = function(username){
-        console.log(username);
         for(var i=0;i<AcceptedUsers.length;i++){
                 if(AcceptedUsers[i].username === username)
                     return true
         }
         return false
+    };
+    services.DeleteUser = function(username){
+        for(var k=0;k<AcceptedUsers.length;k++){
+            if(AcceptedUsers[k].username === username){
+                AcceptedUsers.splice(k,1);
+                break;
+            }
+        }
     };
     services.addtoAccepted = function(username){
         console.log('User was added');
@@ -973,7 +989,6 @@ angular.module('Online').service('BiosignalsOnlineServices',function($rootScope,
     return services;
 });
 
-
 Online.service('RealTimeService',function(){
     var services = {};
     var Measurement ={
@@ -991,8 +1006,11 @@ Online.service('RealTimeService',function(){
 
 });
 
-Online.controller('OnlineCtrl',function(VideoServices,BiosignalsOnlineServices,FriendsAndState,ChatServices,$mdDialog,WebsocketService,AjaxServices,$scope,$http,$mdToast,$location,$rootScope){
-    $scope.username = null;
+
+Online.controller('OnlineCtrl',
+    function(GlobalVariables,SettingService,VideoServices,BiosignalsOnlineServices,FriendsAndState,ChatServices,$mdDialog,WebsocketService,AjaxServices,$scope,$http,$mdToast,$location,$rootScope,$timeout){
+
+    $scope.ready = false ;          // Flag when everything is set up
 
     $scope.functions ={
         showResult: function (string) {
@@ -1015,125 +1033,116 @@ Online.controller('OnlineCtrl',function(VideoServices,BiosignalsOnlineServices,F
                 }
             })
         },
-        FindUsername: function(){
-            $http({
-                method:'get',
-                url:'/online'
-            }).then(function successCallback(response){
-                if(response.data.message ==='Ok' ){ // User has subscribed - require the Token
-                    $scope.username = response.data.user.Username;
-                    my_name = $scope.username;
-                    $scope.functions.getAcceptedUsers(function(result){
-                      BiosignalsOnlineServices.setUsers(result);
+        Login: function(){
+            if(GlobalVariables.getSubscribe()){
+                if (!token) {
+                    $scope.functions.getAcceptedUsers(function (result) {
+                        BiosignalsOnlineServices.setUsers(result);
                     });
-                    if(!token) {
-                        $http({
-                            method: 'post',
-                            url: CloudHttpUrl + '/login',
-                            data: {
-                                grant_type: 'password',
-                                client_id: 'myApp',
-                                client_secret: 'hmmy1994',
-                                username: response.data.user.Username,
-                                password: response.data.user.Password,
-                                category:'RaspberryUser'
-                            }
-                        }).then(
-                            function (response) {
-                                if (response.data.access_token) {
-                                    token = response.data.access_token;
-                                    console.log('Requested Token ');
-                                    AjaxServices.services.GetFriends(function (response) {
-                                        for (var i = 0; i < response.length; i++) {
-                                            FriendsAndState.addfriends(response[i], 'inactive', 0);
-                                        }
-                                        ChatServices.createArray();
-                                        wsCloud = new WebSocket(CloudWebsocketUrl);
-                                        WebsocketService.InitWebsocket();
-                                        wsCloud.onopen = function InitWebsocket(e) {
-                                            message = {
-                                                type: 'init',
-                                                token: token
-                                            };
-                                            wsCloud.send(JSON.stringify(message));
-                                        };
-                                    });
-                            deamon();
-                                }
-                            }, function errorCallback(response) {
-                                console.log(response);
-                            })
-                    }
-                    else {
-                        $scope.UserOnline.friends = FriendsAndState.getfriends();
-                        if (!$scope.$$phase) {
-                            $scope.$apply();
+                    $http({
+                        method: 'post',
+                        url: CloudHttpUrl + '/login',
+                        data: {
+                            grant_type: 'password',
+                            client_id: 'myApp',
+                            client_secret: 'hmmy1994',
+                            username: GlobalVariables.getUsername(),
+                            password: GlobalVariables.getPassword(),
+                            category: 'RaspberryUser'
                         }
-                    }
-                    hasSubscribed = true;
+                    }).then(
+                        function SuccessCallback(response) {
+                            if (response.data.access_token) {
+                                token = response.data.access_token;
+                                AjaxServices.services.GetFriends(function (response) {
+                                    for (var i = 0; i < response.length; i++) {
+                                        FriendsAndState.addfriends(response[i], 'inactive', 0);
+                                    }
+                                    ChatServices.createArray();
+                                    wsCloud = new WebSocket(CloudWebsocketUrl);
+                                    WebsocketService.InitWebsocket();
+                                    wsCloud.onopen = function InitWebsocket(e) {
+                                        message = {
+                                            type: 'init',
+                                            token: token
+                                        };
+                                        wsCloud.send(JSON.stringify(message));
+                                    };
+                                    deamon();
+                                    GlobalVariables.SetIsonline(true);
+                                    $scope.UserOnline.Online = true;
+                                    $scope.ready = true;
+                                });
+                            }
+                        },
+                        function errorCallback(response) {
+                            console.log(response);
+                        })
                 }
-                else{
-                    $scope.UserInformation.FirstTimeOnline = true;
-                }
-            },function errorCallback(response) {
-                console.log(response);
-            });
-
+            }
+            else
+                $scope.UserInformation.FirstTimeOnline = true;
         },   // Something like Login
         SetUsername:function(username,password,callback){
-                $http({
-                    method:'post',
-                    url:  CloudHttpUrl+'/subscribe',
-                    data :{
-                        grant_type: 'password',
-                        client_id: 'myApp',
-                        client_secret: 'hmmy1994',
-                        username: username,
-                        password: password,
-                        category:'RaspberryUser',
-                        email:'Invalid'
+            $http({
+                method:'post',
+                url:  CloudHttpUrl+'/subscribe',
+                data :{
+                    grant_type: 'password',
+                    client_id: 'myApp',
+                    client_secret: 'hmmy1994',
+                    username: username,
+                    password: password,
+                    category:'RaspberryUser',
+                    email:'Invalid'
+                }
+            }).then(function successCallback(response){
+                    console.log(response);
+                    if (response.data.code === 11000) {
+                        //Username Already exists
+                        $scope.functions.showResult('Username already Exists');
                     }
-                }).then(function successCallback(response){
-                        console.log(response);
-                        if (response.data.code === 11000) {
-                            //Username Already exists
-                            $scope.functions.showResult('Username already Exists');
+                    else{               // (1) Save Username and Password
+                        $http({
+                            method:'post',
+                            url:'/online',
+                            data:{
+                                username:username,
+                                password:password,
+                                way:'auto'
                             }
-                        else{               // (1) Save Username and Password
-                            $http({
-                                method:'post',
-                                url:'/online',
-                                data:{
-                                    username:username,
-                                    password:password
+                        }).then(function successCallback(res){
+                            if(res.data.message === 'Ok') {
+                                if(response.data.access_token) { // We save the UserInfo && token after Saving
+                                    token = response.data.access_token;
+                                    my_name = username;
+                                    ChatServices.createArray();
+                                    GlobalVariables.SetIsonline(true);
+                                    $scope.UserOnline.Online = true;
+                                    $scope.ready = true;
+                                    console.log("Setting Token: " + token);
+                                    wsCloud = new WebSocket(CloudWebsocketUrl); // Open a 2nd websocket to the Cloud Server
+                                    $scope.UserInformation.FirstTimeOnline = false; // Close Subsribe page & open Normal Page
                                 }
-                            }).then(function successCallback(res){
-                                if(res.data.message === 'Ok') {
-                                    if(response.data.access_token) { // We save the UserInfo && token after Saving
-                                        token = response.data.access_token;
-                                        my_name = username;
-                                        console.log("Setting Token: " + token);
-                                        wsCloud = new WebSocket(CloudWebsocketUrl); // Open a 2nd websocket to the Cloud Server
-                                        $scope.UserInformation.FirstTimeOnline = false; // Close Subsribe page & open Normal Page
-                                        hasSubscribed = true;
-                                        $rootScope.$broadcast('Subsribed');
-                                    }
-                                }
-                                },function errorCallback(res){
-                                    console.log(res);
-                            })
-                        }
-                    },
-                    function errorCallback(response) {
-                        console.log(response);
-            })
+                            }
+                        },function errorCallback(res){
+                            console.log(res);
+                        })
+                    }
+                },
+                function errorCallback(response) {
+                    console.log(response);
+                })
         } ,  // Something like Subscribe
+        ManualLogin:function(){
+            $scope.functions.Login();
+        },
         SelectedUser :function (username) {
             FriendsAndState.messageRead(username);
             $scope.UserOnline.friends = FriendsAndState.getfriends();
             $scope.UserOnline.Selected = username;
             ChatUser = username;
-            console.log("Summoned");
+            FriendsAndState.setSelected(username);
             $rootScope.$emit('NewMessage'); //?
             if (!$scope.$$phase) {
                 $scope.$apply();
@@ -1150,7 +1159,6 @@ Online.controller('OnlineCtrl',function(VideoServices,BiosignalsOnlineServices,F
             }
         }
     };      //Information About User && First Login
-    $scope.functions.FindUsername();     // Check if User has been subscribed
     $scope.delete = function () {
         var confirm = $mdDialog.confirm()
             .clickOutsideToClose(true)
@@ -1186,99 +1194,101 @@ Online.controller('OnlineCtrl',function(VideoServices,BiosignalsOnlineServices,F
     };   // Delete a Friends
     $scope.UserOnline = {
         friends: [],
-        Selected:''
-    };  // Friends of User And selected of console
+        Selected:'',
+        WayOfLogin:null,
+        Online: false
+    };  // Friends of User And WayOfLogin selected of console
+
 
     // Requests functions
 
     $scope.removeClass= function () {
-            console.log('Lets Change the class');
-            document.getElementById('RequestInfo').classList.remove('md-warn');
+        console.log('Lets Change the class');
+        document.getElementById('RequestInfo').classList.remove('md-warn');
     };
     $scope.RequestsSent={
 
-            //These are about sending new requests
-            target: null,
-            sendRequest: function () {
-                if ($scope.RequestsSent.target) {
-                    AjaxServices.services.FriendRequest($scope.RequestsSent.target, function (result) {
-                        // console.log(result);
-                        $scope.RequestsSent.showResult(result);
-                        //Update the view
-                        $scope.RequestsSent.checkPending();
-                    });
+        //These are about sending new requests
+        target: null,
+        sendRequest: function () {
+            if ($scope.RequestsSent.target) {
+                AjaxServices.services.FriendRequest($scope.RequestsSent.target, function (result) {
+                    // console.log(result);
+                    $scope.RequestsSent.showResult(result);
+                    //Update the view
+                    $scope.RequestsSent.checkPending();
+                });
+            }
+        },
+        showResult: function (string) {
+            string = string.toUpperCase();
+            $mdToast.show(
+                $mdToast.simple()
+                    .textContent(string)
+                    .capsule(true)
+                    .position('top left')
+            )
+
+        },
+
+        //How to deal with requests already sent
+
+        sent: [],
+        checkPending: function () {
+            AjaxServices.services.PendingRequests(function () {
+                $scope.RequestsSent.sent = Pending;
+            })
+        },
+        cancel: function (name) {
+            AjaxServices.services.CancelRequest(name, function (reply) {
+                if (reply.message === 'Ok') {
+                    $scope.RequestsSent.sent = deleteFromList($scope.RequestsSent.sent, name);
+                    Pending = $scope.RequestsSent.sent;
+                    //  console.log($scope.RequestsSent.sent);
                 }
-            },
-            showResult: function (string) {
-                string = string.toUpperCase();
-                $mdToast.show(
-                    $mdToast.simple()
-                        .textContent(string)
-                        .capsule(true)
-                        .position('top left')
-                )
+                else {
+                    $scope.RequestsSent.showResult(reply.message);
 
-            },
-
-            //How to deal with requests already sent
-
-            sent: [],
-            checkPending: function () {
-                AjaxServices.services.PendingRequests(function () {
-                    $scope.RequestsSent.sent = Pending;
-                })
-            },
-            cancel: function (name) {
-                AjaxServices.services.CancelRequest(name, function (reply) {
-                    if (reply.message === 'Ok') {
-                        $scope.RequestsSent.sent = deleteFromList($scope.RequestsSent.sent, name);
-                        Pending = $scope.RequestsSent.sent;
-                        //  console.log($scope.RequestsSent.sent);
-                    }
-                    else {
-                        $scope.RequestsSent.showResult(reply.message);
-
-                    }
-                })
-            }
+                }
+            })
+        }
 
 
-        };
+    };
     $scope.RequestsReceived = {
-            Received: [],
-            checkRequests: function () {
-                AjaxServices.services.GetRequests(function () {
-                    $scope.RequestsReceived.Received = requests;
-                });
-            },
-            accept: function (name) {
-                AjaxServices.services.requestReply(name, 'accept', function (reply) {
-                    if (reply === 'Ok') {
-                        $scope.RequestsReceived.Received = deleteFromList($scope.RequestsReceived.Received, name);
-                        requests = $scope.RequestsReceived.Received;
-                    }
+        Received: [],
+        checkRequests: function () {
+            AjaxServices.services.GetRequests(function () {
+                $scope.RequestsReceived.Received = requests;
+            });
+        },
+        accept: function (name) {
+            AjaxServices.services.requestReply(name, 'accept', function (reply) {
+                if (reply === 'Ok') {
+                    $scope.RequestsReceived.Received = deleteFromList($scope.RequestsReceived.Received, name);
+                    requests = $scope.RequestsReceived.Received;
+                }
 
-                })
-            },
-            reject: function (name) {
-                console.log(name);
-                AjaxServices.services.requestReply(name, 'reject', function (reply) {
-                    console.log(reply);
-                    if (reply === 'Ok') {
-                        console.log("rejecting " + name);
-                        $scope.RequestsReceived.Received = deleteFromList($scope.RequestsReceived.Received, name);
-                        requests = $scope.RequestsReceived.Received;
-                    }
-                });
-            }
-        };
+            })
+        },
+        reject: function (name) {
+            console.log(name);
+            AjaxServices.services.requestReply(name, 'reject', function (reply) {
+                console.log(reply);
+                if (reply === 'Ok') {
+                    console.log("rejecting " + name);
+                    $scope.RequestsReceived.Received = deleteFromList($scope.RequestsReceived.Received, name);
+                    requests = $scope.RequestsReceived.Received;
+                }
+            });
+        }
+    };
     function deamon() {
         if (token !== undefined) {
             $scope.RequestsSent.checkPending();
             $scope.RequestsReceived.checkRequests();
         }
     }
-
 
     WebsocketService.refresh($scope,function(){
         $scope.UserOnline.friends = FriendsAndState.getfriends();
@@ -1306,45 +1316,84 @@ Online.controller('OnlineCtrl',function(VideoServices,BiosignalsOnlineServices,F
     });
     WebsocketService.RequestBiosignals($scope,function() {
         var Requester = BiosignalsOnlineServices.getRequester();
-        if (!BiosignalsOnlineServices.IsInAcceptedUsers(Requester.requester)) { // User in 'uknown'
-            var confirm = $mdDialog.confirm()
-                .clickOutsideToClose(false)
-                .title('Confirm')
-                .textContent(Requester.requester+' is requesting for your Biosignals and he is not in your List. Accept?')
-                .ariaLabel()
-                .openFrom('#left')
-                .closeTo(angular.element(document.querySelector('#right')))
-                .ok('Yes I am ')
-                .cancel('No');
-            $mdDialog.show(confirm).then(
-                function () {  //(A) Save the User to db
-                    $http({
-                        url:'/biosignal/AcceptedUsers',
-                        method:'post',
-                        data:{
-                            myself:my_name,
-                            user:Requester.requester
-                        }
-                    }).then(function successCallback(response){
-                        if(response.data.message ==='Ok') {
-                            BiosignalsOnlineServices.addtoAccepted(Requester.requester);
-                            WebsocketService.sendData(Requester);
-                        }
-                    },function errorCallback(response){
+        if (!BiosignalsOnlineServices.IsInAcceptedUsers(Requester.requester)) { // User is 'unknown'
+                var confirm = $mdDialog.confirm()
+                    .clickOutsideToClose(false)
+                    .title('Confirm')
+                    .textContent(Requester.requester + ' is requesting for your Biosignals and he is not in your List. Accept?')
+                    .ariaLabel()
+                    .openFrom('#left')
+                    .closeTo(angular.element(document.querySelector('#right')))
+                    .ok('Yes I am ')
+                    .cancel('No');
+                $mdDialog.show(confirm).then(
+                    function () {  //(A) Save the User to db
+                        $http({
+                            url: '/biosignal/AcceptedUsers',
+                            method: 'post',
+                            data: {
+                                myself: my_name,
+                                user: Requester.requester
+                            }
+                        }).then(function successCallback(response) {
+                            if (response.data.message === 'Ok') {
+                                BiosignalsOnlineServices.addtoAccepted(Requester.requester);
+                                WebsocketService.sendData(Requester);
+                                // $scope.dirty = 0;
+                            }
+                        }, function errorCallback(response) {
 
-                    })
-                },
-                function () {
-                    //Nothing happened, users cancelled his request
-                });
-        }
-        else{ // User is accepted - send the data without Asking the User
-            WebsocketService.sendData(Requester);
-        }
+                        })
+                    },
+                    function () {
+                        //Nothing happened, users cancelled his request
+                    });
+            }
+            else { // User is accepted - send the data without Asking the User
+                WebsocketService.sendData(Requester);
+            }
     });
 
+    function InitOnline(){
+        if(GlobalVariables.getSubscribe()) {
 
-});
+            if (SettingService.getWayOfLogin() === 'Automatic Login' && !GlobalVariables.GetIsonline()) {
+
+                $scope.functions.Login();     // Check if User has been subscribed
+            }
+            if (GlobalVariables.GetIsonline()) {
+                $scope.UserOnline.friends = FriendsAndState.getfriends();
+                if (FriendsAndState.getSelected())
+                    $timeout(function () {
+                        $scope.functions.SelectedUser(FriendsAndState.getSelected());
+                    }, 5);
+                $scope.UserOnline.Online = true;
+                $scope.ready = true;
+            }
+            else {
+                console.log('Should be here');
+                $scope.UserOnline.Online = false;
+                $scope.ready = true;
+            }
+        }
+        else{
+
+            $scope.UserInformation.FirstTimeOnline = GlobalVariables.getFirstTime();
+            $scope.ready = true;
+
+        }   //Unsubscribed User
+        if (!$scope.$$phase) {
+            $scope.$apply();
+        }
+    }
+
+    InitOnline();
+
+    $rootScope.$on('AutoLogin',$scope.functions.Login);
+
+
+}
+);
 
 Online.controller('Video-Controller', function ($rootScope,RealTimeService, Websocket,VideoServices, WebsocketService, $scope, $timeout) {
     function closeScreen() {
@@ -1643,7 +1692,7 @@ Online.controller('ChatController', function (AjaxServices,ChatServices,$mdDialo
         }, 100);
     };
     ChatServices.refresh($scope, function () {
-        console.log("Is this the function? ");
+        console.log('Wtf?');
         $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
         //Ask from Server if empty array
         if ($scope.messages.arrayofMessages) {

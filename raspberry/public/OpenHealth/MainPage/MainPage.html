@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
+<head >
     <meta charset="UTF-8">
     <title>OpenHealth</title>
 
@@ -64,9 +64,15 @@
     <link href="MainPage/mainPage.css" rel="stylesheet">
 </head>
 
-<body ng-app="Openhealth" ng-cloak ng-controller="OnlineCtrl">
+<body ng-app="Openhealth" ng-cloak ng-controller="SidenavController">
 
-    <div style="height: 100%" layout="column"  ng-controller="SidenavController">
+    <div style='height: 100%' ng-controller="NotificationController"   >
+    <div style='height: 100%' ng-controller="OnlineCtrl" >
+        <div style='height: 100%' ng-controller="BiosignalsController" >
+
+    <div style="height: 100%" layout="column">
+
+
 
      <!--Toolbar of the App (Fixed)-->
 
@@ -236,13 +242,17 @@
                     </md-toolbar>
                 </div>
             </div>
-            <div flex ng-view ng-controller="NotificationController"></div>
+
+            <!--<div style="height: 100%; width:100%" flex >-->
+            <div flex ng-view ></div>
+
+            <!--</div>-->
+
         </div>
 
 
-    </div>
 
-
+</div>
 
 
     <script src="/MainPage/MainPage.js"></script>
@@ -253,5 +263,6 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
     <script src='/javascripts/bootstrap.min.js'></script>
+    </div></div></div>
 </body>
 </html>
