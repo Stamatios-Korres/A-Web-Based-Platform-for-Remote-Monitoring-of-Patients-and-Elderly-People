@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="77b40028-482a-4f70-aa26-458e714cf2f9" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/routes/settings.js" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/.idea/Raspberry.iml" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/.idea/modules.xml" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/.idea/vcs.xml" afterPath="" />
@@ -5920,31 +5919,7 @@
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/views/error.jade" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/views/index1.jade" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/views/layout.jade" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Cloud-Webrtc/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Cloud-Webrtc/app.js" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Cloud-Webrtc/models/user.js" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/models/user.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Cloud-Webrtc/public/app/WelcomePage/WelcomePageController.js" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/public/app/WelcomePage/WelcomePageController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Controllers/NotificationDeamon.js" afterPath="$PROJECT_DIR$/Controllers/NotificationDeamon.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Sensor/Sensor.js" afterPath="$PROJECT_DIR$/Sensor/Sensor.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/models/NotificationModel.js" afterPath="$PROJECT_DIR$/models/NotificationModel.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/models/OnlineUserModel.js" afterPath="$PROJECT_DIR$/models/OnlineUserModel.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Biosignals/Biosignals.html" afterPath="$PROJECT_DIR$/public/OpenHealth/Biosignals/Biosignals.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Biosignals/BiosignalsController.js" afterPath="$PROJECT_DIR$/public/OpenHealth/Biosignals/BiosignalsController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.html" afterPath="$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.js" afterPath="$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Notifications/CrudTemplate.html" afterPath="$PROJECT_DIR$/public/OpenHealth/Notifications/CrudTemplate.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Notifications/NotificationTemplate.html" afterPath="$PROJECT_DIR$/public/OpenHealth/Notifications/NotificationTemplate.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Notifications/Notifications.html" afterPath="$PROJECT_DIR$/public/OpenHealth/Notifications/Notifications.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Notifications/NotificationsController.js" afterPath="$PROJECT_DIR$/public/OpenHealth/Notifications/NotificationsController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Online/Online.html" afterPath="$PROJECT_DIR$/public/OpenHealth/Online/Online.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Online/OnlineController.js" afterPath="$PROJECT_DIR$/public/OpenHealth/Online/OnlineController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Settings/SettingController.js" afterPath="$PROJECT_DIR$/public/OpenHealth/Settings/SettingController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Settings/Settings.html" afterPath="$PROJECT_DIR$/public/OpenHealth/Settings/Settings.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Shared.js" afterPath="$PROJECT_DIR$/public/OpenHealth/Shared.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/Biosignal.js" afterPath="$PROJECT_DIR$/routes/Biosignal.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/Notifications.js" afterPath="$PROJECT_DIR$/routes/Notifications.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/Online.js" afterPath="$PROJECT_DIR$/routes/Online.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Cloud-Webrtc/public/app/success.html" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/public/app/success.html" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -6296,12 +6271,12 @@
       <workItem from="1503140188708" duration="34596000" />
       <workItem from="1503177689977" duration="5497000" />
       <workItem from="1503224991416" duration="20684000" />
-      <workItem from="1503255373052" duration="502000" />
+      <workItem from="1503255373052" duration="991000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="303200000" />
+    <option name="totallyTimeSpent" value="303689000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="-4" width="1301" height="772" extended-state="6" />

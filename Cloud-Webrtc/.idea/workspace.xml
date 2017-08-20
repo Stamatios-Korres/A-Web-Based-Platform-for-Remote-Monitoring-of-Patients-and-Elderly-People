@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="58ee5b00-20d4-4bac-8fc4-9408f80fd15f" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/routes/settings.js" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/.idea/Raspberry.iml" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/.idea/modules.xml" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/.idea/vcs.xml" afterPath="" />
@@ -5920,31 +5919,7 @@
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/views/error.jade" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/views/index1.jade" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/views/layout.jade" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app.js" afterPath="$PROJECT_DIR$/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/models/user.js" afterPath="$PROJECT_DIR$/models/user.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/app/WelcomePage/WelcomePageController.js" afterPath="$PROJECT_DIR$/public/app/WelcomePage/WelcomePageController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../raspberry/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/Controllers/NotificationDeamon.js" afterPath="$PROJECT_DIR$/../raspberry/Controllers/NotificationDeamon.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/Sensor/Sensor.js" afterPath="$PROJECT_DIR$/../raspberry/Sensor/Sensor.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/models/NotificationModel.js" afterPath="$PROJECT_DIR$/../raspberry/models/NotificationModel.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/models/OnlineUserModel.js" afterPath="$PROJECT_DIR$/../raspberry/models/OnlineUserModel.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Biosignals/Biosignals.html" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Biosignals/Biosignals.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Biosignals/BiosignalsController.js" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Biosignals/BiosignalsController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/MainPage/MainPage.html" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/MainPage/MainPage.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/MainPage/MainPage.js" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/MainPage/MainPage.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Notifications/CrudTemplate.html" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Notifications/CrudTemplate.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Notifications/NotificationTemplate.html" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Notifications/NotificationTemplate.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Notifications/Notifications.html" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Notifications/Notifications.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Notifications/NotificationsController.js" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Notifications/NotificationsController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Online/Online.html" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Online/Online.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Online/OnlineController.js" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Online/OnlineController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Settings/SettingController.js" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Settings/SettingController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Settings/Settings.html" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Settings/Settings.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Shared.js" afterPath="$PROJECT_DIR$/../raspberry/public/OpenHealth/Shared.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/routes/Biosignal.js" afterPath="$PROJECT_DIR$/../raspberry/routes/Biosignal.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/routes/Notifications.js" afterPath="$PROJECT_DIR$/../raspberry/routes/Notifications.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../raspberry/routes/Online.js" afterPath="$PROJECT_DIR$/../raspberry/routes/Online.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/app/success.html" afterPath="$PROJECT_DIR$/public/app/success.html" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -6010,7 +5985,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Shared.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Shared.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/app/Shared/Shared.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="221">
@@ -6076,6 +6051,18 @@
                 <element signature="e#34286#34399#0" expanded="false" />
                 <element signature="e#34457#34567#0" expanded="false" />
                 <element signature="e#34625#34736#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="success.html" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/public/app/success.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="17">
+              <caret line="60" column="19" lean-forward="true" selection-start-line="60" selection-start-column="19" selection-end-line="60" selection-end-column="19" />
+              <folding>
+                <element signature="n#script#3;n#head#0;n#html#0;n#!!top" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -6228,13 +6215,13 @@
         <option value="$PROJECT_DIR$/public/app/Authorized/Authorized.html" />
         <option value="$PROJECT_DIR$/WebSocketServer/WebsocketServer.js" />
         <option value="$PROJECT_DIR$/public/app/css/main-page.css" />
-        <option value="$PROJECT_DIR$/public/app/success.html" />
         <option value="$PROJECT_DIR$/public/app/Authorized/AuthorizedController.js" />
         <option value="$PROJECT_DIR$/public/app/Shared/Shared.js" />
         <option value="$PROJECT_DIR$/app.js" />
         <option value="$PROJECT_DIR$/models/user.js" />
         <option value="$PROJECT_DIR$/routes/settings.js" />
         <option value="$PROJECT_DIR$/public/app/WelcomePage/WelcomePageController.js" />
+        <option value="$PROJECT_DIR$/public/app/success.html" />
       </list>
     </option>
   </component>
@@ -6519,12 +6506,12 @@
       <workItem from="1503054391296" duration="11000" />
       <workItem from="1503055566659" duration="25000" />
       <workItem from="1503165960853" duration="5740000" />
-      <workItem from="1503255755914" duration="119000" />
+      <workItem from="1503255755914" duration="759000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="829651000" />
+    <option name="totallyTimeSpent" value="830291000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
@@ -6716,13 +6703,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
           <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/app/success.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="554">
-          <caret line="85" column="40" lean-forward="false" selection-start-line="85" selection-start-column="40" selection-end-line="85" selection-end-column="40" />
         </state>
       </provider>
     </entry>
@@ -6942,6 +6922,16 @@
             <element signature="e#34286#34399#0" expanded="false" />
             <element signature="e#34457#34567#0" expanded="false" />
             <element signature="e#34625#34736#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/app/success.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="60" column="19" lean-forward="true" selection-start-line="60" selection-start-column="19" selection-end-line="60" selection-end-column="19" />
+          <folding>
+            <element signature="n#script#3;n#head#0;n#html#0;n#!!top" expanded="false" />
           </folding>
         </state>
       </provider>
