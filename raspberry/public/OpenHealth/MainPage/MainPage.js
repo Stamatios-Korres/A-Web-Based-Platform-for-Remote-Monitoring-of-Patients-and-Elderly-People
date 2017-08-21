@@ -8,7 +8,7 @@ var ws = new WebSocket('ws:localhost:4000'); //Websocket connections with the Lo
 var Pulse  ;
 var SpO2 ;
 var status = "";
-var stable = 'Yes';
+var stable = 'No';
 var notification = [] ;
 var Activenotification ='';
 
@@ -21,12 +21,14 @@ var token = null;
 var my_name;
 var wsCloud;
 
-// A global socket URL  //var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
-var CloudWebsocketUrl = 'ws:localhost:3000';
+// A global socket URL
+var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
+// var CloudWebsocketUrl = 'ws:localhost:3000';
 
-// A global Https URL   // var CloudHttpUrl = 'wss://healthcloud.menychtas.com/node';
+// A global Https URL
+var CloudHttpUrl = 'https://healthcloud.menychtas.com/node';
 
-var CloudHttpUrl = 'http://localhost:3000';
+// var CloudHttpUrl = 'http://localhost:3000';
 
 
 
@@ -50,14 +52,15 @@ myApp.config(['$routeProvider',
                 templateUrl: 'Online/Online.html'
             })
             .when('/Biosignals',{
-                templateUrl: 'Biosignals/Biosignals.html'
+                templateUrl: 'Biosignals/Biosignals.html',
+                controller: 'BiosignalsController'
             })
             .when('/Notifications',{
                 templateUrl:'Notifications/Notifications.html'
             })
             .when('/Settings',{
-                templateUrl:'Settings/Settings.html',
-                controller: 'SettingController'
+                templateUrl:'Settings/Settings.html'
+                // controller: 'SettingController'
             })
             .otherwise({
             redirectTo: '/Settings'
@@ -109,14 +112,12 @@ myApp.service('GlobalVariables',function(){
 myApp.controller('SidenavController',function(GlobalVariables,SettingService,$http,$scope,$location,$rootScope){
     $scope.Selected =1;
     $scope.OnlinePart = false;
-    $rootScope.$on('Subsribed',function(){
-            console.log('summoned');
-            $scope.OnlinePart = true;
-        });
-
     if($scope.Selected ===1)
         $location.path('Notifications');
-
+    $rootScope.$on('IsOnLine',function(){
+        $scope.username = my_name;
+        $scope.OnlinePart=true
+    });
     $scope.changeClass=function(ev){
         ev.target.style.background = 'grey'
     };
@@ -147,11 +148,8 @@ myApp.controller('SidenavController',function(GlobalVariables,SettingService,$ht
                     $rootScope.$broadcast('AutoLogin');
 
                 } // Should connect the User immediatly
-                else  {
-                    console.log('Here');
+                else
                     SettingService.setWayOfLogin('Manual Login');
-                }
-
             }
             else if (response.data.message === 'No username has been set') {
                 GlobalVariables.setSubscribe(false);

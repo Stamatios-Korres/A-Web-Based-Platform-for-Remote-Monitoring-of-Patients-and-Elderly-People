@@ -96,14 +96,11 @@ exports.initialize = function (server) {
                     }
                     case 'new-ice-candidate':
                         onlineList.SendBasedonId(data);
-                        console.log('Candidate Received');
                         break;
                     case 'hang-up':
                         onlineList.SendBasedonId(data);
-                        console.log('Call is ended');
                         break;
                     case 'busy':
-                        console.log('Change has been confirmed');
                         onlineList.SendResultToAll(connection, data);
                         onlineList.SendBasedonId(data);
                         break;
@@ -173,8 +170,6 @@ exports.RequestReply = function(target,source,decision){ // Must be sent to all 
 
             var stateSource = onlineList.CheckState(source);
             var stateTarget = onlineList.CheckState(target);
-            console.log(stateSource);
-            console.log(stateTarget);
             var msgTarget ={
                 type:'RequestReply',
                 target:target,
@@ -251,9 +246,7 @@ function SaveMessage(source, target, info,callback) {
     conversation.findOne({Participants:{$all:[source,target]}},function(err,result){
         if(err)
             console.log(err);
-        console.log('Conversation found: '+ result);
         var ConvId = result.ConversationId;
-        console.log(ConvId);
         var uuid = uuidv1();
         var newmessage={
             data:info,
@@ -266,7 +259,6 @@ function SaveMessage(source, target, info,callback) {
             if(err)
                 console.log(err);
             else {
-                console.log(result);
                 callback(uuid);
             }
         })
@@ -286,7 +278,6 @@ OnlineList.prototype.findUser = function (connection) {
 OnlineList.prototype.SendResultToAll = function (connection, forwardedMessage) {
     var userAnswered;
     var Username;
-    console.log(forwardedMessage);
     for (var i = 0; i < this.list.length; i++) {        // Find the username of User which answered
         if (this.list[i].PortIp === connection) {
             userAnswered = this.list[i];
@@ -367,11 +358,9 @@ OnlineList.prototype.Removeuser = function (connection) {
             userLeft = this.list[i];
             if(userLeft) {
                 Username = userLeft.username;
-                console.log('Found the user you have been asking for');
                 this.list.splice(i, 1);
             }
             else{
-                console.log('Not a valid User something uknown');
                 return;
             }
             break;
@@ -388,11 +377,11 @@ OnlineList.prototype.Removeuser = function (connection) {
             }
         }
         else {                       // SameAccount is 0 , there is not another User online to the same account
-            console.log('Only 1 user online');
+            console.log('Only 1 user was online');
             relationship.findOne({user: Username}, function (err, result) {
                 //results = All friends of user who left
                 if (err) {
-                    console.log('Some error occured')
+                    console.log('Could not remove user,Error')
                 }
                 //User has no current Friends
                 else if (!result)

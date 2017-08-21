@@ -30,14 +30,10 @@ angular.module('Online').service('FriendsAndState',function(){
         },
         newmessage:function(name){
             var i;
-            console.log("Let's see the problem");
             for ( i = 0; i < friends.length; i++) {
                 if(friends[i].username === name){
-                    console.log("Ok found the User");
                     var times = friends[i].unread;
-                    console.log(typeof times);
                     if(typeof times === 'number'){
-                        console.log('Ok it has increased since then');
                         times++;
                         friends[i].unread = times;
                     }
@@ -55,7 +51,6 @@ angular.module('Online').service('FriendsAndState',function(){
 
             for (var i = 0; i < friends.length; i++) {
                 if (friends[i].username === name) {
-                    console.log('State for '+ name+' has been changed to '+state);
                     friends[i].state = state;
                     break;
                 }
@@ -64,7 +59,6 @@ angular.module('Online').service('FriendsAndState',function(){
         removefromlist:function(element){
             for(var i = 0; i < friends.length; i++) {
                 if (friends[i].username === element) {
-                    //   console.log("removed it");
                     friends.splice(i, 1);
                     break;
                 }
@@ -618,6 +612,8 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
                                 break;
                         }
                         requests.splice(i,1);
+                        if(requests.length === 0)
+                            document.getElementById("RequestInfo").classList.remove('md-warn');
                         $rootScope.$emit('UpdateRequest');
                         break;
                     }
@@ -699,7 +695,6 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
                         $rootScope.$emit('Video-answer');
                         break;
                     case 'hang-up':
-
                         $rootScope.$emit('close-video');
                         break;
                     case 'busy':
@@ -745,7 +740,6 @@ angular.module('Online').service('WebsocketService',function(BiosignalService,Bi
 
                     case 'RequestBiosignals':
                         BiosignalsOnlineServices.setRequester(data.source,data.sourceId,data.range);
-                        alert('Got One');
                         $rootScope.$emit('RequestBiosignals');
                         break;
                     default:
@@ -846,7 +840,6 @@ angular.module('Online').service('ChatServices',function($rootScope,FriendsAndSt
         var i;
       for(i=0;i<ArraysofTexts.length;i++) {
           if (ArraysofTexts[i].name === username) { // Find the particular User and save the Index
-              console.log(ArraysofTexts[i].name);
               break;
           }
       }
@@ -873,7 +866,7 @@ angular.module('Online').service('ChatServices',function($rootScope,FriendsAndSt
             name: username,
             Chat: []
         };
-        console.log('New friend was added');
+
         ArraysofTexts.push(object);
     };
     services.SelectUser = function(username,callback){
@@ -933,7 +926,7 @@ angular.module('Online').service('ChatServices',function($rootScope,FriendsAndSt
             }
         }
         ArraysofTexts[index].Chat[ArraysofTexts[index].Chat.length-1].uuid = uuid;
-        console.log(  ArraysofTexts[index].Chat[ArraysofTexts[index].Chat.length-1]);
+
     };
     services.refresh =function (scope, callback) {
         var handler = $rootScope.$on('NewMessage', callback);
@@ -951,10 +944,12 @@ angular.module('Online').service('BiosignalsOnlineServices',function($rootScope,
     var services = {};
     var Requester = {};
     services.setUsers = function(Arr){
-        console.log('About to add new Accepted Users');
         for(var i=0;i<Arr.length;i++){
             AcceptedUsers.push({username:Arr[i]})
         }
+    };
+    services.getUsers = function(){
+        return AcceptedUsers;
     };
     services.IsInAcceptedUsers = function(username){
         for(var i=0;i<AcceptedUsers.length;i++){
@@ -972,7 +967,6 @@ angular.module('Online').service('BiosignalsOnlineServices',function($rootScope,
         }
     };
     services.addtoAccepted = function(username){
-        console.log('User was added');
         var newUser = {
             username:username
         };
@@ -1007,10 +1001,12 @@ Online.service('RealTimeService',function(){
 });
 
 
-Online.controller('OnlineCtrl',
-    function(GlobalVariables,SettingService,VideoServices,BiosignalsOnlineServices,FriendsAndState,ChatServices,$mdDialog,WebsocketService,AjaxServices,$scope,$http,$mdToast,$location,$rootScope,$timeout){
+Online.controller('OnlineCtrl',function($location,GlobalVariables,SettingService,VideoServices,BiosignalsOnlineServices,FriendsAndState,ChatServices,$mdDialog,WebsocketService,AjaxServices,$scope,$http,$mdToast,$location,$rootScope,$timeout){
 
     $scope.ready = false ;          // Flag when everything is set up
+    // $scope.changeView = function(string){
+    //     $location.path(string);
+    // };
 
     $scope.functions ={
         showResult: function (string) {
@@ -1038,7 +1034,7 @@ Online.controller('OnlineCtrl',
                 if (!token) {
                     $scope.functions.getAcceptedUsers(function (result) {
                         BiosignalsOnlineServices.setUsers(result);
-                    });
+
                     $http({
                         method: 'post',
                         url: CloudHttpUrl + '/login',
@@ -1078,6 +1074,7 @@ Online.controller('OnlineCtrl',
                         function errorCallback(response) {
                             console.log(response);
                         })
+                    });
                 }
             }
             else
@@ -1097,7 +1094,6 @@ Online.controller('OnlineCtrl',
                     email:'Invalid'
                 }
             }).then(function successCallback(response){
-                    console.log(response);
                     if (response.data.code === 11000) {
                         //Username Already exists
                         $scope.functions.showResult('Username already Exists');
@@ -1116,13 +1112,25 @@ Online.controller('OnlineCtrl',
                                 if(response.data.access_token) { // We save the UserInfo && token after Saving
                                     token = response.data.access_token;
                                     my_name = username;
+                                    $rootScope.$broadcast('IsOnLine');
+
                                     ChatServices.createArray();
                                     GlobalVariables.SetIsonline(true);
                                     $scope.UserOnline.Online = true;
                                     $scope.ready = true;
-                                    console.log("Setting Token: " + token);
                                     wsCloud = new WebSocket(CloudWebsocketUrl); // Open a 2nd websocket to the Cloud Server
+                                    WebsocketService.InitWebsocket();
+                                    wsCloud.onopen = function InitWebsocket(e) {
+                                        message = {
+                                            type: 'init',
+                                            token: token
+                                        };
+                                        wsCloud.send(JSON.stringify(message));
+                                    };
+                                    SettingService.setWayOfLogin('Automatic Login');
+                                    $rootScope.$broadcast('Subsrcibed');
                                     $scope.UserInformation.FirstTimeOnline = false; // Close Subsribe page & open Normal Page
+                                    GlobalVariables.setFirstTime(false);
                                 }
                             }
                         },function errorCallback(res){
@@ -1135,6 +1143,8 @@ Online.controller('OnlineCtrl',
                 })
         } ,  // Something like Subscribe
         ManualLogin:function(){
+            $rootScope.$broadcast('IsOnLine');
+            GlobalVariables.SetIsonline(true);
             $scope.functions.Login();
         },
         SelectedUser :function (username) {
@@ -1176,9 +1186,7 @@ Online.controller('OnlineCtrl',
                 AjaxServices.services.DeleteFriends($scope.UserOnline.Selected, function (result) {
                     if(result.data.message === 'Ok') {
                         for (var i = 0; i < $scope.UserOnline.friends.length; i++) {
-                            console.log($scope.UserOnline.friends[i].username);
                             if ($scope.UserOnline.friends[i].username === $scope.UserOnline.Selected) {
-                                console.log('deleted ' + $scope.UserOnline.Selected);
                                 $scope.UserOnline.friends.splice(i, 1);
                                 break;
                             }
@@ -1203,7 +1211,6 @@ Online.controller('OnlineCtrl',
     // Requests functions
 
     $scope.removeClass= function () {
-        console.log('Lets Change the class');
         document.getElementById('RequestInfo').classList.remove('md-warn');
     };
     $scope.RequestsSent={
@@ -1213,9 +1220,7 @@ Online.controller('OnlineCtrl',
         sendRequest: function () {
             if ($scope.RequestsSent.target) {
                 AjaxServices.services.FriendRequest($scope.RequestsSent.target, function (result) {
-                    // console.log(result);
                     $scope.RequestsSent.showResult(result);
-                    //Update the view
                     $scope.RequestsSent.checkPending();
                 });
             }
@@ -1244,7 +1249,6 @@ Online.controller('OnlineCtrl',
                 if (reply.message === 'Ok') {
                     $scope.RequestsSent.sent = deleteFromList($scope.RequestsSent.sent, name);
                     Pending = $scope.RequestsSent.sent;
-                    //  console.log($scope.RequestsSent.sent);
                 }
                 else {
                     $scope.RequestsSent.showResult(reply.message);
@@ -1259,6 +1263,8 @@ Online.controller('OnlineCtrl',
         Received: [],
         checkRequests: function () {
             AjaxServices.services.GetRequests(function () {
+                if(requests.length >0)
+                    document.getElementById("RequestInfo").classList.add('md-warn');
                 $scope.RequestsReceived.Received = requests;
             });
         },
@@ -1272,11 +1278,8 @@ Online.controller('OnlineCtrl',
             })
         },
         reject: function (name) {
-            console.log(name);
             AjaxServices.services.requestReply(name, 'reject', function (reply) {
-                console.log(reply);
                 if (reply === 'Ok') {
-                    console.log("rejecting " + name);
                     $scope.RequestsReceived.Received = deleteFromList($scope.RequestsReceived.Received, name);
                     requests = $scope.RequestsReceived.Received;
                 }
@@ -1307,7 +1310,6 @@ Online.controller('OnlineCtrl',
         }
     });
     WebsocketService.UpdateRequest($scope, function () {
-        console.log('About to Change the requests');
         $scope.RequestsReceived.Received = requests;
         $scope.RequestsSent.sent = Pending;
         if (!$scope.$$phase) {
@@ -1338,8 +1340,8 @@ Online.controller('OnlineCtrl',
                         }).then(function successCallback(response) {
                             if (response.data.message === 'Ok') {
                                 BiosignalsOnlineServices.addtoAccepted(Requester.requester);
+                                $rootScope.$emit('Accepted');
                                 WebsocketService.sendData(Requester);
-                                // $scope.dirty = 0;
                             }
                         }, function errorCallback(response) {
 
@@ -1355,6 +1357,7 @@ Online.controller('OnlineCtrl',
     });
 
     function InitOnline(){
+        //SUbscribed User
         if(GlobalVariables.getSubscribe()) {
 
             if (SettingService.getWayOfLogin() === 'Automatic Login' && !GlobalVariables.GetIsonline()) {
@@ -1371,29 +1374,27 @@ Online.controller('OnlineCtrl',
                 $scope.ready = true;
             }
             else {
-                console.log('Should be here');
                 $scope.UserOnline.Online = false;
                 $scope.ready = true;
             }
         }
+        //Unsubscribed User
         else{
-
-            $scope.UserInformation.FirstTimeOnline = GlobalVariables.getFirstTime();
+            $scope.UserInformation.FirstTimeOnline =   GlobalVariables.getFirstTime();
             $scope.ready = true;
+        }
 
-        }   //Unsubscribed User
         if (!$scope.$$phase) {
             $scope.$apply();
         }
     }
 
-    InitOnline();
+    $timeout(InitOnline,10);
 
     $rootScope.$on('AutoLogin',$scope.functions.Login);
 
 
-}
-);
+});
 
 Online.controller('Video-Controller', function ($rootScope,RealTimeService, Websocket,VideoServices, WebsocketService, $scope, $timeout) {
     function closeScreen() {
@@ -1417,7 +1418,6 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
         },
         call: function (username) {
             if ($scope.videoInfo.status === 'Closed') { // Safety reason, user can't start calling while he is in a call
-                console.log("In here");
                 $scope.videoInfo.Type = 'Outgoing';
                 $scope.videoInfo.target = username; // Keep this info avaialable through calling proccess :)
                 $scope.videoInfo.HowVideoWasClosedFlag = true;
@@ -1441,13 +1441,11 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
                 sourceId: VideoServices.getMyid(),
                 targetId: VideoServices.getTargetid()
             };
-            console.log(message);
             $scope.videoInfo.message = '';
             wsCloud.send(JSON.stringify(message));
             $scope.videoInfo.InCall = true;
         },
         rejectCall: function () {
-            console.log(VideoServices.getTarget());
             var message = {
                 type: 'busy',
                 target: VideoServices.getTarget(),
@@ -1457,7 +1455,6 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
                 // No User Id here we want to inform all users
             };
             wsCloud.send(JSON.stringify(message));
-            console.log('Target was set to null');
             VideoServices.ResetTarget();
             closeScreen();
         },
@@ -1472,8 +1469,6 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
             wsCloud.send(JSON.stringify(message));
         },
         hangUp: function () {
-
-            console.log('Ok with Video closing');
             //Send message to other Peer to inform screen
             var message = {
                 type: 'hang-up',
@@ -1491,7 +1486,6 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
     //Event handlers when new message arrives from Websockets
 
     $rootScope.$on('close-video', function () {
-        console.log('The other peer closed');
         $scope.videoInfo.Type = 'Closed';
         $scope.videoInfo.InCall = false;
         $scope.videoInfo.message = 'Call Ended ';
@@ -1519,12 +1513,10 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
         $scope.videoInfo.message = VideoServices.getTarget() + ' has closed his phone';
         $scope.videoInfo.Type = 'Closed';
         $scope.$apply();
-        console.log('Target was set to null because of cancelled call ');
         VideoServices.ResetTarget();
         $timeout(closeScreen, 3000);
     });
     $rootScope.$on('Offline', function () {
-        console.log('Oops users seems to be disconnected');
         $scope.videoInfo.Type = 'Closed';
         $scope.videoInfo.InCall = false;
         $scope.videoInfo.message = VideoServices.getTarget() + " was disconected";
@@ -1627,7 +1619,6 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
                 target:VideoServices.getTarget(),
                 data: data
             };
-            console.log('ready');
             $scope.RealTime.dataRefresh(data.blood,data.heart);
             wsCloud.send(JSON.stringify(message));
         }
@@ -1745,7 +1736,6 @@ Online.controller('ChatController', function (AjaxServices,ChatServices,$mdDialo
 function deleteFromList(list, element) {
     for (var i = 0; i < list.length; i++) {
         if (list[i] === element) {
-            console.log('deleted ' + element);
             list.splice(i, 1);
             break;
         }

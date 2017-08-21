@@ -1,9 +1,4 @@
 /*Video Staffs*/
-body {
-    /*padding-top: 70px;*/
-    /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
-}
-
 
 html, body {
     margin:0;
@@ -26,6 +21,8 @@ h1 {
     color: white;
 }
 #draggable {
+    top: 20%;
+    left: 30%;
     width: 500px;
     height: 500px;
     position: absolute;
@@ -71,12 +68,10 @@ h1 {
 /* Css required for Angular Material */
 
 #myView{
-    /*background-color: red;*/
     height: 100%;
 }
 md-toolbar{
     height:70px;
-    /*background-color: gold;*/
 }
 
 .input1{

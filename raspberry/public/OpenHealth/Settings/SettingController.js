@@ -14,7 +14,7 @@ Settings.service('SettingService', function () {
 });
 
 
-Settings.controller('SettingController', function ($mdToast, GlobalVariables, SettingService, BiosignalsOnlineServices, $mdDialog, $scope, $http) {
+Settings.controller('SettingController', function ($mdToast, GlobalVariables,$rootScope,SettingService,$timeout,BiosignalsOnlineServices, $mdDialog, $scope, $http) {
 
     $scope.functions = {
         showResult: function (string) {
@@ -59,13 +59,10 @@ Settings.controller('SettingController', function ($mdToast, GlobalVariables, Se
     $scope.acceptedFriends = {
         Listof: [],
         getAccepted: function () {
-            $scope.functions.getAcceptedUsers(function (response) {
-                console.log(response);
-                $scope.acceptedFriends.Listof = response;
+                $scope.acceptedFriends.Listof = BiosignalsOnlineServices.getUsers();
                 if (!$scope.$$phase) {
                     $scope.$apply();
                 }
-            })
         },
         showConfirm: function (user) {
             var confirm = $mdDialog.confirm()
@@ -86,9 +83,10 @@ Settings.controller('SettingController', function ($mdToast, GlobalVariables, Se
             });
         }
     };
-    $scope.acceptedFriends.getAccepted();
+
     $scope.LoginSettings = {
         WayofLogin: null,
+        Subscribed: false,
         getway: function () {
             $scope.LoginSettings.WayofLogin = SettingService.getWayOfLogin();
             if (!$scope.$$phase) {
@@ -129,7 +127,7 @@ Settings.controller('SettingController', function ($mdToast, GlobalVariables, Se
 
         }
     };
-    $scope.LoginSettings.getway();
+
     $scope.Password = {
         Old1: null,
         Old2: null,
@@ -191,6 +189,25 @@ Settings.controller('SettingController', function ($mdToast, GlobalVariables, Se
         }
 
     };
+
+    $timeout(function() {
+        if(GlobalVariables.getSubscribe()) {
+            $scope.acceptedFriends.getAccepted();
+            $scope.LoginSettings.Subscribed = true;
+            $scope.LoginSettings.getway();
+        }
+        else{
+            $scope.LoginSettings.Subscribed = false;
+            console.log('No point on doing this');
+        }
+    },250);
+
+    $rootScope.$on('Subsrcibed',function() {
+        $scope.LoginSettings.Subscribed = true;
+        $scope.acceptedFriends.getAccepted();
+        $scope.LoginSettings.getway();
+    });
+    $rootScope.$on('Accepted',$scope.acceptedFriends.getAccepted);
 
     function deleteFromList(list, element) {
         for (var i = 0; i < list.length; i++) {

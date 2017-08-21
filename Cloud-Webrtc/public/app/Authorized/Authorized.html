@@ -8,7 +8,7 @@
                 <p   flex="100" class="md-display-1">OpenHealth</p>
             </div>
 
-                <input  class="input2 md-whiteframe-2dp"  placeholder="  Search for Friends" ng-model='RequestsSent.target' flex="35" type="text" >
+                <input  class="input2 md-whiteframe-2dp"  placeholder="  Search for Friends" ng-model='RequestsSent.target' flex="35">
             <md-button id='add' ng-click="RequestsSent.sendRequest()" class="md-raised md-primary" >add</md-button>
 
             <!--Requests Management -->
@@ -32,7 +32,6 @@
                                     <md-button ng-click="RequestsReceived.accept(newRequest)" class="md-accent md-raised">Accept</md-button>
                                     <md-button ng-click="RequestsReceived.reject(newRequest)" class="md-accent md-raised ">Reject</md-button>
                                 </div>
-
                             </md-list-item>
                         </md-list>
 
@@ -59,7 +58,7 @@
             <!--User's Account-->
             <div  layout="column">
                     <md-menu >
-                        <md-button ng-click="$mdMenu.open($event)">  <i  class="material-icons">account_circle</i>{{username}}</md-button>
+                        <md-button ng-click="$mdMenu.open($event)">  <i class="material-icons">account_circle</i>{{username}}</md-button>
                         <md-menu-content  width="3" >
                             <md-menu-item md-autofocus>
                                 <md-button class="md-primary" md-no-ink md-autofocus layout="row">
@@ -68,7 +67,7 @@
                                 </md-button>
                             </md-menu-item>
                             <md-menu-item>
-                                <md-button ng-click='logout.clean()'class="md-primary" md-no-ink md-autofocus>
+                                <md-button ng-click='logout.clean()' class="md-primary" md-no-ink md-autofocus>
                                     <i class="material-icons">power_settings_new</i>
                                     Logout
                                 </md-button>
@@ -77,7 +76,6 @@
                         </md-menu-content>
                     </md-menu>
             </div>
-
         </div>
     </md-toolbar>
 
@@ -106,18 +104,23 @@
         <div id="UserInfo " flex md-whiteframe="1" layout="column" ng-show="mainPageInfo.Selected!=''">
 
             <!--Here will the Charts will appear-->
-            <div flex style="margin-top:10%" layout="column">
+
+            <div flex style="margin:20%" layout="column">
+
+                <md-button   style="margin-left:95%;width: 30px" ng-click='Biosignals.clearArea(mainPageInfo.Selected)' ng-show="Biosignals.dataArrived === true" md-no-ink class=" md-icon-button ">&#x2715;</md-button>
                 <nvd3   options='chart.options' api='chart.api' events="chart.event" data='chart.data' ></nvd3>
-                <div style="padding: 20px">
+
+                <div style="padding: 20px" layout="row"  layout-align="space-around center">
                     <md-input-container ng-show="Biosignals.dataArrived === true">
-                        <md-select flex-offset="90" placeholder="Select Range" ng-init="Biosignals.range = 24 " md-on-close="Biosignals.refresh()"  ng-model="Biosignals.range"  style="min-width: 200px;">
-                            <md-option ng-value=24>24Hours</md-option>
+                        <md-select  placeholder="Select Range" ng-init="Biosignals.range = 24 " md-on-close="Biosignals.refresh()"  ng-model="Biosignals.range"  style="min-width: 200px;">
+                            <md-option ng-value=24>Last 24-Hours</md-option>
                             <md-option ng-value=3*24>Last 3 Days</md-option>
                             <md-option ng-value=7*24>Last Week</md-option>
                             <md-option ng-value=30*24>Last Month</md-option>
                             <md-option ng-value="All">All</md-option>
                         </md-select>
                     </md-input-container>
+
                 </div>
             </div>
 

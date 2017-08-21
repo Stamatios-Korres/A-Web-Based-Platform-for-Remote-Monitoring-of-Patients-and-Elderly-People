@@ -8,18 +8,15 @@ Biosignals.service('BiosignalService', function ($http) {
     var services = {};
     var OnlineServices = {};
     OnlineServices.updateHeart = function (newvalue, uniqueId, callback) {
-        console.log('Now explain me this');
         $http({
             method: 'post',
             url: '/biosignal/heartUpdate',
             data: {newvalue: newvalue, uniqueId: uniqueId}
         }).then(function successCallback(response) {
-            console.log(response);
             callback(response.data.message);
         });
     };
     OnlineServices.deleteHeart = function (uniqueId, callback) {
-        console.log('Now explain me this');
         $http({
             headers: {
                 'Content-type': 'application/json;charset=utf-8'
@@ -29,7 +26,6 @@ Biosignals.service('BiosignalService', function ($http) {
             url: '/biosignal/heartdelete',
             data: {uniqueId: uniqueId}
         }).then(function successCallback(response) {
-            console.log(response);
             callback(response.data.message);
         });
     };
@@ -39,7 +35,6 @@ Biosignals.service('BiosignalService', function ($http) {
             url: '/biosignal/heartInsert',
             data: value
         }).then(function successCallback(response) {
-            console.log(response);
             callback(response.data.message);
         });
     };
@@ -67,7 +62,6 @@ Biosignals.service('BiosignalService', function ($http) {
             url: '/biosignal/BloodSaturation',
             data: {newvalue: newvalue, uniqueId: uniqueId}
         }).then(function successCallback(response) {
-            console.log(response);
             callback(response.data.message);
         });
     };
@@ -77,7 +71,6 @@ Biosignals.service('BiosignalService', function ($http) {
             url: '/biosignal/BloodSaturationInsert',
             data: value
         }).then(function successCallback(response) {
-            console.log(response);
             callback(response.data.message);
         });
     };
@@ -100,7 +93,6 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                             break;
                         }
                     }
-                    console.log('update form');
                     $scope.heartRate.heart.api.refresh();
                     $scope.flag = false;
                     $scope.heartRate.newValue = '';
@@ -122,7 +114,6 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                             break;
                         }
                     }
-                    console.log('update form');
                     $scope.heartRate.heart.api.refresh();
                     $scope.flag = false;
                     $scope.heartRate.measurement = {
@@ -257,17 +248,13 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                     bars: {
                         dispatch: {
                             tooltipShow: function (e) {
-                                console.log('tooltipShow')
                             },
                             elementClick: function (e) {
                                 $scope.heartRate.measurement.value = e.data[0];
                                 var temp = new Date(e.data[1]);
-                                console.log('Unique id is: ' + e.data[2]);
                                 $scope.heartRate.measurement.uniqueId = e.data[2];
-                                console.log(typeof temp.getMonth());
                                 var month = temp.getMonth() + 1;
                                 $scope.heartRate.measurement.date = month + '/' + temp.getDate() + '/' + temp.getFullYear();
-
                                 $scope.flag = true;
                                 $scope.$apply();
                             }
@@ -328,7 +315,6 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                             break;
                         }
                     }
-                    console.log('update form');
                     $scope.bloodSaturation.bloodSaturation.api.refresh();
                     $scope.flag = false;
                     $scope.bloodSaturation.newValue = '';
@@ -350,7 +336,6 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                             break;
                         }
                     }
-                    console.log('update form');
                     $scope.heartRate.heart.api.refresh();
                     $scope.flag = false;
                     $scope.heartRate.measurement = {
@@ -487,13 +472,11 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                     bars: {
                         dispatch: {
                             tooltipShow: function (e) {
-                                console.log('tooltipShow')
                             },
                             elementClick: function (e) {
 
                                 $scope.bloodSaturation.measurement.value = e.data[0];
                                 var temp = new Date(e.data[1]);
-                                console.log('Unique id is: ' + e.data[2]);
                                 $scope.bloodSaturation.measurement.uniqueId = e.data[2];
                                 var month = temp.getMonth() + 1;
                                 $scope.bloodSaturation.measurement.date = month + '/' + temp.getDate() + '/' + temp.getFullYear();
@@ -591,7 +574,6 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                         axisLabelDistance: -10
                     },
                     callback: function(chart){
-                        console.log("!!! lineChart callback !!!");
                     }
                 },
                 title: {
@@ -668,7 +650,6 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                         value: $scope.NewValue.heartRate,
                         Date: new Date()
                     };
-                    console.log(msg.Date);
                     BiosignalService.OnlineServices.insertHeart(msg, function (result) {
                         if (result === 'Ok') {
                             $scope.NewValue.timeTaken = '';
@@ -709,7 +690,6 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
             }
         },
         InsertOxygenSaturation: function (string) {
-            console.log(string);
             switch (string) {
                 case 'auto':
                     var msg = {
@@ -717,7 +697,6 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                         value: $scope.NewValue.bloodSaturation,
                         Date: new Date()
                     };
-                    console.log(msg.Date);
                     BiosignalService.OnlineServices.insertBloodSaturation(msg, function (result) {
                         if (result === 'Ok') {
                             $scope.NewValue.bloodSaturation = '';
@@ -786,9 +765,7 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
         },
         getHeart: function (range) {
             BiosignalService.OnlineServices.getHeart(range,function (result) {
-                console.log(result);
                 if (result.message === 'Ok') {
-                    console.log('we are ok');
                     $scope.heartRate.heart.data[0].values = result.Result;
                     $scope.heartRate.heart.api.refresh();
                     $scope.functions.appearHeart();
@@ -807,16 +784,12 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
             })
         },
         refresh: function () {
-            // if($scope.previousValue === $scope.range && !$scope.FirstTime)
-                console.log('First CAtegory');
-            // else {
                 $scope.FirstTime = false;
-                // $scope.previousValue = $scope.range;
                 $scope.functions.getHeart($scope.range);
                 $scope.functions.getBloodSaturation($scope.range);
-            // }
         }
     };
+
 
     Websocket.NewMeasurement($scope,function(){
         if(status !==  "Disconnected / Scanning") {
@@ -827,22 +800,28 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
             $scope.sensor.Chart.data[0].values.push(SpO2);
             $scope.sensor.Chart.data[1].values.push(Pulse);
             $scope.sensor.Chart.api.update();
-            // $scope.sensor.Text.show = true;
-            // if(stable === 'Yes') {
-            //     $scope.sensor.Text.area = 'Sensor is now stable you can Remove ';
-            //     $scope.sensor.Text.stop = true;
-            // }
-            // else if(stable === 'No' &&  $scope.sensor.Text.stop === false) {
-            //     $scope.sensor.Text.area = 'Wait, still getting Data';
             }
         else {
-            $scope.sensor.Text.area = 'Sensor is disconnected';
             $timeout(function(){
                 $scope.sensor.Text.show = false;
                 $scope.sensor.Text.stop = false;
                 $scope.sensor.Text.area = '';
-
+                $scope.sensor.Chart.data[0].values = [];
+                $scope.sensor.Chart.data[1].values = [];
+                $scope.sensor.Chart.api.update();
+                SpO2 = null;
+                Pulse = null;
             },3000);
+        }
+        if(stable === 'Yes' && !$scope.sensor.Text.stop){
+            $timeout(
+                function(){
+                $scope.sensor.Text.show = true;
+                $scope.sensor.Text.stop = true;
+                $scope.sensor.Text.area = 'Ok stable measurement was saved, you can remove your Oximeter';
+                if(!$scope.$digest)
+                    $scope.$apply();
+                },100);
         }
 
         $scope.sensor.Chart.options.subtitle.text = 'State of Sensor: ' + status;

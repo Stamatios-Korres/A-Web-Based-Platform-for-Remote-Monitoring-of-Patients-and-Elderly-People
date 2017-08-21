@@ -20,7 +20,12 @@
     <!--Script to specify moving table-->
     <script>
         $(function () {
-            $("#draggable").draggable({});
+//            $("#draggable").draggable( "containment");
+            $("#draggable").draggable({
+                containment: "parent"
+            });
+            var containment =  $("#draggable").draggable( "option", "containment" );
+            $("#draggable").draggable( "option", "containment", "parent" );
         });
     </script>
     <link rel="stylesheet" href="js/angular/angular-material/angular-material.min.css">
@@ -81,7 +86,7 @@
                <div id='RealTime' ng-show='RealTime.show === true' class="ui-widget-content ">
                    Heart Rate: {{RealTime.heart}}<br>
                    Blood Saturation:{{RealTime.blood}}<br>
-                   <md-button id="close" flex-offset="60" ng-click="RealTime.hide()" md-no-ink></md-button>
+                   <md-button  aria-label="Switch 2" id="close" flex-offset="60" ng-click="RealTime.hide()" md-no-ink></md-button>
                </div>
             <video id="local_video"  autoplay muted></video>
             <video id="received_video" autoplay ></video>

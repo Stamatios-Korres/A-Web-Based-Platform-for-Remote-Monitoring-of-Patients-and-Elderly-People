@@ -13,6 +13,13 @@ angular.module('Openhealth').service('FriendsAndState',function(){
                 }
             }
         },
+        getSate:function(name){
+            for (var i = 0; i < friends.length; i++) {
+                if (friends[i].username === name) {
+                    return friends[i].state
+                }
+            }
+        },
         addfriends: function (name, state,unread) {
             console.log(unread+' messages from: '+name);
             var newUser = {
@@ -55,7 +62,6 @@ angular.module('Openhealth').service('FriendsAndState',function(){
         removefromlist:function(element){
             for(var i = 0; i < friends.length; i++) {
                 if (friends[i].username === element) {
-                 //   console.log("removed it");
                     friends.splice(i, 1);
                     break;
                 }
@@ -102,7 +108,6 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             method: 'get',
             url: 'Pending'
         }).then(function successCallback(response) {
-           // console.log(response.data);
             Pending = response.data;
             callback();
         })
@@ -121,7 +126,6 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             url: 'friendRequest',
             data: {message: message}
         }).then(function successCallback(response) {
-            console.log(response.data);
             callback(response.data.answer);
         })
     };
@@ -148,7 +152,6 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             method: 'get',
             url: 'getName'
         }).then(function succesCallback(response) {
-            console.log(response.data.username);
             my_name = response.data.username;
         });
         function errorCallback(response) {
@@ -169,7 +172,6 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             url: 'biosignals',
             params: message
         }).then(function successCallback(response) {
-            console.log(response.data);
             callback(response.data);
         })
     };
@@ -180,7 +182,6 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             target: name,
             type: type
         };
-        console.log(message);
         $http({
             headers: {
                 'Authorization': string
@@ -189,7 +190,6 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             url: 'requestReply',
             data: {message: message}
         }).then(function successCallback(response) {
-            console.log(response.data);
             callback(response.data.message);
         })
     };
@@ -220,7 +220,6 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             url: 'DeleteFriendship',
             data:{target:name}
         }).then(function successCallback(response) {
-            console.log(response);
             callback(response);
         });
     };
@@ -234,7 +233,6 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             url: 'messages',
             params:{target:username}
         }).then(function successCallback(response) {
-            console.log(response);
             callback(response);
         });
     };
@@ -248,7 +246,6 @@ angular.module('Openhealth').service('AjaxServices',function(FriendsAndState, $h
             url: 'messages',
             params:{uuidUser:Myid,uuid:uuid,target:target}
         }).then(function successCallback(response) {
-            console.log(response);
             callback(response);
         });
     };
@@ -588,13 +585,12 @@ angular.module('Openhealth').service('ChatServices',function($rootScope,FriendsA
                 Chat: []
             };
             ArraysofTexts.push(object);
-
         }
     };
     services.newfriend = function(username){
         var object = {
             name: username,
-            askedServer: false,
+            askedServer: true,
             Chat: []
         };
         ArraysofTexts.push(object);
@@ -687,8 +683,6 @@ angular.module('Openhealth').service('RealTimeService',function(){
 
 });
 
-
-
 angular.module('Openhealth').service('WebsocketService',function(RealTimeService,BiosignalsService,$mdToast,VideoServices,ChatServices, $timeout, $rootScope, FriendsAndState, $window){
     var services = {};
     services.makeVideoCall = function (message) {
@@ -705,8 +699,6 @@ angular.module('Openhealth').service('WebsocketService',function(RealTimeService
                     //General Purpose(Friend Requests -
 
                     case 'onlineUsers':
-                        console.log('Online Users : ');
-                        console.log(data.online);
                         Myid = data.id;
                         for (var ii = 0; ii < data.online.length; ii++) {
                             FriendsAndState.changeState(data.online[ii], 'active');
@@ -719,7 +711,6 @@ angular.module('Openhealth').service('WebsocketService',function(RealTimeService
                         $rootScope.$emit('WebsocketNews');
                         break;
                     case 'UserGotOffLine':
-                        console.log('he left us : ' + data.name);
                         FriendsAndState.changeState(data.name, 'inative');
                         var IstheTargetDisconnected = VideoServices.checkifUsed(data.name);                        //User got disconnected while still in call
                         if(IstheTargetDisconnected)
@@ -730,7 +721,6 @@ angular.module('Openhealth').service('WebsocketService',function(RealTimeService
                     // Friends and Requests Messages so we are in no need of polling
 
                     case 'NewRequest':{
-                        console.log(data);
                         requests.push(data.source);
                         $rootScope.$emit('UpdateRequest');
                         document.getElementById("RequestInfo").classList.add('md-warn');
@@ -743,18 +733,16 @@ angular.module('Openhealth').service('WebsocketService',function(RealTimeService
                               break;
                         }
                         requests.splice(i,1);
+                        if(requests.length === 0)
+                            document.getElementById("RequestInfo").classList.remove('md-warn');
                         $rootScope.$emit('UpdateRequest');
                         break;
                     }
                     case 'RequestReply':{
-                        if(data.decision === 'reject') {
-                            console.log('Impossible')
-                        }
-                        else if (data.decision === 'accept') {
+                        if (data.decision === 'accept') {
                             var string = data.source + ' has accepted your Request';
                             showReason(string);
                             //Friend&State & Chat Room
-                            console.log('new friend is in state: '+ data.state);
                             ChatServices.newfriend(data.source);
                             FriendsAndState.addfriends(data.source,data.state,0);
                             $rootScope.$emit('WebsocketNews');
@@ -785,7 +773,6 @@ angular.module('Openhealth').service('WebsocketService',function(RealTimeService
                     //Cases for Video - WebRTC
 
                     case 'video-start':
-                        console.log(data);
                         var peer = VideoServices.getPeer();
                         var message = {
                             type: 'busy',
@@ -795,15 +782,14 @@ angular.module('Openhealth').service('WebsocketService',function(RealTimeService
                             targetId: data.sourceId
                         };
                         if(!peer) {
-                            if(VideoServices.getTarget()) {
-                                console.log('User has already a received call waiting');
-                                ws.send(JSON.stringify(message));
+                            if(VideoServices.getTarget() ) {
+                                if(VideoServices.getTarget() !== data.source)
+                                    ws.send(JSON.stringify(message));
                             }
                             else {
                                 VideoServices.setUsers(data.source, my_name);
                                 VideoServices.setTargetId(data.sourceId);
                                 VideoServices.setMyId(data.targetId);
-                                console.log('Signal emmited');
                                 $rootScope.$emit('Video-Start');
                             }
                         }
@@ -824,7 +810,6 @@ angular.module('Openhealth').service('WebsocketService',function(RealTimeService
                         $rootScope.$emit('Video-offer');
                         break;
                     case 'new-ice-candidate':
-                        console.log(data.candidate);
                         var candidate = new RTCIceCandidate(data.candidate);
                         VideoServices.addIceCandiate(candidate);
 
@@ -861,18 +846,15 @@ angular.module('Openhealth').service('WebsocketService',function(RealTimeService
                         ChatServices.NewMessage(data.source,data.data,data.source,data.uuid); // Username of Friend/Message/and Direction
                         FriendsAndState.newmessage(data.source);
                         $rootScope.$emit('NewMessage');
-                        console.log('Message was added and signal was emmited');
                         break;
 
                     }
                     case 'updateUuid':{
-                        console.log(data);
                         ChatServices.updateUuid(data.uuid,data.User);
                         break;
                     }
                     case 'NewMessageFromOtherAccount':{
                         ChatServices.NewMessage(data.User,data.info,'me',data.uuid);
-                        console.log('new message was succesfully added');
                         $rootScope.$emit('NewMessage');
                         break;
                     }
@@ -888,7 +870,6 @@ angular.module('Openhealth').service('WebsocketService',function(RealTimeService
                         $rootScope.$emit('BiosignalAnswer');
                         break;
                     case 'RealTime':
-                        console.log(data.data.heart,data.data.blood);
                         RealTimeService.setMeasurement(data.data.heart,data.data.blood);
                         $rootScope.$emit('RealTime');
                         break;

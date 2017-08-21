@@ -22,6 +22,10 @@
 .nv-bars rect {
    width: 15px;
 }
+md-toolbar{
+    height:70px;
+}
+
 .Sensor-State{
    border: 1px black;
    height:60px;
@@ -40,6 +44,7 @@
    padding:2px 2px;
    background-color:#fff;
    cursor:pointer;}
+
 #close:before {
     content:'\00d7'; color:red; font-size:2em;}
 
@@ -56,10 +61,12 @@
    color: black;
    font-size:12px;
    height: 30px;
-   width: 160px;
+   width: 260px;
 }
 
 #draggable {
+    top: 20%;
+    left: 30%;
    width: 500px;
    height: 500px;
    position: absolute;

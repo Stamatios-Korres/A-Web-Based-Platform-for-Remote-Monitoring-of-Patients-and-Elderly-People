@@ -3,7 +3,7 @@
                 <md-tabs md-dynamic-height md-border-bottom>
 
                     <!-- 1st Tab-->
-                    <md-tab label="History Charts" md-on-select='functions.refresh()'>
+                    <md-tab label="History Charts"  md-on-select='functions.refresh()'>
                         <div layout="row">
                             <div class="Heart-Chart" layout="row">
                                 <nvd3 class='Nothide' ng-show='ChartSelect === "heart_Rate"' config='heartRate.heart.config' options='heartRate.heart.options' api='heartRate.heart.api'events="heartRate.heart.events" data='heartRate.heart.data' on-ready="heartRate.heart.callback"></nvd3>
@@ -47,7 +47,7 @@
                         <div class="RealTimeChart">
                             <nvd3 config='sensor.Chart.config' options='sensor.Chart.options' api='sensor.Chart.api' events="sensor.Chart.event" data='sensor.Chart.data' ></nvd3>
                         </div>
-                            <div ng-show='sensor.Text.show === true' md-whiteframe="2" style=" margin: 4px;width : 20%; height:11%;">
+                            <div ng-show='sensor.Text.show === true' md-whiteframe="2" style=" margin: 4px;width : 22%; height:15%;">
                                 <div style=" border:black 1px;  margin: 4px;"><small>{{sensor.Text.area}}</small></div>
                             </div>
                         </div>

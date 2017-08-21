@@ -41,7 +41,7 @@
         <div style="margin:  20px;padding: 20px;height:165px; width: 245px" md-whiteframe="5" >
             <h4> Change Way of login</h4>
             <md-divider></md-divider>
-            <md-switch ng-model="LoginSettings.WayofLogin" aria-label="Switch 2" ng-true-value="'Automatic Login'" ng-change="LoginSettings.updateWay(LoginSettings.WayofLogin)" ng-false-value="'Manual Login'" class="md-primary" md-no-ink>
+            <md-switch ng-disabled="LoginSettings.Subscribed === false" ng-model="LoginSettings.WayofLogin" aria-label="Switch 2" ng-true-value="'Automatic Login'" ng-change="LoginSettings.updateWay(LoginSettings.WayofLogin)" ng-false-value="'Manual Login'" class="md-primary" md-no-ink>
                {{ LoginSettings.WayofLogin }}
             </md-switch>
             <small>*If you are online this will take effect when you restart the device</small>
@@ -52,9 +52,9 @@
             <md-list>
                 <md-list-item  class="listItem" ng-repeat=" userA in acceptedFriends.Listof track by $index"  layout="row" >
                     <div flex>
-                        {{userA}}
+                        {{userA.username}}
                     </div>
-                    <md-button class="md-icon-button" id='select' ng-click="acceptedFriends.showConfirm(userA)">&#x2715;</md-button>
+                    <md-button class="md-icon-button" id='select' ng-click="acceptedFriends.showConfirm(userA.username)">&#x2715;</md-button>
                 </md-list-item>
             </md-list>
         </div>

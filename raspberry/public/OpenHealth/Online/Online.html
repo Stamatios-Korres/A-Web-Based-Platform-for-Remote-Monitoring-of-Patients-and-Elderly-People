@@ -41,7 +41,7 @@
         <div  id="MainPage" style="height: 100%;" layout="row" flex ng-show=" UserInformation.FirstTimeOnline===false && UserOnline.Online === true">
 
             <!--Online Friends and their State-->
-            <div id="OnlineFriends" flex="20" layout="column" class="md-whiteframe-4dp">
+            <div id="OnlineFriends" flex="20" layout="column" class="md-whiteframe-5dp">
                 <h3 flex-offset="20" > friends</h3>
                 <md-divider  ng-if="!$last"></md-divider>
                 <md-list  layout="column">
@@ -60,16 +60,14 @@
 
             <!--Information about a Particular User -->
 
-            <div id="UserInfo " flex md-whiteframe="1" layout="column"   ng-show="UserOnline.Selected!=''">
+            <div id="UserInfo " flex md-whiteframe="2" layout="column"   ng-show="UserOnline.Selected!=''">
                 <div class="Diagrams" flex></div>
                 <div class='UserOptions' flex="15"  layout-margin  layout="row" >
                     <div  layout="row">
                         <md-button ng-click="videoInfo.call(UserOnline.Selected)" md-no-ink  layout-margin class=" md-fab md-accent md-raised btnInfo">
                             <p><i  class="material-icons">call</i></p>
                         </md-button>
-                        <md-button md-no-ink  layout-margin  class="md-fab md-accent md-raised btnInfo">
-                            <p><i class="material-icons">equalizer</i></p>
-                        </md-button>
+
                     </div>
                     <div flex></div>
                     <div layout="row" layout-margin >
@@ -103,7 +101,6 @@
                 </div>
 
             </div>
-            <!--ng-controller="ChatController"-->
         </div>
 
 

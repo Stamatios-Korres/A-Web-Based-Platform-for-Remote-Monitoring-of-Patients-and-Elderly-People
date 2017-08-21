@@ -43,6 +43,14 @@ MainPage.service('BiosignalsService',function(){
        }
        Users.push(user);
    };
+   services.removeUser = function(username){
+       for(var k=0;k<Users.length;k++){
+           if(Users[k].username === username){
+               Users.splice(k,1);
+               return;
+           }
+       }
+   };
    return services;
 });
 
@@ -75,7 +83,6 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
         };
 
         $scope.removeClass = function(){
-            console.log('Lets Change the class');
             document.getElementById('RequestInfo').classList.remove('md-warn');
         }; // Function which updates the requests colour
 
@@ -88,9 +95,7 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
             sendRequest: function () {
                 if ($scope.RequestsSent.target) {
                     AjaxServices.services.FriendRequest($scope.RequestsSent.target, function (result) {
-                        // console.log(result);
                         $scope.RequestsSent.showResult(result);
-                        //Update the view
                         $scope.RequestsSent.checkPending();
                     });
                 }
@@ -111,6 +116,7 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
             sent: [],
             checkPending: function () {
                 AjaxServices.services.PendingRequests(function () {
+
                     $scope.RequestsSent.sent = Pending;
                 })
             },
@@ -119,7 +125,6 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
                     if (reply.message === 'Ok') {
                         $scope.RequestsSent.sent = deleteFromList($scope.RequestsSent.sent, name);
                         Pending = $scope.RequestsSent.sent;
-                        //  console.log($scope.RequestsSent.sent);
                     }
                     else {
                         $scope.RequestsSent.showResult(reply.message);
@@ -134,6 +139,8 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
             Received: [],
             checkRequests: function () {
                 AjaxServices.services.GetRequests(function () {
+                    if(requests.length >0)
+                        document.getElementById("RequestInfo").classList.add('md-warn');
                     $scope.RequestsReceived.Received = requests;
                 });
             },
@@ -147,11 +154,8 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
                 })
             },
             reject: function (name) {
-                console.log(name);
                 AjaxServices.services.requestReply(name, 'reject', function (reply) {
-                    console.log(reply);
                     if (reply === 'Ok') {
-                        console.log("rejecting " + name);
                         $scope.RequestsReceived.Received = deleteFromList($scope.RequestsReceived.Received, name);
                         requests = $scope.RequestsReceived.Received;
                     }
@@ -159,7 +163,6 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
             }
         };
         WebsocketService.UpdateRequest($scope,function(){
-            console.log('About to Change the requests');
             $scope.RequestsReceived.Received = requests;
             $scope.RequestsSent.sent = Pending;
             if (!$scope.$$phase) {
@@ -205,31 +208,13 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
         });
 
         $scope.SelectedUser = function (username) {
-
                 FriendsAndState.messageRead(username);
                 $scope.mainPageInfo.friends = FriendsAndState.getfriends();
                 $scope.mainPageInfo.Selected = username;
                 ChatUser = username;
                 $scope.Biosignals.target = username;
                 $rootScope.$emit('NewMessage');
-
-            if(username !== $scope.mainPageInfo.Selected){       //Check if different user has been selected
-                //Function connected only to Biosignals
-                $scope.chart.data[1].values = [];
-                $scope.chart.data[0].values = [];
-                $scope.chart.api.refresh();
-                $scope.Biosignals.dataArrived = false;
-                $scope.Biosignals.Requesting = false;
-                $scope.Biosignals.local = null;
-                $scope.chart.options.title.text =  'No data received ';
-                $scope.chart.options.subtitle.text = 'Press the button and ask for data ';
-                $scope.chart.options.subtitle.enable = true;
-                $scope.chart.options.title.enable = true;
                 $scope.Biosignals.showdata();
-                if (!$scope.$$phase) {
-                    $scope.$apply();
-                }
-            }
         };
         $scope.delete = function () {
             var status;
@@ -281,24 +266,37 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
 
 
         $scope.Biosignals = {
+            hide:false,
             Requesting:false,
             target:null,
             range:24,
             local:null,
             dataArrived:false,
-            refresh:function(){
-                if($scope.Biosignals.range === $scope.Biosignals.local)
-                    return;
-                $scope.Biosignals.local = $scope.Biosignals.range;
-                var message = {
-                    type: 'RequestBiosignals',
-                    target: $scope.mainPageInfo.Selected,
-                    source: my_name,
-                    range:$scope.Biosignals.range
-                };
-                $scope.Biosignals.Requesting = true;
-                ws.send(JSON.stringify(message));
+            refresh:function() {
+                if (!$scope.Biosignals.Requesting) {
+                    if ($scope.Biosignals.range === $scope.Biosignals.local)         //Only request of User has changed the range
+                        return;
+                    $scope.Biosignals.local = $scope.Biosignals.range;
+                    var message = {
+                        type: 'RequestBiosignals',
+                        target: $scope.mainPageInfo.Selected,
+                        source: my_name,
+                        range: $scope.Biosignals.range
+                    };
+                    $scope.Biosignals.Requesting = true;
+                    ws.send(JSON.stringify(message));
+                    $timeout(function(){
+                            $scope.Biosignals.Requesting = false;
+                        },
+                        5000)
+
+                }
             },
+            clearArea:function(username){
+                    BiosignalsService.removeUser(username);
+                    $scope.Biosignals.dataArrived = false;
+                    $scope.Biosignals.showdata();
+            },      // Remove Biosignals are reset flags
             showdata:function(){
 
                 // Set New title and Subtile
@@ -308,17 +306,26 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
                     $scope.chart.options.title.text = 'Biosignals from: ' + $scope.Biosignals.target;
                     $scope.Biosignals.dataArrived = true;
                     //Ask and show the data you received
-
-
                     $scope.chart.data[1].values = User.heart_rate;
                     $scope.chart.data[0].values = User.blood_saturation;
                     $scope.chart.api.refresh();
-
                     // User can now ask for more data
                     $scope.Biosignals.Requesting = false;
-                    if (!$scope.$$phase) {
-                        $scope.$apply();
-                    }
+                }
+                else{
+                    $scope.chart.data[1].values = [];
+                    $scope.chart.data[0].values = [];
+                    $scope.chart.api.refresh();
+                    $scope.Biosignals.dataArrived = false;
+                    $scope.Biosignals.Requesting = false;
+                    $scope.Biosignals.local = null;
+                    $scope.chart.options.title.text =  'Chart Area';
+                    $scope.chart.options.subtitle.text = 'No data received -Press the button and ask for data ';
+                    $scope.chart.options.subtitle.enable = true;
+                    $scope.chart.options.title.enable = true;
+                }
+                if (!$scope.$$phase) {
+                    $scope.$apply();
                 }
              }
         };
@@ -326,33 +333,44 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
 
         WebsocketService.BiosignalAnswer($scope,$scope.Biosignals.showdata);
         $scope.requestBiosignals = function(username){
-            if(!$scope.Biosignals.Requesting) {
+            if(!$scope.Biosignals.Requesting) {                 //Be sure user is not waiting for an answer
                 $scope.Biosignals.Requesting = true;
-                if($scope.Biosignals.range === $scope.Biosignals.local) {
+                if ($scope.Biosignals.range === $scope.Biosignals.local) {
                     $scope.Biosignals.Requesting = false;
                     return;
                 }
                 $scope.Biosignals.local = $scope.Biosignals.range;
-                AjaxServices.services.GetBiosignals(username, function (response) {
-                    // $scope.Biosignals.target = username;
-                    if (response.message !== 'Ok'){
-                        $scope.showResult(response.message);
-                        $scope.Biosignals.Requesting = false;
+                if (FriendsAndState.getSate(username) === 'active') {
+                    AjaxServices.services.GetBiosignals(username, function (response) {
+                        // $scope.Biosignals.target = username;
+                        if (response.message !== 'Ok') {
+                            $scope.showResult(response.message);
+                            $scope.Biosignals.Requesting = false;
+                        }
+                        else { // Throught Websockets request the raspberry User about the Biosignal request
+                            $scope.showResult('Request has been sent ');
+                            $scope.chart.options.subtitle.text = 'Please wait. Asking data from ' + username;
+                            var message = {
+                                type: 'RequestBiosignals',
+                                target: username,
+                                source: my_name,
+                                sourceId: null,
+                                range: $scope.Biosignals.range
+                            };
+                            ws.send(JSON.stringify(message));
+                        }
+                        $timeout(function () {
+                                $scope.Biosignals.Requesting = false;
+                            },
+                            5000)       //If no answer comes in 3 seconds allow user to send again the request
+                    });
+                    if (!$scope.$$phase) {
+                        $scope.$apply();
                     }
-                    else { // Throught Websockets request the raspberry User about the Biosignal request
-                        $scope.chart.options.subtitle.text = 'Please wait. Asking data from ' + username;
-                        var message = {
-                            type: 'RequestBiosignals',
-                            target: username,
-                            source: my_name,
-                            sourceId: null,
-                            range:$scope.Biosignals.range
-                        };
-                        ws.send(JSON.stringify(message));
-                    }
-                });
-                if (!$scope.$$phase) {
-                    $scope.$apply();
+                }
+                else{
+                    $scope.showResult(username+' is currently offline, try later');
+                    $scope.Biosignals.Requesting = false;
                 }
             }
         };
@@ -417,11 +435,11 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
                 },
                 title: {
                     enable: true,
-                    text: 'No data received '
+                    text: 'Chart Area'
                 },
                 subtitle: {
                     enable: true,
-                    text: 'Press the button and ask for data '  ,
+                    text:   'No data received  - Press the button and ask for data '  ,
                     css: {
                         'text-align': 'center',
                         'margin': '10px 13px 0px 7px'

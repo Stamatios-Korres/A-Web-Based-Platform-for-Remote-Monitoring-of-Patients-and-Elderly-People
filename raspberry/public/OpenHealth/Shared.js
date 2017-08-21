@@ -18,14 +18,15 @@ SharedServices.service('Websocket',function($rootScope,RealTimeService) {
                                 RealTimeService.setMeasurement(Pulse, SpO2);
 
                             }
-                            stable = oximeter.stable;
+                            if(oximeter.stable === 'Yes')
+                                stable = oximeter.stable;
+
                             status = oximeter.status;
                             $rootScope.$emit('NewMeasurement');
                         }
                         break;
                     case 'ActiveNotification':
                         Activenotification = data.notification;
-                        console.log(Activenotification);
                         $rootScope.$emit('ActiveNotification');
                         break;
 
