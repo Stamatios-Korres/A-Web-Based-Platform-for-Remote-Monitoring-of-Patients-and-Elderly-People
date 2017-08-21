@@ -361,6 +361,7 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
                         }
                         $timeout(function () {
                                 $scope.Biosignals.Requesting = false;
+                                $scope.Biosignals.local = null;
                             },
                             5000)       //If no answer comes in 3 seconds allow user to send again the request
                     });

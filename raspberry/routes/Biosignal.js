@@ -42,14 +42,24 @@ router.post('/heartInsert',function(req,res,next){
 });
 
 router.delete('/heartdelete',function(req,res,next){
-   var Id = req.body.uniqueId;
-   console.log(Id);
-   biosignal.remove({uniqueId:Id},function(err,result){
-       if(err)
-           res.send({message:'err'});
-       else
-           res.send({message:"Ok"})
-   })
+    var Id = req.body.uniqueId;
+    console.log(Id);
+    biosignal.remove({uniqueId:Id},function(err,result){
+        if(err)
+            res.send({message:'err'});
+        else
+            res.send({message:"Ok"})
+    })
+});
+
+router.delete('/bloodSaturationdelete',function(req,res,next){
+    var Id = req.body.uniqueId;
+    biosignal.remove({uniqueId:Id},function(err,result){
+        if(err)
+            res.send({message:'err'});
+        else
+            res.send({message:"Ok"})
+    })
 });
 
 router.get('/bloodSaturationbiosignals',function(req,res,next){
@@ -184,7 +194,17 @@ router.post('/BloodSaturationInsert',function(req,res,next){
 
 
 router.put('/BloodSaturation',function(req,res,next){
-   res.send({message:"Ok"});
+    console.log(req.body.newvalue);
+    var newValue = req.body.newvalue;
+    var id = req.body.uniqueId;
+    biosignal.update({uniqueId:id},{measurement:{value:newValue}},function(err,result){
+        if(err || !result)
+            res.send({message:'Error'});
+        else{
+            console.log(result);
+            res.send({message:'Ok'})
+        }
+    });
 });
 
 

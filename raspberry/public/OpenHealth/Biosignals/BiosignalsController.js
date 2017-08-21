@@ -47,20 +47,26 @@ Biosignals.service('BiosignalService', function ($http) {
             callback(response.data);
         });
     };
-    OnlineServices.getBloodSaturation = function (range,callback) {
-        $http({
-            method: 'get',
-            url: '/biosignal/bloodSaturationbiosignals',
-            params:{range:range}
-        }).then(function successCallback(response) {
-            callback(response.data);
-        });
-    };
+
     OnlineServices.updateBloodSaturation = function (newvalue, uniqueId, callback) {
+        console.log(uniqueId);
         $http({
             method: 'put',
             url: '/biosignal/BloodSaturation',
             data: {newvalue: newvalue, uniqueId: uniqueId}
+        }).then(function successCallback(response) {
+            callback(response.data.message);
+        });
+    };
+    OnlineServices.deleteBloodSaturation = function (uniqueId, callback) {
+        $http({
+            headers: {
+                'Content-type': 'application/json;charset=utf-8'
+            }
+            ,
+            method: 'delete',
+            url: '/biosignal/bloodSaturationdelete',
+            data: {uniqueId: uniqueId}
         }).then(function successCallback(response) {
             callback(response.data.message);
         });
@@ -72,6 +78,15 @@ Biosignals.service('BiosignalService', function ($http) {
             data: value
         }).then(function successCallback(response) {
             callback(response.data.message);
+        });
+    };
+    OnlineServices.getBloodSaturation = function (range,callback) {
+        $http({
+            method: 'get',
+            url: '/biosignal/bloodSaturationbiosignals',
+            params:{range:range}
+        }).then(function successCallback(response) {
+            callback(response.data);
         });
     };
     return {services: services, OnlineServices: OnlineServices};
@@ -307,9 +322,9 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
         dataServer: [],
         newValue: null,
         updateBloodSaturation: function () {
-            BiosignalService.OnlineServices.updateBloodSaturation($scope.heartRate.newValue, $scope.heartRate.measurement.uniqueId, function (result) {
+            BiosignalService.OnlineServices.updateBloodSaturation($scope.bloodSaturation.newValue, $scope.bloodSaturation.measurement.uniqueId, function (result) {
                 if (result === 'Ok') {
-                    for (var i = 0; i < $scope.heartRate.heart.data[0].values.length; i++) {
+                    for (var i = 0; i < $scope.bloodSaturation.bloodSaturation.data[0].values.length; i++) {
                         if ($scope.bloodSaturation.bloodSaturation.data[0].values[i][2] === $scope.bloodSaturation.measurement.uniqueId) {
                             $scope.bloodSaturation.bloodSaturation.data[0].values[i][0] = $scope.bloodSaturation.newValue;
                             break;
@@ -327,18 +342,17 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
             });
         },
         deleteBloodSaturation: function () {
-            BiosignalService.OnlineServices.deleteHeart($scope.heartRate.measurement.uniqueId, function (result) {
+            BiosignalService.OnlineServices.deleteBloodSaturation($scope.bloodSaturation.measurement.uniqueId, function (result) {
                 if (result === 'Ok') {
-                    for (var i = 0; i < $scope.heartRate.heart.data[0].values.length; i++) {
-                        if ($scope.heartRate.heart.data[0].values[i][2] === $scope.heartRate.measurement.uniqueId) {
-                            $scope.heartRate.heart.data[0].values.splice(i, 1);
-
+                    for (var i = 0; i < $scope.bloodSaturation.bloodSaturation.data[0].values.length; i++) {
+                        if ($scope.bloodSaturation.bloodSaturation.data[0].values[i][2] === $scope.bloodSaturation.measurement.uniqueId) {
+                            $scope.bloodSaturation.bloodSaturation.data[0].values.splice(i, 1);
                             break;
                         }
                     }
-                    $scope.heartRate.heart.api.refresh();
+                    $scope.bloodSaturation.bloodSaturation.api.refresh();
                     $scope.flag = false;
-                    $scope.heartRate.measurement = {
+                    $scope.bloodSaturation.measurement = {
                         value: '',
                         date: '',
                         uniqueId: ''
@@ -474,7 +488,6 @@ Biosignals.controller('BiosignalsController', function (Websocket,$timeout, $mdT
                             tooltipShow: function (e) {
                             },
                             elementClick: function (e) {
-
                                 $scope.bloodSaturation.measurement.value = e.data[0];
                                 var temp = new Date(e.data[1]);
                                 $scope.bloodSaturation.measurement.uniqueId = e.data[2];

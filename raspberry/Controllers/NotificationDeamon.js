@@ -55,7 +55,6 @@ function SearchDb() {
                 else {
                     var distance = result[i].repeat;
                     if(distance === 'Weekly') {
-                        console.log('Periodical');
                         if( nowDate.getDay() -tempDate.getDay() === 0){
                             var difference = (nowDate.getHours()*60 + nowDate.getMinutes())-(tempDate.getHours()*60 + tempDate.getMinutes());
                             if(Math.abs(difference) <= 5 && !result[i].showedToday && !result[i].readyTochange){

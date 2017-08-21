@@ -9,27 +9,38 @@
                                 <nvd3 class='Nothide' ng-show='ChartSelect === "heart_Rate"' config='heartRate.heart.config' options='heartRate.heart.options' api='heartRate.heart.api'events="heartRate.heart.events" data='heartRate.heart.data' on-ready="heartRate.heart.callback"></nvd3>
                                 <nvd3 config='bloodSaturation.bloodSaturation.config' options='bloodSaturation.bloodSaturation.options' api='bloodSaturation.bloodSaturation.api'events="bloodSaturation.bloodSaturation.events" data='bloodSaturation.bloodSaturation.data' ng-show='ChartSelect === "blood_Saturation"' ></nvd3>
                             </div>
+
+
                             <div layout="row">
                                 <div  layout='column' style="width:250px">
-                                    <md-radio-group ng-init='ChartSelect="heart_Rate"' ng-model="ChartSelect" >
+                                    <md-radio-group  ng-init='ChartSelect="heart_Rate"' ng-model="ChartSelect" >
                                         <h3>Select category</h3>
                                         <md-radio-button value="heart_Rate"  class="md-primary">Heart Rate</md-radio-button>
                                         <md-radio-button value="blood_Saturation"  class="md-primary">Blood Saturation</md-radio-button>
                                     </md-radio-group>
 
-                                    <div layout-margin  class='Nothide' style=" height: 30%; border-radius: 15px; padding-left: 30px ; width:250px;" md-whiteframe="2" ng-show="flag === true">
+                                    <div layout-margin  class='Nothide' style=" height: 30%; border-radius: 15px; padding-left: 30px ; width:250px;" md-whiteframe="2" ng-show="ChartSelect ==='heart_Rate' && flag === true">
                                         <small>Date of measurement :</small> {{heartRate.measurement.date}}<br>
                                         <small>Heart Rate : </small> {{heartRate.measurement.value}}<br>
                                         <input type="number" placeholder=" Update Value " ng-model="heartRate.newValue"><br>
-                                        <md-button class='md-primary md-raised' ng-disabled='heartRate.newValue === null 'ng-click="heartRate.updateHeart()">Update </md-button>
+                                        <md-button class='md-primary md-raised' ng-disabled='heartRate.newValue === null ' ng-click="heartRate.updateHeart()">Update </md-button>
                                         <md-button ng-click='heartRate.deleteHeart()' class='md-warn md-raised'">Delete
                                     </div>
+
+                                    <div layout-margin  ng-show=' flag === true && ChartSelect === "blood_Saturation"' class='Nothide' style=" height: 30%; border-radius: 15px; padding-left: 30px ; width:250px;" md-whiteframe="2">
+                                        <small>Date of measurement :</small> {{bloodSaturation.measurement.date}}<br>
+                                        <small>Blood Saturation (SPO2) : </small> {{bloodSaturation.measurement.value}}<br>
+                                        <input type="number" placeholder=" Update Value " ng-model="bloodSaturation.newValue"><br>
+                                        <md-button class='md-primary md-raised' ng-disabled='bloodSaturation.newValue === null' ng-click="bloodSaturation.updateBloodSaturation()">Update </md-button>
+                                        <md-button ng-click='bloodSaturation.deleteBloodSaturation()' class='md-warn md-raised'">Delete
+                                    </div>
+
                                 </div>
                                 <div style="padding: 10px">
                                     <md-input-container>
                                         <label>Select Range</label>
                                         <md-select placeholder="Select Range" ng-init="range = 24 " md-on-close="functions.refresh()"  ng-model="range"  style="min-width: 200px;">
-                                            <md-option ng-value=24>24Hours</md-option>
+                                            <md-option ng-value =24>24Hours</md-option>
                                             <md-option ng-value=3*24>Last 3 Days</md-option>
                                             <md-option ng-value=7*24>Last Week</md-option>
                                             <md-option ng-value=30*24>Last Month</md-option>
