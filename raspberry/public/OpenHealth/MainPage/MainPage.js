@@ -22,13 +22,13 @@ var my_name;
 var wsCloud;
 
 // A global socket URL
-// var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
-var CloudWebsocketUrl = 'ws:localhost:3000';
+var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
+// var CloudWebsocketUrl = 'ws:localhost:3000';
 
 // A global Https URL
-// var CloudHttpUrl = 'https://healthcloud.menychtas.com/node';
+var CloudHttpUrl = 'https://healthcloud.menychtas.com/node';
 
-var CloudHttpUrl = 'http://localhost:3000';
+// var CloudHttpUrl = 'http://localhost:3000';
 
 
 
