@@ -14,7 +14,6 @@ html, body {
     height: 10px;
     width: 10px;
     border-radius: 50%;
-
 }
 
 h1 {
@@ -83,20 +82,12 @@ md-toolbar{
     width: 160px;
 }
 
-
 .input2 {
+    margin: 5px;
     color: black;
     font-size: 18px;
-    height: 30px;
+    height: 40px;
     width: 200px;
-}
-
-#OnlineFriends{
-    /*background-color: red ;*/
-}
-
-.btnInfo{
-
 }
 
 .flexChild {

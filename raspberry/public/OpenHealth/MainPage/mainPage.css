@@ -55,13 +55,12 @@ md-toolbar{
     /*background-color: lightblue;*/
 
 }
-.input2{
-
-   margin: 5px;
-   color: black;
-   font-size:12px;
-   height: 30px;
-   width: 260px;
+.input2 {
+    margin: 5px;
+    color: black;
+    font-size: 18px;
+    height: 40px;
+    width: 200px;
 }
 
 #draggable {

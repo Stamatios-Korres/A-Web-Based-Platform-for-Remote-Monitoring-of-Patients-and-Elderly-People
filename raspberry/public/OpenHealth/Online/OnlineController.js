@@ -1001,13 +1001,9 @@ Online.service('RealTimeService',function(){
 });
 
 
-Online.controller('OnlineCtrl',function($location,GlobalVariables,SettingService,VideoServices,BiosignalsOnlineServices,FriendsAndState,ChatServices,$mdDialog,WebsocketService,AjaxServices,$scope,$http,$mdToast,$location,$rootScope,$timeout){
+Online.controller('OnlineCtrl',function($q,$location,GlobalVariables,SettingService,VideoServices,BiosignalsOnlineServices,FriendsAndState,ChatServices,$mdDialog,WebsocketService,AjaxServices,$scope,$http,$mdToast,$location,$rootScope,$timeout){
 
     $scope.ready = false ;          // Flag when everything is set up
-    // $scope.changeView = function(string){
-    //     $location.path(string);
-    // };
-
     $scope.functions ={
         showResult: function (string) {
             string = string.toUpperCase();
@@ -1206,7 +1202,29 @@ Online.controller('OnlineCtrl',function($location,GlobalVariables,SettingService
         WayOfLogin:null,
         Online: false
     };  // Friends of User And WayOfLogin selected of console
-
+    $scope.autocomplete ={
+        checkOnline:function(){
+            console.log('summoned');
+            var deferred = $q.defer();
+            if($scope.RequestsSent.target){
+                $http({
+                    method:'post',
+                    url: CloudHttpUrl+'/autocomplete',
+                    data:{
+                        input:$scope.RequestsSent.target
+                    }
+                }).then(function succesCallback(response){
+                        if(response.data.message ==='Ok') {
+                            deferred.resolve(response.data.Result);
+                        }
+                    },
+                    function errorCallback(response){
+                        deferred.reject([]);
+                    })
+            }
+            return deferred.promise;
+        }
+    }; // Returns a promise which is later resolved
 
     // Requests functions
 

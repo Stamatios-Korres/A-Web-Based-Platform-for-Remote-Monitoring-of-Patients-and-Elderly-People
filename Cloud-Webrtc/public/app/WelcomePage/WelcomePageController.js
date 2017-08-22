@@ -2,8 +2,8 @@
  * Created by timoskorres on 1/6/2017.
  */
 
-var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
-// var CloudWebsocketUrl ='ws:localhost:3000';
+// var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
+var CloudWebsocketUrl ='ws:localhost:3000';
 
 angular.module('Openhealth').controller('WelcomePageController', function (ChatServices,FriendsAndState, $mdToast, $mdDialog, WebsocketService, AjaxServices, $scope, $http, $window, $location, $timeout) {
 

@@ -8,9 +8,24 @@
                 <p   flex="100" class="md-display-1">OpenHealth</p>
             </div>
 
-                <input  class="input2 md-whiteframe-2dp"  placeholder="  Search for Friends" ng-model='RequestsSent.target' flex="35">
+                <!--<input  class="input2 md-whiteframe-2dp"   placeholder="  Search for Friends" ng-model='RequestsSent.target' flex="35">-->
+            <md-autocomplete  flex="35" class="input2" md-no-cache="true"
+                             md-selected-item="selectedItem"
+                             md-items="item in autocomplete.checkOnline()"
+                             md-search-text-change="autocomplete.suggestionList"
+                             md-search-text="RequestsSent.target"
+                             placeholder="Search For Friends"
+                             md-min-length="1"
+                             <!--md-item-text="item.display">-->
+                            <md-item-template>
+                                <span  >{{item}}</span>
+                            </md-item-template>
+                            <md-not-found>
+                                No matches found.
+                            </md-not-found>
+            </md-autocomplete>
             <md-button id='add' ng-click="RequestsSent.sendRequest()" class="md-raised md-primary" >add</md-button>
-
+            <!--This is the query -->
             <!--Requests Management -->
             <div layout="row" flex="40" layout-margin>
                 <md-menu>
@@ -19,8 +34,8 @@
 
                        <!--Friend Requests Received-->
                         <div layout-align="space-around" layout="row">
-                            <i  style="margin-left: 5%"class="material-icons">accessibility</i>
-                            <span style="margin:1% "flex-offset="50">New Requests</span>
+                            <i  style="margin-left: 5%" class="material-icons">accessibility</i>
+                            <span style="margin:1% " flex-offset="50">New Requests</span>
                         </div>
                         <md-divider md-inset></md-divider>
 
@@ -54,7 +69,7 @@
                     </md-menu-content>
                 </md-menu>
             </div>
-
+            {{RequestsSent.target}}
             <!--User's Account-->
             <div  layout="column">
                     <md-menu >

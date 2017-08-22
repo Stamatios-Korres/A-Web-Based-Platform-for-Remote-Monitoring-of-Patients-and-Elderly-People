@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="77b40028-482a-4f70-aa26-458e714cf2f9" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/routes/AutoCompete.js" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/.idea/Raspberry.iml" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/.idea/modules.xml" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/.idea/vcs.xml" afterPath="" />
@@ -5920,11 +5921,16 @@
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/views/index1.jade" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/../Raspberry/views/layout.jade" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Cloud-Webrtc/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Cloud-Webrtc/app.js" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/app.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Cloud-Webrtc/public/app/Authorized/Authorized.html" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/public/app/Authorized/Authorized.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Cloud-Webrtc/public/app/Authorized/AuthorizedController.js" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/public/app/Authorized/AuthorizedController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Controllers/NotificationDeamon.js" afterPath="$PROJECT_DIR$/Controllers/NotificationDeamon.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Biosignals/Biosignals.html" afterPath="$PROJECT_DIR$/public/OpenHealth/Biosignals/Biosignals.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Biosignals/BiosignalsController.js" afterPath="$PROJECT_DIR$/public/OpenHealth/Biosignals/BiosignalsController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/Biosignal.js" afterPath="$PROJECT_DIR$/routes/Biosignal.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Cloud-Webrtc/public/app/WelcomePage/WelcomePageController.js" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/public/app/WelcomePage/WelcomePageController.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Cloud-Webrtc/public/app/css/main-page.css" afterPath="$PROJECT_DIR$/../Cloud-Webrtc/public/app/css/main-page.css" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.html" afterPath="$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.js" afterPath="$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/MainPage/mainPage.css" afterPath="$PROJECT_DIR$/public/OpenHealth/MainPage/mainPage.css" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/OpenHealth/Online/OnlineController.js" afterPath="$PROJECT_DIR$/public/OpenHealth/Online/OnlineController.js" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -5941,8 +5947,8 @@
       <file leaf-file-name="BiosignalsController.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/public/OpenHealth/Biosignals/BiosignalsController.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="307">
-              <caret line="324" column="121" lean-forward="false" selection-start-line="324" selection-start-column="121" selection-end-line="324" selection-end-column="121" />
+            <state relative-caret-position="579">
+              <caret line="340" column="17" lean-forward="false" selection-start-line="340" selection-start-column="17" selection-end-line="340" selection-end-column="17" />
               <folding>
                 <element signature="e#284#547#0" expanded="false" />
                 <element signature="e#612#973#0" expanded="false" />
@@ -5969,6 +5975,94 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="OnlineController.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/OpenHealth/Online/OnlineController.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="357">
+              <caret line="1003" column="43" lean-forward="false" selection-start-line="1003" selection-start-column="43" selection-end-line="1003" selection-end-column="43" />
+              <folding>
+                <element signature="e#147#2468#0" expanded="false" />
+                <element signature="e#2552#7342#0" expanded="false" />
+                <element signature="e#7415#18897#0" expanded="false" />
+                <element signature="e#19088#30737#0" expanded="false" />
+                <element signature="e#30825#33898#0" expanded="false" />
+                <element signature="e#33988#35180#0" expanded="false" />
+                <element signature="e#35227#35551#0" expanded="false" />
+                <element signature="e#35895#42955#0" expanded="false" />
+                <element signature="e#35935#36182#0" expanded="false" />
+                <element signature="e#36227#36568#0" expanded="false" />
+                <element signature="e#42552#42949#0" expanded="false" />
+                <element signature="e#43019#43354#0" expanded="false" />
+                <element signature="e#43433#44660#0" expanded="false" />
+                <element signature="e#44708#44804#0" expanded="false" />
+                <element signature="e#44886#45684#0" expanded="false" />
+                <element signature="e#45795#45878#0" expanded="false" />
+                <element signature="e#45904#47316#0" expanded="false" />
+                <element signature="e#47348#48435#0" expanded="false" />
+                <element signature="e#48459#48612#0" expanded="false" />
+                <element signature="e#48660#48969#0" expanded="false" />
+                <element signature="e#49019#49162#0" expanded="false" />
+                <element signature="e#49220#49394#0" expanded="false" />
+                <element signature="e#49454#51327#0" expanded="false" />
+                <element signature="e#51427#52193#0" expanded="false" />
+                <element signature="e#52234#52365#0" expanded="false" />
+                <element signature="e#52674#60991#0" expanded="false" />
+                <element signature="e#61096#64696#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="mainPage.css" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/OpenHealth/MainPage/mainPage.css">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="413">
+              <caret line="65" column="12" lean-forward="true" selection-start-line="65" selection-start-column="12" selection-end-line="65" selection-end-column="12" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MainPage.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="390">
+              <caret line="31" column="0" lean-forward="true" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+              <folding>
+                <element signature="e#1116#1317#0" expanded="false" />
+                <element signature="e#1335#2009#0" expanded="false" />
+                <element signature="e#2055#3002#0" expanded="false" />
+                <element signature="e#2719#2754#0" expanded="false" />
+                <element signature="e#2793#2825#0" expanded="false" />
+                <element signature="e#2871#2907#0" expanded="false" />
+                <element signature="e#2946#2978#0" expanded="false" />
+                <element signature="e#3395#3446#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MainPage.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="671">
+              <caret line="103" column="50" lean-forward="false" selection-start-line="102" selection-start-column="50" selection-end-line="103" selection-end-column="50" />
+              <folding>
+                <element signature="n#script#16;n#head#0;n#html#0;n#!!top" expanded="false" />
+                <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#div#0;n#md-menu-content#0;n#md-menu#0;n#div#0;n#div#1;n#div#0;n#md-toolbar#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+                <element signature="n#md-list#1;n#md-menu-content#0;n#md-menu#0;n#div#0;n#div#1;n#div#0;n#md-toolbar#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+                <element signature="n#md-list-item#0;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+                <element signature="n#md-list-item#1;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+                <element signature="n#md-list-item#2;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+                <element signature="n#md-list-item#3;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+                <element signature="n#md-list-item#4;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+                <element signature="n#div#1;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="Shared.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/OpenHealth/Shared.js">
           <provider selected="true" editor-type-id="text-editor">
@@ -5982,7 +6076,7 @@
       <file leaf-file-name="Biosignal.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/routes/Biosignal.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="714">
+            <state relative-caret-position="884">
               <caret line="203" column="32" lean-forward="false" selection-start-line="203" selection-start-column="32" selection-end-line="203" selection-end-column="32" />
               <folding>
                 <element signature="e#681#1135#0" expanded="false" />
@@ -6001,7 +6095,7 @@
       <file leaf-file-name="Biosignals.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/OpenHealth/Biosignals/Biosignals.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1003">
+            <state relative-caret-position="1054">
               <caret line="62" column="34" lean-forward="true" selection-start-line="62" selection-start-column="34" selection-end-line="62" selection-end-column="34" />
               <folding>
                 <element signature="n#style#0;n#div#1;n#div#0;n#div#1;n#div#0;n#md-tab#0;n#md-tabs#0;n#div#0;n#div#0;n#!!top" expanded="true" />
@@ -6077,18 +6171,18 @@
         <option value="$PROJECT_DIR$/public/OpenHealth/Notifications/NotificationsController.js" />
         <option value="$PROJECT_DIR$/public/OpenHealth/Notifications/Notifications.html" />
         <option value="$PROJECT_DIR$/Sensor/Sensor.js" />
-        <option value="$PROJECT_DIR$/public/OpenHealth/MainPage/mainPage.css" />
         <option value="$PROJECT_DIR$/public/OpenHealth/Shared.js" />
         <option value="$PROJECT_DIR$/public/OpenHealth/Settings/Settings.html" />
         <option value="$PROJECT_DIR$/public/OpenHealth/Settings/SettingController.js" />
-        <option value="$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.html" />
         <option value="$PROJECT_DIR$/public/OpenHealth/Online/Online.html" />
-        <option value="$PROJECT_DIR$/public/OpenHealth/Online/OnlineController.js" />
-        <option value="$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.js" />
         <option value="$PROJECT_DIR$/Controllers/NotificationDeamon.js" />
         <option value="$PROJECT_DIR$/public/OpenHealth/Biosignals/Biosignals.html" />
         <option value="$PROJECT_DIR$/routes/Biosignal.js" />
         <option value="$PROJECT_DIR$/public/OpenHealth/Biosignals/BiosignalsController.js" />
+        <option value="$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.js" />
+        <option value="$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.html" />
+        <option value="$PROJECT_DIR$/public/OpenHealth/Online/OnlineController.js" />
+        <option value="$PROJECT_DIR$/public/OpenHealth/MainPage/mainPage.css" />
       </list>
     </option>
   </component>
@@ -6132,6 +6226,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -6160,14 +6255,14 @@
               <item name="raspberry" type="462c0819:PsiDirectoryNode" />
               <item name="public" type="462c0819:PsiDirectoryNode" />
               <item name="OpenHealth" type="462c0819:PsiDirectoryNode" />
-              <item name="Biosignals" type="462c0819:PsiDirectoryNode" />
+              <item name="MainPage" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="raspberry" type="b2602c69:ProjectViewProjectNode" />
               <item name="raspberry" type="462c0819:PsiDirectoryNode" />
               <item name="public" type="462c0819:PsiDirectoryNode" />
               <item name="OpenHealth" type="462c0819:PsiDirectoryNode" />
-              <item name="Settings" type="462c0819:PsiDirectoryNode" />
+              <item name="Online" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="raspberry" type="b2602c69:ProjectViewProjectNode" />
@@ -6183,14 +6278,13 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="nodejs_interpreter_path" value="/usr/bin/node" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Cloud-Webrtc" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="HbShouldOpenHtmlAsHb" value="" />
     <property name="SearchEverywhereHistoryKey" value="ter&#9;ACTION&#9;ActivateTerminalToolWindow&#10;te&#9;ACTION&#9;ActivateTerminalToolWindow&#10;termi&#9;ACTION&#9;ActivateTerminalToolWindow&#10;TERMIN&#9;ACTION&#9;ActivateTerminalToolWindow&#10;TERMI&#9;ACTION&#9;ActivateTerminalToolWindow&#10;term&#9;ACTION&#9;ActivateTerminalToolWindow" />
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
@@ -6249,12 +6343,13 @@
       <workItem from="1503224991416" duration="20684000" />
       <workItem from="1503255373052" duration="3174000" />
       <workItem from="1503307399208" duration="682000" />
-      <workItem from="1503309564343" duration="15878000" />
+      <workItem from="1503309564343" duration="16479000" />
+      <workItem from="1503359864332" duration="342000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="322432000" />
+    <option name="totallyTimeSpent" value="323375000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1431" y="-4" width="1855" height="1204" extended-state="6" />
@@ -6263,13 +6358,13 @@
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15338428" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="true" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34684685" sideWeight="0.50269026" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32970452" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="npm" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32744187" sideWeight="0.49730977" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32744187" sideWeight="0.49730977" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -6577,15 +6672,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="35" column="6" lean-forward="false" selection-start-line="35" selection-start-column="6" selection-end-line="35" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/OpenHealth/MainPage/mainPage.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="459">
-          <caret line="27" column="0" lean-forward="true" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -6594,76 +6680,6 @@
         <state relative-caret-position="1751">
           <caret line="103" column="0" lean-forward="false" selection-start-line="103" selection-start-column="0" selection-end-line="103" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="688">
-          <caret line="150" column="94" lean-forward="false" selection-start-line="150" selection-start-column="84" selection-end-line="150" selection-end-column="94" />
-          <folding>
-            <element signature="n#script#16;n#head#0;n#html#0;n#!!top" expanded="false" />
-            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#div#0;n#md-menu-content#0;n#md-menu#0;n#div#0;n#div#1;n#div#0;n#md-toolbar#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
-            <element signature="n#md-list#1;n#md-menu-content#0;n#md-menu#0;n#div#0;n#div#1;n#div#0;n#md-toolbar#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
-            <element signature="n#md-list-item#0;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
-            <element signature="n#md-list-item#1;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
-            <element signature="n#md-list-item#2;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
-            <element signature="n#md-list-item#3;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
-            <element signature="n#md-list-item#4;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
-            <element signature="n#div#1;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/OpenHealth/Online/OnlineController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="1005" column="69" lean-forward="true" selection-start-line="1005" selection-start-column="69" selection-end-line="1005" selection-end-column="69" />
-          <folding>
-            <element signature="e#147#2468#0" expanded="false" />
-            <element signature="e#2552#7342#0" expanded="false" />
-            <element signature="e#7415#18897#0" expanded="false" />
-            <element signature="e#19088#30737#0" expanded="false" />
-            <element signature="e#30825#33898#0" expanded="false" />
-            <element signature="e#33988#35180#0" expanded="false" />
-            <element signature="e#35227#35551#0" expanded="false" />
-            <element signature="e#36023#36270#0" expanded="false" />
-            <element signature="e#36315#36656#0" expanded="false" />
-            <element signature="e#42640#43037#0" expanded="false" />
-            <element signature="e#43107#43442#0" expanded="false" />
-            <element signature="e#43521#44748#0" expanded="false" />
-            <element signature="e#44796#44892#0" expanded="false" />
-            <element signature="e#45014#45097#0" expanded="false" />
-            <element signature="e#45123#46535#0" expanded="false" />
-            <element signature="e#46567#47654#0" expanded="false" />
-            <element signature="e#47678#47831#0" expanded="false" />
-            <element signature="e#47879#48188#0" expanded="false" />
-            <element signature="e#48238#48381#0" expanded="false" />
-            <element signature="e#48439#48613#0" expanded="false" />
-            <element signature="e#48673#50546#0" expanded="false" />
-            <element signature="e#50646#51412#0" expanded="false" />
-            <element signature="e#51453#51584#0" expanded="false" />
-            <element signature="e#51893#60210#0" expanded="false" />
-            <element signature="e#60315#63915#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="118">
-          <caret line="36" column="8" lean-forward="false" selection-start-line="36" selection-start-column="8" selection-end-line="36" selection-end-column="8" />
-          <folding>
-            <element signature="e#1116#1317#0" expanded="false" />
-            <element signature="e#1335#2009#0" expanded="false" />
-            <element signature="e#2055#3002#0" expanded="false" />
-            <element signature="e#2719#2754#0" expanded="false" />
-            <element signature="e#2793#2825#0" expanded="false" />
-            <element signature="e#2871#2907#0" expanded="false" />
-            <element signature="e#2946#2978#0" expanded="false" />
-            <element signature="e#3395#3446#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -6695,7 +6711,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="948">
           <caret line="57" column="0" lean-forward="false" selection-start-line="57" selection-start-column="0" selection-end-line="57" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -6703,13 +6718,12 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="606">
           <caret line="43" column="70" lean-forward="false" selection-start-line="43" selection-start-column="70" selection-end-line="43" selection-end-column="70" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/routes/Biosignal.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="714">
+        <state relative-caret-position="884">
           <caret line="203" column="32" lean-forward="false" selection-start-line="203" selection-start-column="32" selection-end-line="203" selection-end-column="32" />
           <folding>
             <element signature="e#681#1135#0" expanded="false" />
@@ -6726,7 +6740,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/public/OpenHealth/Biosignals/Biosignals.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1003">
+        <state relative-caret-position="1054">
           <caret line="62" column="34" lean-forward="true" selection-start-line="62" selection-start-column="34" selection-end-line="62" selection-end-column="34" />
           <folding>
             <element signature="n#style#0;n#div#1;n#div#0;n#div#1;n#div#0;n#md-tab#0;n#md-tabs#0;n#div#0;n#div#0;n#!!top" expanded="true" />
@@ -6738,10 +6752,90 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="31" column="0" lean-forward="true" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+          <folding>
+            <element signature="e#1116#1317#0" expanded="false" />
+            <element signature="e#1335#2009#0" expanded="false" />
+            <element signature="e#2055#3002#0" expanded="false" />
+            <element signature="e#2719#2754#0" expanded="false" />
+            <element signature="e#2793#2825#0" expanded="false" />
+            <element signature="e#2871#2907#0" expanded="false" />
+            <element signature="e#2946#2978#0" expanded="false" />
+            <element signature="e#3395#3446#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/OpenHealth/MainPage/MainPage.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="671">
+          <caret line="103" column="50" lean-forward="false" selection-start-line="102" selection-start-column="50" selection-end-line="103" selection-end-column="50" />
+          <folding>
+            <element signature="n#script#16;n#head#0;n#html#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#div#0;n#md-menu-content#0;n#md-menu#0;n#div#0;n#div#1;n#div#0;n#md-toolbar#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+            <element signature="n#md-list#1;n#md-menu-content#0;n#md-menu#0;n#div#0;n#div#1;n#div#0;n#md-toolbar#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+            <element signature="n#md-list-item#0;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+            <element signature="n#md-list-item#1;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+            <element signature="n#md-list-item#2;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+            <element signature="n#md-list-item#3;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+            <element signature="n#md-list-item#4;n#md-list#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+            <element signature="n#div#1;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/OpenHealth/Online/OnlineController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="1003" column="43" lean-forward="false" selection-start-line="1003" selection-start-column="43" selection-end-line="1003" selection-end-column="43" />
+          <folding>
+            <element signature="e#147#2468#0" expanded="false" />
+            <element signature="e#2552#7342#0" expanded="false" />
+            <element signature="e#7415#18897#0" expanded="false" />
+            <element signature="e#19088#30737#0" expanded="false" />
+            <element signature="e#30825#33898#0" expanded="false" />
+            <element signature="e#33988#35180#0" expanded="false" />
+            <element signature="e#35227#35551#0" expanded="false" />
+            <element signature="e#35895#42955#0" expanded="false" />
+            <element signature="e#35935#36182#0" expanded="false" />
+            <element signature="e#36227#36568#0" expanded="false" />
+            <element signature="e#42552#42949#0" expanded="false" />
+            <element signature="e#43019#43354#0" expanded="false" />
+            <element signature="e#43433#44660#0" expanded="false" />
+            <element signature="e#44708#44804#0" expanded="false" />
+            <element signature="e#44886#45684#0" expanded="false" />
+            <element signature="e#45795#45878#0" expanded="false" />
+            <element signature="e#45904#47316#0" expanded="false" />
+            <element signature="e#47348#48435#0" expanded="false" />
+            <element signature="e#48459#48612#0" expanded="false" />
+            <element signature="e#48660#48969#0" expanded="false" />
+            <element signature="e#49019#49162#0" expanded="false" />
+            <element signature="e#49220#49394#0" expanded="false" />
+            <element signature="e#49454#51327#0" expanded="false" />
+            <element signature="e#51427#52193#0" expanded="false" />
+            <element signature="e#52234#52365#0" expanded="false" />
+            <element signature="e#52674#60991#0" expanded="false" />
+            <element signature="e#61096#64696#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/OpenHealth/MainPage/mainPage.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="413">
+          <caret line="65" column="12" lean-forward="true" selection-start-line="65" selection-start-column="12" selection-end-line="65" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/public/OpenHealth/Biosignals/BiosignalsController.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="307">
-          <caret line="324" column="121" lean-forward="false" selection-start-line="324" selection-start-column="121" selection-end-line="324" selection-end-column="121" />
+        <state relative-caret-position="579">
+          <caret line="340" column="17" lean-forward="false" selection-start-line="340" selection-start-column="17" selection-end-line="340" selection-end-column="17" />
           <folding>
             <element signature="e#284#547#0" expanded="false" />
             <element signature="e#612#973#0" expanded="false" />

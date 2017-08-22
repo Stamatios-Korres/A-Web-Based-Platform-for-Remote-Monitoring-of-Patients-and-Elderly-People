@@ -85,8 +85,23 @@
                             <p flex="100" class="md-display-1">OpenHealth</p>
                         </div>
                         <div  ng-show=" OnlinePart === true " flex-offset="5" flex layout-align="space-around center" layout="row">
-                            <input class="input2 md-whiteframe-2dp" placeholder=" Search for Friends"
-                                   ng-model='RequestsSent.target' flex="35" >
+                            <md-autocomplete  flex="35" class="input2" md-no-cache="true"
+                                              md-selected-item="selectedItem"
+                                              md-items="item in autocomplete.checkOnline()"
+                                              md-search-text-change="autocomplete.suggestionList"
+                                              md-search-text="RequestsSent.target"
+                                              placeholder="Search For Friends"
+                                              md-min-length="1"
+                            <!--md-item-text="item.display">-->
+                            <md-item-template>
+                                <span  >{{item}}</span>
+                            </md-item-template>
+                            <md-not-found>
+                                No matches found.
+                            </md-not-found>
+                            </md-autocomplete>
+                            <!--<input class="input2 md-whiteframe-2dp" placeholder=" Search for Friends"-->
+                                   <!--ng-model='RequestsSent.target' flex="35" >-->
                             <md-button id='add' ng-click="RequestsSent.sendRequest()" class="md-raised md-primary">add</md-button>
 
                             <!--Requests Management -->

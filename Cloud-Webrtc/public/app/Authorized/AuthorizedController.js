@@ -55,7 +55,7 @@ MainPage.service('BiosignalsService',function(){
 });
 
 
-MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $timeout, $location, $scope,VideoServices, FriendsAndState, WebsocketService, AjaxServices) {
+MainPage.controller('ToolbarController', function ($q,$http,ChatServices, $mdToast, $timeout, $location, $scope,VideoServices, FriendsAndState, WebsocketService, AjaxServices) {
     if (token !== undefined) {
 
         $scope.username = my_name;
@@ -178,6 +178,29 @@ MainPage.controller('ToolbarController', function (ChatServices, $mdToast, $time
             }
         }
         deamon();
+        $scope.autocomplete ={
+            checkOnline:function(){
+                console.log('summoned');
+                var deferred = $q.defer();
+                if($scope.RequestsSent.target){
+                        $http({
+                            method:'post',
+                            url:'autocomplete',
+                            data:{
+                                input:$scope.RequestsSent.target
+                            }
+                        }).then(function succesCallback(response){
+                            if(response.data.message ==='Ok') {
+                                deferred.resolve(response.data.Result);
+                                }
+                            },
+                            function errorCallback(response){
+                                 deferred.reject([]);
+                        })
+                }
+                return deferred.promise;
+            }
+        }; // Returns a promise which is later resolved
     }
 });
 

@@ -6,12 +6,12 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 
-var index = require('./routes/index');
 var token = require('./routes/tokens');
 var login = require('./routes/login');
 var subscribe = require('./routes/subscribe');
 var message = require('./routes/message');
 var biosignals = require('./routes/biosignalRoute');
+var autocomplete = require('./routes/AutoCompete');
 var app = express();
 var flash = require('connect-flash');
 var passport = require('passport');
@@ -44,6 +44,7 @@ app.use('/',login);
 app.use('/subscribe',subscribe);
 app.use('/messages',message);
 app.use('/biosignals',biosignals);
+app.use('/autocomplete',autocomplete);
 
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://127.0.0.1/Webrtc',{
