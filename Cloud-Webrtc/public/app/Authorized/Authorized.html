@@ -99,7 +99,7 @@
 
         <!--Online Friends and their State-->
         <div id="OnlineFriends" flex="20" layout="column" class="md-whiteframe-4dp">
-            <h3 flex-offset="20" md-title > friends</h3>
+            <h3 flex-offset="20" > friends</h3>
             <md-divider  ng-if="!$last"></md-divider>
             <md-list  layout="column">
                 <md-list-item style="float:left;" class='md-primary' ng-repeat="temp in mainPageInfo.friends" ng-click="SelectedUser(temp.username)"  ng-class="mainPageInfo.Selected === temp.username ? 'Selected':''" flex layout="row"  layout-align="space-around center" md-no-ink>
@@ -120,10 +120,10 @@
 
             <!--Here will the Charts will appear-->
 
-            <div flex style="margin:20%" layout="column">
+            <div flex layout="column">
 
-                <md-button   style="margin-left:95%;width: 30px" ng-click='Biosignals.clearArea(mainPageInfo.Selected)' ng-show="Biosignals.dataArrived === true" md-no-ink class=" md-icon-button ">&#x2715;</md-button>
-                <nvd3   options='chart.options' api='chart.api' events="chart.event" data='chart.data' ></nvd3>
+                <md-button   style="margin-left:100%;width: 30px" ng-click='Biosignals.clearArea(mainPageInfo.Selected)' ng-show="Biosignals.dataArrived === true" md-no-ink class=" md-icon-button ">&#x2715;</md-button>
+                <nvd3   class="with-3d-shadow with-transitions"  options='chart.options' api='chart.api' events="chart.event" data='chart.data' ></nvd3>
 
                 <div style="padding: 20px" layout="row"  layout-align="space-around center">
                     <md-input-container ng-show="Biosignals.dataArrived === true">
@@ -158,7 +158,7 @@
         <!--Chat with a user -->
         <div id=Chat flex="25" layout="column" ng-controller="ChatController" ng-show="mainPageInfo.Selected!=''">
             <md-toolbar style="margin: 1%" md-whiteframe="3"  >
-                <h3  flex-offset="20"> {{mainPageInfo.Selected}}</h3>
+                <h4  flex-offset="20"> {{mainPageInfo.Selected}}</h4>
             </md-toolbar>
             <div   style="overflow-x: auto;overflow-y: auto;"  flex id="mydiv">
                     <md-list>

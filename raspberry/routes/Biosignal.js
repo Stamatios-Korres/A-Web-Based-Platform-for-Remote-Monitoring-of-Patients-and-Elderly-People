@@ -16,7 +16,6 @@ router.post('/heartUpdate',function(req,res,next){
             res.send({message:'Ok'})
         }
     });
-
 });
 
 //Manually added by User - Heart Measurement
@@ -189,7 +188,7 @@ router.post('/BloodSaturationInsert',function(req,res,next){
             res.send({message:'Ok'})
         }
     });
-});
+}); // Not Rest Logic
 
 
 

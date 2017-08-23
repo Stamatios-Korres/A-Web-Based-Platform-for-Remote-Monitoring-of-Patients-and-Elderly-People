@@ -13,7 +13,7 @@ var index = 0;
 var status = "";
 const BIO_BUFFER_SIZE = 10;
 var SLIDING_WINDOW = [];
-var SLIDING_WINDOW_MAX_LENGHT = 10;
+var SLIDING_WINDOW_MAX_LENGHT = 5;
 
 
 noble.on('stateChange', function (state) {

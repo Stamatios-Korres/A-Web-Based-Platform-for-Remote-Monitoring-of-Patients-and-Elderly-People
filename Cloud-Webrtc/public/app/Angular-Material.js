@@ -10,7 +10,7 @@ var App = angular.module('AngularMaterial',['ngMaterial']);
 App.config(
     function($mdThemingProvider,$mdToastProvider) {
         $mdThemingProvider.theme('default')
-            .primaryPalette('blue')
+            .primaryPalette('green')
             .accentPalette('blue-grey');
     }
 );

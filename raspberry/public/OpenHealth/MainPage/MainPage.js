@@ -22,13 +22,13 @@ var my_name;
 var wsCloud;
 
 // A global socket URL
-var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
-// var CloudWebsocketUrl = 'ws:localhost:3000';
+// var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
+var CloudWebsocketUrl = 'ws:localhost:3000';
 
 // A global Https URL
-var CloudHttpUrl = 'https://healthcloud.menychtas.com/node';
+// var CloudHttpUrl = 'https://healthcloud.menychtas.com/node';
 
-// var CloudHttpUrl = 'http://localhost:3000';
+var CloudHttpUrl = 'http://localhost:3000';
 
 
 
@@ -52,8 +52,8 @@ myApp.config(['$routeProvider',
                 templateUrl: 'Online/Online.html'
             })
             .when('/Biosignals',{
-                templateUrl: 'Biosignals/Biosignals.html',
-                controller: 'BiosignalsController'
+                templateUrl: 'Biosignals/Biosignals.html'
+                // controller: 'BiosignalsController'
             })
             .when('/Notifications',{
                 templateUrl:'Notifications/Notifications.html'
@@ -109,7 +109,7 @@ myApp.service('GlobalVariables',function(){
     return services;
 });
 
-myApp.controller('SidenavController',function(GlobalVariables,SettingService,$http,$scope,$location,$rootScope){
+myApp.controller('SidenavController',function($timeout,GlobalVariables,SettingService,$http,$scope,$location,$rootScope){
     $scope.Selected =1;
     $scope.OnlinePart = false;
     if($scope.Selected ===1)
@@ -124,6 +124,12 @@ myApp.controller('SidenavController',function(GlobalVariables,SettingService,$ht
     $scope.changeNGview= function(number,string) {
         $scope.Selected = number;
         $scope.OnlinePart =(number === 4 && GlobalVariables.GetIsonline());
+
+        if($scope.OnlinePart) {
+            $timeout(function() {
+                $rootScope.$emit('NewMessage');
+            },20);
+        }
         $location.path(string);
     };
 

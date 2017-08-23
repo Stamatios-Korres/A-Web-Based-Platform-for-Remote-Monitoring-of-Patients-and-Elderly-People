@@ -259,6 +259,7 @@ angular.module('Online').service('VideoServices',function($rootScope){
         ]
     };
 
+
     var target;  // Names of the users in call
     var myself;
     var target_id = -1; // Unique Id's to distinct multiple User's logged in the same Account
@@ -274,6 +275,8 @@ angular.module('Online').service('VideoServices',function($rootScope){
     var flag = false;
     var j =1;
     var bufferIcecandidates =[];
+    var localstreamVideo;
+    var remotestreamVideo;
 
 
     function handleICECandidateEvent(event) {
@@ -336,26 +339,36 @@ angular.module('Online').service('VideoServices',function($rootScope){
     function CloseVideo (){
         var remoteVideo = document.getElementById("received_video");
         var localVideo = document.getElementById("local_video");
-        if (remoteVideo.srcObject) {
-            console.log('Remote is killed');
-            remoteVideo.srcObject.getAudioTracks()[0].stop();
-            remoteVideo.srcObject.getVideoTracks()[0].stop();
-            remoteVideo.srcObject.getTracks()[1].stop();
-            remoteVideo.srcObject.getTracks()[0].stop();
-            remoteVideo.srcObject = null;
-        }
+
+        MyPeerConnection.removeStream(localstreamVideo);
         if (localVideo.srcObject) {
             console.log('Local is killed');
-            localVideo.srcObject.getAudioTracks()[0].stop();
-            localVideo.srcObject.getVideoTracks()[0].stop();
-            localVideo.srcObject.getTracks()[0].stop();
-            localVideo.srcObject.getTracks()[1].stop();
+            localstreamVideo.getAudioTracks().forEach(function(track) {track.stop(); });
+            localstreamVideo.getVideoTracks().forEach(function(track) {track.stop();});
+            localstreamVideo.getTracks().forEach(function(track) {track.stop(); });
+            if (localstreamVideo.active) {
+                console.log('WHy the fuck??');
+            }
             localVideo.srcObject = null;
         }
+        if (remoteVideo.srcObject) {
+            console.log('Remote is killed');
+            remotestreamVideo.getAudioTracks().forEach(function(track) {track.stop(); });
+            remotestreamVideo.getVideoTracks().forEach(function(track) {track.stop();});
+            remotestreamVideo.getTracks().forEach(function(track) {track.stop(); });
+            remoteVideo.srcObject = null;
+            if (remotestreamVideo.active) {
+                console.log('WHy the fuck??');
+            }
+        }
+        localstreamVideo = null;
+        remotestreamVideo = null;
         closePeer();
         console.log('Ok video is closed');
     }
     function handleAddStreamEvent(event) { // It is called only when remote stream has arrived
+        remotestreamVideo = event.stream;
+
         document.getElementById("received_video").srcObject = event.stream;
     }
     function handleGetUserMediaError(e) {
@@ -452,6 +465,7 @@ angular.module('Online').service('VideoServices',function($rootScope){
                 navigator.mediaDevices.getUserMedia(mediaConstraints)
                     .then(function (localStream) {
                         document.getElementById("local_video").srcObject = localStream;
+                        localstreamVideo = localStream;
                         MyPeerConnection.addStream(localStream);
                     })
                     .catch(handleGetUserMediaError);
@@ -465,6 +479,7 @@ angular.module('Online').service('VideoServices',function($rootScope){
                     .then(function (stream) {
                         localStream = stream;
                         document.getElementById("local_video").srcObject = localStream;
+                        localstreamVideo = localStream;
                         return MyPeerConnection.addStream(localStream);
                     })
                     .then(function () {
@@ -542,7 +557,14 @@ angular.module('Online').service('VideoServices',function($rootScope){
     services.getBusy = function(){
         return busy;
     };
-
+    services.mute = function(){
+        if(localstreamVideo)
+            localstreamVideo.getAudioTracks()[0].enabled = false;
+    };
+    services.unmute = function(){
+        if(localstreamVideo)
+            localstreamVideo.getAudioTracks()[0].enabled = true;
+    };
     //Cases that must be iterrupted -> User goes Offline,Rejects,Busy,UserA cancel the call
 
     services.checkifUsed = function(name){
@@ -1000,8 +1022,7 @@ Online.service('RealTimeService',function(){
 
 });
 
-
-Online.controller('OnlineCtrl',function($q,$location,GlobalVariables,SettingService,VideoServices,BiosignalsOnlineServices,FriendsAndState,ChatServices,$mdDialog,WebsocketService,AjaxServices,$scope,$http,$mdToast,$location,$rootScope,$timeout){
+Online.controller('OnlineCtrl',function($q,GlobalVariables,SettingService,VideoServices,BiosignalsOnlineServices,FriendsAndState,ChatServices,$mdDialog,WebsocketService,AjaxServices,$scope,$http,$mdToast,$location,$rootScope,$timeout){
 
     $scope.ready = false ;          // Flag when everything is set up
     $scope.functions ={
@@ -1159,9 +1180,14 @@ Online.controller('OnlineCtrl',function($q,$location,GlobalVariables,SettingServ
         FirstTimeOnline:false,
         username:null,
         password:null,
+        password2:null,
         SendRequest:function(){
-            if($scope.UserInformation.username && $scope.UserInformation.password){
+            if($scope.UserInformation.username && $scope.UserInformation.password &&  $scope.UserInformation.password2){
+                if($scope.UserInformation.password === $scope.UserInformation.password2)
                 $scope.functions.SetUsername($scope.UserInformation.username,$scope.UserInformation.password);
+                else
+                    $scope.functions.showResult('Passwords do not match');
+
             }
         }
     };      //Information About User && First Login
@@ -1204,7 +1230,6 @@ Online.controller('OnlineCtrl',function($q,$location,GlobalVariables,SettingServ
     };  // Friends of User And WayOfLogin selected of console
     $scope.autocomplete ={
         checkOnline:function(){
-            console.log('summoned');
             var deferred = $q.defer();
             if($scope.RequestsSent.target){
                 $http({
@@ -1215,6 +1240,12 @@ Online.controller('OnlineCtrl',function($q,$location,GlobalVariables,SettingServ
                     }
                 }).then(function succesCallback(response){
                         if(response.data.message ==='Ok') {
+                            for (var i=0;i<response.data.Result.length;i++){
+                                if(response.data.Result[i] === my_name){
+                                    response.data.Result.splice(i,1);
+                                    break;
+                                }
+                            }
                             deferred.resolve(response.data.Result);
                         }
                     },
@@ -1375,7 +1406,6 @@ Online.controller('OnlineCtrl',function($q,$location,GlobalVariables,SettingServ
     });
 
     function InitOnline(){
-        //SUbscribed User
         if(GlobalVariables.getSubscribe()) {
 
             if (SettingService.getWayOfLogin() === 'Automatic Login' && !GlobalVariables.GetIsonline()) {
@@ -1385,9 +1415,7 @@ Online.controller('OnlineCtrl',function($q,$location,GlobalVariables,SettingServ
             if (GlobalVariables.GetIsonline()) {
                 $scope.UserOnline.friends = FriendsAndState.getfriends();
                 if (FriendsAndState.getSelected())
-                    $timeout(function () {
                         $scope.functions.SelectedUser(FriendsAndState.getSelected());
-                    }, 5);
                 $scope.UserOnline.Online = true;
                 $scope.ready = true;
             }
@@ -1395,13 +1423,11 @@ Online.controller('OnlineCtrl',function($q,$location,GlobalVariables,SettingServ
                 $scope.UserOnline.Online = false;
                 $scope.ready = true;
             }
-        }
-        //Unsubscribed User
+        }   //SUbscribed User
         else{
             $scope.UserInformation.FirstTimeOnline =   GlobalVariables.getFirstTime();
             $scope.ready = true;
-        }
-
+        }   //Unsubscribed User
         if (!$scope.$$phase) {
             $scope.$apply();
         }
@@ -1416,6 +1442,7 @@ Online.controller('OnlineCtrl',function($q,$location,GlobalVariables,SettingServ
 
 Online.controller('Video-Controller', function ($rootScope,RealTimeService, Websocket,VideoServices, WebsocketService, $scope, $timeout) {
     function closeScreen() {
+        $scope.videoInfo.flag = 'mute';
         $scope.videoInfo.HowVideoWasClosedFlag = false;
         $scope.videoInfo.status = 'Closed';  // Next time call is began do not show buttons by default
         $scope.videoInfo.Type = null;
@@ -1425,12 +1452,22 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
 
 
     $scope.videoInfo = {
-        HowVideoWasClosedFlag: false,   // The only use of this Flag is to determine when Video Screen must be closed
+        HowVideoWasClosedFlag: true,   // The only use of this Flag is to determine when Video Screen must be closed
         target: '',
         status: 'Closed',
         message: '',
         Type: null, //options are icnoming,outgoing
         InCall: false,
+        mute:function(){
+            if($scope.videoInfo.flag === 'mute') {
+                $scope.videoInfo.flag = 'unmute';
+                VideoServices.mute();
+            }
+            else{
+                $scope.videoInfo.flag = 'mute';
+                VideoServices.unmute();
+            }
+        },
         closeScreen: function () {
             closeScreen();
         },
@@ -1438,7 +1475,7 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
             if ($scope.videoInfo.status === 'Closed') { // Safety reason, user can't start calling while he is in a call
                 $scope.videoInfo.Type = 'Outgoing';
                 $scope.videoInfo.target = username; // Keep this info avaialable through calling proccess :)
-                $scope.videoInfo.HowVideoWasClosedFlag = true;
+                $scope.videoInfo.HowVideoWasClosedFlag = false;
                 var message = {
                     type: 'video-start',
                     source: my_name,
@@ -1504,47 +1541,56 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
     //Event handlers when new message arrives from Websockets
 
     $rootScope.$on('close-video', function () {
+        $scope.videoInfo.HowVideoWasClosedFlag = true;
+
         $scope.videoInfo.Type = 'Closed';
         $scope.videoInfo.InCall = false;
         $scope.videoInfo.message = 'Call Ended ';
         VideoServices.closeVideo();
         $scope.$apply();
         $timeout(function () {
-                if ($scope.videoInfo.HowVideoWasClosedFlag === false)
+                if ($scope.videoInfo.HowVideoWasClosedFlag === true)
                     closeScreen()
             }
-            ,5000);
+            ,2000);
     });
     $rootScope.$on('busy', function () {
+        $scope.videoInfo.HowVideoWasClosedFlag = true;
         $scope.videoInfo.message = 'Sorry ' + $scope.videoInfo.target + ' is busy!';
         $scope.videoInfo.Type = 'Closed';
         $scope.$apply();
-        $scope.videoInfo.HowVideoWasClosedFlag = false;
         $timeout(function () {
-                if ($scope.videoInfo.HowVideoWasClosedFlag === false)
+                if ($scope.videoInfo.HowVideoWasClosedFlag === true)
                     closeScreen()
             }
-            , 5000);
+            , 2000);
     });
     $rootScope.$on('cancel', function () {
+        $scope.videoInfo.HowVideoWasClosedFlag = true;
         $scope.videoInfo.Total = false;
         $scope.videoInfo.message = VideoServices.getTarget() + ' has closed his phone';
         $scope.videoInfo.Type = 'Closed';
         $scope.$apply();
         VideoServices.ResetTarget();
-        $timeout(closeScreen, 3000);
+        $timeout(function () {
+                if ($scope.videoInfo.HowVideoWasClosedFlag === true)
+                    closeScreen()
+            }
+            , 2000);
     });
     $rootScope.$on('Offline', function () {
         $scope.videoInfo.Type = 'Closed';
         $scope.videoInfo.InCall = false;
+        $scope.videoInfo.HowVideoWasClosedFlag = true;
+
         $scope.videoInfo.message = VideoServices.getTarget() + " was disconected";
         $scope.$apply();
         VideoServices.closeVideo();
         $timeout(function () {
-                if ($scope.videoInfo.HowVideoWasClosedFlag === false)
+                if ($scope.videoInfo.HowVideoWasClosedFlag === true)
                     closeScreen()
             }
-            , 5000);
+            , 2000);
     }); //User disconnected from Server
 
 
@@ -1554,7 +1600,7 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
             $scope.videoInfo.Type = 'Incoming';     // Only show accept-reject buttons if the user is receiving data
             $scope.videoInfo.status = 'open';
             $scope.videoInfo.message = VideoServices.getTarget() + " is calling";
-            $scope.videoInfo.HowVideoWasClosedFlag = true;
+            $scope.videoInfo.HowVideoWasClosedFlag = false;
 
         }
         else { //User already is calling other user,inform the other user
@@ -1603,8 +1649,12 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
             $scope.videoInfo.message = 'Cancelled by another Device';
         $scope.$apply();
         VideoServices.ResetTarget();
-
-        $timeout(closeScreen, 4000);
+        $scope.videoInfo.HowVideoWasClosedFlag = true;
+        $timeout(function () {
+                if ($scope.videoInfo.HowVideoWasClosedFlag === true)
+                    closeScreen()
+            }
+            , 3000);
     });
 
     //Real Time show  Measurements functions
@@ -1612,6 +1662,7 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
         blood:0,
         heart:0,
         show:false,
+        nodataArrived:null,
         hide:function(){
             $scope.RealTime.show = false;
             if (!$scope.$$phase) {
@@ -1619,12 +1670,19 @@ Online.controller('Video-Controller', function ($rootScope,RealTimeService, Webs
             }
         },
         dataRefresh:function(blood,heart){
-          $scope.RealTime.blood = blood.y;
-          $scope.RealTime.heart = heart.y;
-          $scope.RealTime.show = true;
-          if (!$scope.$$phase) {
-              $scope.$apply();
-          }
+            $timeout.cancel($scope.RealTime.nodataArrived);
+            $scope.RealTime.blood = blood.y;
+            $scope.RealTime.heart = heart.y;
+            $scope.RealTime.show = true;
+            if (!$scope.$$phase) {
+            $scope.$apply();
+            }
+            $scope.RealTime.nodataArrived = $timeout(function(){
+                  $scope.RealTime.show = false;
+                  if (!$scope.$$phase) {
+                      $scope.$apply();
+                  }
+            },3000);
         }
     };
     Websocket.NewMeasurement($scope,function(){
@@ -1702,23 +1760,26 @@ Online.controller('ChatController', function (AjaxServices,ChatServices,$mdDialo
     };
     ChatServices.refresh($scope, function () {
         console.log('Wtf?');
-        $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
-        //Ask from Server if empty array
-        if ($scope.messages.arrayofMessages) {
-            if (ChatServices.getFlag(ChatUser) ===false  ) {
-                console.log('Going to ask Chat from: ' + ChatUser);
-                AjaxServices.services.GetChat(ChatUser, function (result) {
-                    var SavedMessages = result.data.message;
-                    for (var i = 0; i < SavedMessages.length; i++) {
-                        ChatServices.NewMessage(ChatUser, SavedMessages[i].message, SavedMessages[i].direction, SavedMessages[i].uuid);
-                    }
-                    $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
-                    ChatServices.setFlag(ChatUser);
-                    $scope.scrollDown();
-                });
+        if(ChatUser) {
+            $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
+            //Ask from Server if empty array
+            if ($scope.messages.arrayofMessages) {
+                if (ChatServices.getFlag(ChatUser) === false) {
+                    console.log('Going to ask Chat from: ' + ChatUser);
+                    AjaxServices.services.GetChat(ChatUser, function (result) {
+                        var SavedMessages = result.data.message;
+                        for (var i = 0; i < SavedMessages.length; i++) {
+                            ChatServices.NewMessage(ChatUser, SavedMessages[i].message, SavedMessages[i].direction, SavedMessages[i].uuid);
+                        }
+                        $scope.messages.arrayofMessages = ChatServices.SelectUser(ChatUser);
+                        ChatServices.setFlag(ChatUser);
+                        $scope.scrollDown();
+                    });
+                }
             }
         }
-
+        else
+            console.log('problem');
         if (!$scope.$$phase) {
             $scope.$apply();
         }

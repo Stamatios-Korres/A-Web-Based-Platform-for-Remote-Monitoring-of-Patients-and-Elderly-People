@@ -1,45 +1,17 @@
-<div style="height: 100% "  layout="column" flex>
+<div style="height: 100% "  layout="column" flex ng-controller="BiosignalsController">
             <div ng-cloak>
                 <md-tabs md-dynamic-height md-border-bottom>
 
                     <!-- 1st Tab-->
-                    <md-tab label="History Charts"  md-on-select='functions.refresh()'>
+                    <md-tab label="History Charts" md-on-select="HistoryChart.functions.getData()" >
                         <div layout="row">
-                            <div class="Heart-Chart" layout="row">
-                                <nvd3 class='Nothide' ng-show='ChartSelect === "heart_Rate"' config='heartRate.heart.config' options='heartRate.heart.options' api='heartRate.heart.api'events="heartRate.heart.events" data='heartRate.heart.data' on-ready="heartRate.heart.callback"></nvd3>
-                                <nvd3 config='bloodSaturation.bloodSaturation.config' options='bloodSaturation.bloodSaturation.options' api='bloodSaturation.bloodSaturation.api'events="bloodSaturation.bloodSaturation.events" data='bloodSaturation.bloodSaturation.data' ng-show='ChartSelect === "blood_Saturation"' ></nvd3>
-                            </div>
+                            <nvd3   class="show  Nothide with-3d-shadow with-transitions"  options='HistoryChart.chart.options' api='HistoryChart.chart.api' events="HistoryChart.chart.event" data='HistoryChart.chart.data' ></nvd3>
 
-
-                            <div layout="row">
-                                <div  layout='column' style="width:250px">
-                                    <md-radio-group  ng-init='ChartSelect="heart_Rate"' ng-model="ChartSelect" >
-                                        <h3>Select category</h3>
-                                        <md-radio-button value="heart_Rate"  class="md-primary">Heart Rate</md-radio-button>
-                                        <md-radio-button value="blood_Saturation"  class="md-primary">Blood Saturation</md-radio-button>
-                                    </md-radio-group>
-
-                                    <div layout-margin  class='Nothide' style=" height: 30%; border-radius: 15px; padding-left: 30px ; width:250px;" md-whiteframe="2" ng-show="ChartSelect ==='heart_Rate' && flag === true">
-                                        <small>Date of measurement :</small> {{heartRate.measurement.date}}<br>
-                                        <small>Heart Rate : </small> {{heartRate.measurement.value}}<br>
-                                        <input type="number" placeholder=" Update Value " ng-model="heartRate.newValue"><br>
-                                        <md-button class='md-primary md-raised' ng-disabled='heartRate.newValue === null ' ng-click="heartRate.updateHeart()">Update </md-button>
-                                        <md-button ng-click='heartRate.deleteHeart()' class='md-warn md-raised'">Delete
-                                    </div>
-
-                                    <div layout-margin  ng-show=' flag === true && ChartSelect === "blood_Saturation"' class='Nothide' style=" height: 30%; border-radius: 15px; padding-left: 30px ; width:250px;" md-whiteframe="2">
-                                        <small>Date of measurement :</small> {{bloodSaturation.measurement.date}}<br>
-                                        <small>Blood Saturation (SPO2) : </small> {{bloodSaturation.measurement.value}}<br>
-                                        <input type="number" placeholder=" Update Value " ng-model="bloodSaturation.newValue"><br>
-                                        <md-button class='md-primary md-raised' ng-disabled='bloodSaturation.newValue === null' ng-click="bloodSaturation.updateBloodSaturation()">Update </md-button>
-                                        <md-button ng-click='bloodSaturation.deleteBloodSaturation()' class='md-warn md-raised'">Delete
-                                    </div>
-
-                                </div>
-                                <div style="padding: 10px">
+                            <div layout="column">
+                                <div style=" margin-top:30%; margin-left:15% ;padding: 10px">
                                     <md-input-container>
                                         <label>Select Range</label>
-                                        <md-select placeholder="Select Range" ng-init="range = 24 " md-on-close="functions.refresh()"  ng-model="range"  style="min-width: 200px;">
+                                        <md-select placeholder="Select Range" ng-init="range = 24 " md-on-close="HistoryChart.functions.askDB()"  ng-model="HistoryChart.range"  style="min-width: 200px;">
                                             <md-option ng-value =24>24Hours</md-option>
                                             <md-option ng-value=3*24>Last 3 Days</md-option>
                                             <md-option ng-value=7*24>Last Week</md-option>
@@ -48,6 +20,27 @@
                                         </md-select>
                                     </md-input-container>
                                 </div>
+
+                                <div  layout='column' style="width:250px">
+
+                                    <div layout-margin  class='  Nothide' style=" height: 30%; border-radius: 15px; padding-left: 30px ; width:250px;" md-whiteframe="2" ng-show="HistoryChart.ChartSelect ==='Heart' && HistoryChart.flag === true">
+                                        <small>Date of measurement :</small> {{HistoryChart.measurement.date}}<br>
+                                        <small>Heart Rate(bpm) : </small> {{HistoryChart.measurement.value}}<br>
+                                        <input type="number" placeholder=" Update Value " ng-model="HistoryChart.newValue"><br>
+                                        <md-button class='md-primary md-raised' ng-disabled='HistoryChart.newValue === null ' ng-click="HistoryChart.functions.updateHeart()">Update </md-button>
+                                        <md-button ng-click='HistoryChart.functions.deleteHeart()' class='md-warn md-raised'">Delete
+                                    </div>
+
+                                    <div layout-margin  ng-show=' HistoryChart.flag === true && HistoryChart.ChartSelect === "Blood"' class='Nothide' style=" height: 30%; border-radius: 15px; padding-left: 30px ; width:250px;" md-whiteframe="2">
+                                        <small>Date of measurement :</small> {{HistoryChart.measurement.date}}<br>
+                                        <small>Blood Saturation (SPO2) : </small> {{HistoryChart.measurement.value}}<br>
+                                        <input type="number" placeholder=" Update Value " ng-model="HistoryChart.newValue"><br>
+                                        <md-button class='md-primary md-raised' ng-disabled='HistoryChart.newValue === null' ng-click="HistoryChart.functions.updateBloodSaturation()">Update </md-button>
+                                        <md-button ng-click='HistoryChart.functions.deleteBloodSaturation()' class='md-warn md-raised'">Delete
+                                    </div>
+
+                                </div>
+
                             </div>
                         </div>
                     </md-tab>

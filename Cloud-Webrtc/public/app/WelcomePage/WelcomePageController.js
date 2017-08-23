@@ -2,8 +2,8 @@
  * Created by timoskorres on 1/6/2017.
  */
 
-var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
-// var CloudWebsocketUrl ='ws:localhost:3000';
+// var CloudWebsocketUrl = 'wss://healthcloud.menychtas.com/sockets';
+var CloudWebsocketUrl ='ws:localhost:3000';
 
 angular.module('Openhealth').controller('WelcomePageController', function (ChatServices,FriendsAndState, $mdToast, $mdDialog, WebsocketService, AjaxServices, $scope, $http, $window, $location, $timeout) {
 
@@ -71,11 +71,11 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
                                 };
                                 message = JSON.stringify(message);
                                 ws.send(message);
+
                             };
                         });
 
                         $location.path('main-page');
-
                     }
                 }, //Succesfull Login
                     function errorCallback(response) {
@@ -88,10 +88,19 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
         }
     };
 
-
+    $scope.showResult= function (string) {
+        string = string.toUpperCase();
+        $mdToast.show(
+            $mdToast.simple()
+                .textContent(string)
+                .capsule(true)
+                .position('top left')
+        )
+    };
     $scope.subscribe = {
         username: null,
         password: null,
+        password2:null,
         email: null,
         Displaymessage: '',
         ShowReason: function (reason) {
@@ -104,61 +113,60 @@ angular.module('Openhealth').controller('WelcomePageController', function (ChatS
         return /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+([^<>()\.,;:\s@\"]{2,}|[\d\.]+))$/.test(mail);
         },
         SendRequest: function () {
-            if ($scope.subscribe.username  && $scope.subscribe.password && $scope.subscribe.email && $scope.subscribe.validMail($scope.subscribe.email)===true){
-                console.log('Request should have been sent here');
-                console.log($scope.subscribe.email);
-                $http({
-                    method: 'post',
-                    url: 'subscribe',
-                    data: {
-                        grant_type: 'password',
-                        client_id: 'myApp',
-                        client_secret: 'hmmy1994',
-                        username: $scope.subscribe.username,
-                        password: $scope.subscribe.password,
-                        email: $scope.subscribe.email,
-                        category:'NormalUser'
-                    }
-                }).then(function succesCallback(response) {
-                    console.log(response);
-                    if (response.data.code === 11000) {
-                        //Username Already exists
-                        alert('Username-Already exists');
-                    }
-                    else {
-                        console.log("Subsrcibe setting localStorage");
-                        localStorage.setItem('token', response.data.access_token);
-                        token = localStorage.getItem('token');
-                        console.log(token);
-                        my_name = $scope.subscribe.username;
-                        ws = new WebSocket(CloudWebsocketUrl);
+            if ($scope.subscribe.username  && $scope.subscribe.password && $scope.subscribe.password2 && $scope.subscribe.email && $scope.subscribe.validMail($scope.subscribe.email)===true) {
+                if ($scope.subscribe.password === $scope.subscribe.password2) {
+                    console.log($scope.subscribe.email);
+                    $http({
+                        method: 'post',
+                        url: 'subscribe',
+                        data: {
+                            grant_type: 'password',
+                            client_id: 'myApp',
+                            client_secret: 'hmmy1994',
+                            username: $scope.subscribe.username,
+                            password: $scope.subscribe.password,
+                            email: $scope.subscribe.email,
+                            category: 'NormalUser'
+                        }
+                    }).then(function succesCallback(response) {
+                        console.log(response);
+                        if (response.data.code === 11000) {
+                            //Username Already exists
+                            $scope.showResult('Username-Already exists');
+                        }
+                        else {
+                            console.log("Subsrcibe setting localStorage");
+                            localStorage.setItem('token', response.data.access_token);
+                            token = localStorage.getItem('token');
+                            console.log(token);
+                            my_name = $scope.subscribe.username;
+                            ws = new WebSocket(CloudWebsocketUrl);
 
-                        AjaxServices.services.GetFriends(function (response) {
-                            for (var i = 0; i < response.length; i++) {
-                                FriendsAndState.addfriends(response.data[i], 'inactive');
-                            }
-                            WebsocketService.InitWebsocket();
-                        });
-                        ws.onopen = function InitWebsocket(e) {
-                            console.log('Initializing Connection with Server ' + my_name);
-                            message = {
-                                type: 'init',
-                                token: localStorage.getItem('token')
+                            AjaxServices.services.GetFriends(function (response) {
+                                for (var i = 0; i < response.length; i++) {
+                                    FriendsAndState.addfriends(response.data[i], 'inactive');
+                                }
+                                WebsocketService.InitWebsocket();
+                            });
+                            ws.onopen = function InitWebsocket(e) {
+                                console.log('Initializing Connection with Server ' + my_name);
+                                message = {
+                                    type: 'init',
+                                    token: localStorage.getItem('token')
+                                };
+                                message = JSON.stringify(message);
+                                ws.send(message);
                             };
-                            message = JSON.stringify(message);
-                            ws.send(message);
-                        };
-                        $location.path('main-page');
-                    }
+                            $location.path('main-page');
+                        }
 
-                    // }
-                }, function errorCallback(response) {
-                    console.log(response);
-                });
+                        // }
+                    }, function errorCallback(response) {
+                        console.log(response);
+                    });
+                }else
+                    $scope.showResult('Passwords do not match!');
             }
-            else
-                console.log("We have some kind of problem");
-
         }
     };
 

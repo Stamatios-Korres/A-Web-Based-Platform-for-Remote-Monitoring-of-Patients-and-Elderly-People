@@ -7,6 +7,9 @@ var MainPage = angular.module('MainPage', ['ngRoute', 'ngResource', 'ngMaterial'
 MainPage.service('BiosignalsService',function(){
    var services ={};
    var Users = [];
+   services.reset = function(){
+     Users = [];
+   };
    services.getTarget = function(username){
        for(var i =0;i<Users.length;i++){
            if(Users[i].username === username){
@@ -55,7 +58,7 @@ MainPage.service('BiosignalsService',function(){
 });
 
 
-MainPage.controller('ToolbarController', function ($q,$http,ChatServices, $mdToast, $timeout, $location, $scope,VideoServices, FriendsAndState, WebsocketService, AjaxServices) {
+MainPage.controller('ToolbarController', function (BiosignalsService,$rootScope,$q,$http,ChatServices, $mdToast, $timeout, $location, $scope,VideoServices, FriendsAndState, WebsocketService, AjaxServices) {
     if (token !== undefined) {
 
         $scope.username = my_name;
@@ -78,6 +81,8 @@ MainPage.controller('ToolbarController', function ($q,$http,ChatServices, $mdToa
                 ChatUser = '';            // Every Time one User will be available for sending messages. ChatUser defines the Username of this Users
                 Myid=undefined;
                 ChatServices.reset();
+                BiosignalsService.reset();
+                $rootScope.$emit('Kill_Video');
 
             }
         };
@@ -180,7 +185,6 @@ MainPage.controller('ToolbarController', function ($q,$http,ChatServices, $mdToa
         deamon();
         $scope.autocomplete ={
             checkOnline:function(){
-                console.log('summoned');
                 var deferred = $q.defer();
                 if($scope.RequestsSent.target){
                         $http({
@@ -191,6 +195,12 @@ MainPage.controller('ToolbarController', function ($q,$http,ChatServices, $mdToa
                             }
                         }).then(function succesCallback(response){
                             if(response.data.message ==='Ok') {
+                                for (var i=0;i<response.data.Result.length;i++){
+                                    if(response.data.Result[i] === my_name){
+                                        response.data.Result.splice(i,1);
+                                        break;
+                                    }
+                                }
                                 deferred.resolve(response.data.Result);
                                 }
                             },
@@ -235,7 +245,8 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
                 $scope.mainPageInfo.friends = FriendsAndState.getfriends();
                 $scope.mainPageInfo.Selected = username;
                 ChatUser = username;
-                $scope.Biosignals.target = username;
+            $scope.Biosignals.SwitchFlag ='Request';
+            $scope.Biosignals.target = username;
                 $rootScope.$emit('NewMessage');
                 $scope.Biosignals.showdata();
         };
@@ -295,6 +306,7 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
             range:24,
             local:null,
             dataArrived:false,
+            SwitchFlag:'Request',            //Options are request and hide
             refresh:function() {
                 if (!$scope.Biosignals.Requesting) {
                     if ($scope.Biosignals.range === $scope.Biosignals.local)         //Only request of User has changed the range
@@ -316,7 +328,8 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
                 }
             },
             clearArea:function(username){
-                    BiosignalsService.removeUser(username);
+                $scope.Biosignals.SwitchFlag ='Request';
+                BiosignalsService.removeUser(username);
                     $scope.Biosignals.dataArrived = false;
                     $scope.Biosignals.showdata();
             },      // Remove Biosignals are reset flags
@@ -324,6 +337,7 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
 
                 // Set New title and Subtile
                 var User = BiosignalsService.getTarget($scope.Biosignals.target);
+
                 if(User) {
                     $scope.chart.options.subtitle.enable = false;
                     $scope.chart.options.title.text = 'Biosignals from: ' + $scope.Biosignals.target;
@@ -354,48 +368,60 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
         };
 
 
-        WebsocketService.BiosignalAnswer($scope,$scope.Biosignals.showdata);
+        WebsocketService.BiosignalAnswer($scope,function(){
+            $scope.Biosignals.SwitchFlag ='Hide';
+            $scope.Biosignals.showdata();
+
+        });
         $scope.requestBiosignals = function(username){
-            if(!$scope.Biosignals.Requesting) {                 //Be sure user is not waiting for an answer
-                $scope.Biosignals.Requesting = true;
-                if ($scope.Biosignals.range === $scope.Biosignals.local) {
-                    $scope.Biosignals.Requesting = false;
-                    return;
-                }
-                $scope.Biosignals.local = $scope.Biosignals.range;
-                if (FriendsAndState.getSate(username) === 'active') {
-                    AjaxServices.services.GetBiosignals(username, function (response) {
-                        // $scope.Biosignals.target = username;
-                        if (response.message !== 'Ok') {
-                            $scope.showResult(response.message);
-                            $scope.Biosignals.Requesting = false;
-                        }
-                        else { // Throught Websockets request the raspberry User about the Biosignal request
-                            $scope.showResult('Request has been sent ');
-                            $scope.chart.options.subtitle.text = 'Please wait. Asking data from ' + username;
-                            var message = {
-                                type: 'RequestBiosignals',
-                                target: username,
-                                source: my_name,
-                                sourceId: null,
-                                range: $scope.Biosignals.range
-                            };
-                            ws.send(JSON.stringify(message));
-                        }
-                        $timeout(function () {
+            if($scope.Biosignals.SwitchFlag ==='Request') {
+                if (!$scope.Biosignals.Requesting) {                 //Be sure user is not waiting for an answer
+                    $scope.Biosignals.Requesting = true;
+                    if ($scope.Biosignals.range === $scope.Biosignals.local) {
+                        $scope.Biosignals.Requesting = false;
+                        return;
+                    }
+                    $scope.Biosignals.local = $scope.Biosignals.range;
+                    if (FriendsAndState.getSate(username) === 'active') {
+                        AjaxServices.services.GetBiosignals(username, function (response) {
+                            // $scope.Biosignals.target = username;
+                            if (response.message !== 'Ok') {
+                                $scope.showResult(response.message);
                                 $scope.Biosignals.Requesting = false;
-                                $scope.Biosignals.local = null;
-                            },
-                            5000)       //If no answer comes in 3 seconds allow user to send again the request
-                    });
-                    if (!$scope.$$phase) {
-                        $scope.$apply();
+                            }
+                            else { // Throught Websockets request the raspberry User about the Biosignal request
+                                $scope.showResult('Request has been sent ');
+                                $scope.chart.options.subtitle.text = 'Please wait. Asking data from ' + username;
+                                var message = {
+                                    type: 'RequestBiosignals',
+                                    target: username,
+                                    source: my_name,
+                                    sourceId: null,
+                                    range: $scope.Biosignals.range
+                                };
+                                ws.send(JSON.stringify(message));
+                            }
+                            $timeout(function () {
+                                    $scope.Biosignals.Requesting = false;
+                                    $scope.Biosignals.local = null;
+                                },
+                                5000)       //If no answer comes in 3 seconds allow user to send again the request
+                        });
+                        if (!$scope.$$phase) {
+                            $scope.$apply();
+                        }
+                    }
+                    else {
+                        $scope.showResult(username + ' is currently offline, try later');
+                        $scope.Biosignals.Requesting = false;
                     }
                 }
-                else{
-                    $scope.showResult(username+' is currently offline, try later');
-                    $scope.Biosignals.Requesting = false;
+            }
+            else{
+                if($scope.mainPageInfo.Selected) {
+                    $scope.Biosignals.clearArea($scope.mainPageInfo.Selected);
                 }
+                console.log('Hide not function');
             }
         };
 
@@ -409,8 +435,8 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
             options : {
                 chart: {
                     type: 'lineChart',
-                    height: 350,
-                    width:550,
+                    height: 400,
+                    width:600,
                     padData:true,
                     forceY:([55,110]),
                     margin : {
@@ -422,11 +448,25 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
                     x: function(d){ return d.x; },
                     y: function(d){ return d.y; },
                     useInteractiveGuideline: false,
+                    lines:{
                     dispatch: {
-                        stateChange: function(e){ console.log("stateChange"); },
-                        changeState: function(e){ console.log("changeState"); },
-                        tooltipShow: function(e){ console.log("tooltipShow"); },
-                        tooltipHide: function(e){ console.log("tooltipHide"); }
+                            stateChange: function (e) {
+                                console.log("stateChange");
+                            },
+                            changeState: function (e) {
+                                console.log("changeState");
+                            },
+                            tooltipShow: function (e) {
+                                console.log("tooltipShow");
+                            },
+                            tooltipHide: function (e) {
+                                console.log("tooltipHide");
+                            },
+                            elementClick: function (e) {
+                                    console.log('Measurement is: '+e.series.key );
+                                    console.log('Value is: '+e.series.value );
+                            }
+                        }
                     },
                     xAxis: {
                         axisLabel: 'Time',
@@ -497,27 +537,37 @@ MainPage.controller('AuthorizedController', function (BiosignalsService,$mdToast
     }
 });
 
-
-
 MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, VideoServices, WebsocketService, $scope, $timeout) {
 
 
 
     $scope.videoInfo = {
-        HowVideoWasClosedFlag: false,   // The only use of this Flag is to determine when Video Screen must be closed
+        HowVideoWasClosedFlag: true,   // The only use of this Flag is to determine when Video Screen must be closed
         target: '',
         status: 'Closed',
         message: '',
         Type: null, //options are icnoming,outgoing
         InCall: false,
+        flag:'mute',
+        mute:function(){
+            if($scope.videoInfo.flag === 'mute') {
+                $scope.videoInfo.flag = 'unmute';
+                VideoServices.mute();
+            }
+            else{
+                $scope.videoInfo.flag = 'mute';
+                VideoServices.unmute();
+            }
+        },
         closeScreen: function () {
+
             closeScreen();
         },
         call: function (username) {
             if ($scope.videoInfo.status === 'Closed') { // Safety reason, user can't start calling while he is in a call
                 $scope.videoInfo.Type = 'Outgoing';
                 $scope.videoInfo.target = username; // Keep this info avaialable through calling proccess :)
-                $scope.videoInfo.HowVideoWasClosedFlag = true;
+                $scope.videoInfo.HowVideoWasClosedFlag = false;
                 var message = {
                     type: 'video-start',
                     source: my_name,
@@ -598,6 +648,7 @@ MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, Vi
     //Event handlers when new message arrives from Websockets
 
     $rootScope.$on('close-video', function () {
+        $scope.videoInfo.HowVideoWasClosedFlag = true;
         console.log('The other peer closed');
         $scope.videoInfo.Type = 'Closed';
         $scope.videoInfo.InCall = false;
@@ -608,36 +659,40 @@ MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, Vi
             $scope.$apply();
         }
         $timeout(function () {
-                if ($scope.videoInfo.HowVideoWasClosedFlag === false)
+                if ($scope.videoInfo.HowVideoWasClosedFlag === true)
                     closeScreen()
                 }
-        ,5000);
+        ,3000);
     });
     $rootScope.$on('busy', function () {
+        $scope.videoInfo.HowVideoWasClosedFlag = true;
         $scope.videoInfo.message = 'Sorry ' + $scope.videoInfo.target + ' is busy!';
         $scope.videoInfo.Type = 'Closed';
         $scope.$apply();
         $scope.RealTime.show = false;
-
-        $scope.videoInfo.HowVideoWasClosedFlag = false;
         $timeout(function () {
-                if ($scope.videoInfo.HowVideoWasClosedFlag === false)
+                if ($scope.videoInfo.HowVideoWasClosedFlag === true)
                     closeScreen()
             }
-            , 5000);
+            , 3000);
     });
     $rootScope.$on('cancel', function () {
+        $scope.videoInfo.HowVideoWasClosedFlag = true;
         $scope.videoInfo.Total = false;
         $scope.videoInfo.message = VideoServices.getTarget() + ' has closed his phone';
         $scope.videoInfo.Type = 'Closed';
         $scope.RealTime.show = false;
 
         $scope.$apply();
-        console.log('Target was set to null because of cancelled call ');
         VideoServices.ResetTarget();
-        $timeout(closeScreen, 3000);
+        $timeout(function () {
+                if ($scope.videoInfo.HowVideoWasClosedFlag === true)
+                    closeScreen()
+            }
+            , 3000);
     });
     $rootScope.$on('Offline', function () {
+        $scope.videoInfo.HowVideoWasClosedFlag = true;
         console.log('Oops users seems to be disconnected');
         $scope.videoInfo.Type = 'Closed';
         $scope.RealTime.show = false;
@@ -647,20 +702,21 @@ MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, Vi
         $scope.$apply();
         VideoServices.closeVideo();
         $timeout(function () {
-                if ($scope.videoInfo.HowVideoWasClosedFlag === false)
+                if ($scope.videoInfo.HowVideoWasClosedFlag === true)
                     closeScreen()
             }
-            , 5000);
+            , 2000);
     }); //User disconnected from Server
 
 
     WebsocketService.videostart($scope, function () {
+
         var peer = VideoServices.getPeer();
         if (!peer && $scope.videoInfo.target === '') {                                  // Extra safety it has already beeing checked
             $scope.videoInfo.Type = 'Incoming';     // Only show accept-reject buttons if the user is receiving data
             $scope.videoInfo.status = 'open';
             $scope.videoInfo.message = VideoServices.getTarget() + " is calling";
-            $scope.videoInfo.HowVideoWasClosedFlag = true;
+            $scope.videoInfo.HowVideoWasClosedFlag = false;
 
         }
         else { //User already is calling other user,inform the other user
@@ -710,6 +766,7 @@ MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, Vi
         $timeout(closeScreen, 4000);
     });
     function closeScreen() {
+        $scope.videoInfo.flag = 'mute';
         $scope.videoInfo.HowVideoWasClosedFlag = false;
         $scope.videoInfo.status = 'Closed';  // Next time call is began do not show buttons by default
         $scope.videoInfo.Type = null;
@@ -719,7 +776,9 @@ MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, Vi
     }
 
     // Handles Real Time Measurement
+    var promiseNewData;
     WebsocketService.RealTime($scope,function(){
+        $timeout.cancel(promiseNewData);
         var mes = RealTimeService.getMeasurement();
         $scope.RealTime.blood = mes.blood.y;
         $scope.RealTime.heart = mes.heart.y;
@@ -727,7 +786,16 @@ MainPage.controller('Video-Controller', function (RealTimeService,$rootScope, Vi
         if (!$scope.$$phase) {
             $scope.$apply();
         }
+        promiseNewData = $timeout(function(){
+            $scope.RealTime.show = false;
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
+        },2000);
 
+    });
+    $rootScope.$on('Kill_Video',function(){
+        closeScreen();
     });
 
 });

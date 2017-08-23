@@ -3,7 +3,7 @@
 
     <!--User uses Online Services for the first time-->
 
-    <div  class="md-whiteframe-11dp"  ng-show=" UserInformation.FirstTimeOnline===true"  layout-margin layout="column" style="margin: 10% ;height: 300px ;width: 700px" >
+    <div  class="md-whiteframe-11dp"  ng-show=" UserInformation.FirstTimeOnline===true"  layout-margin layout="column" style="margin: 10% ;height: 350px ;width: 700px" >
 
         <!--Title-->
         <h1 flex-offset="10">Subscribe to OpenHealth</h1>
@@ -18,10 +18,16 @@
                     <div ng-messages="SubscribeForm.Username.$error" >
                         <div ng-message="required">This is required.</div>
                     </div>
-                </md-input-container>
+                </md-input-container><br>
                 <md-input-container>
                     <input name='Password' type="password" ng-model="UserInformation.password" required placeholder="Password">
                     <div ng-messages="SubscribeForm.Password.$error" >
+                        <div ng-message="required">This is required.</div>
+                    </div>
+                </md-input-container>
+                <md-input-container>
+                    <input name='Password2' type="password" ng-model="UserInformation.password2" required placeholder="Re-Enter Password">
+                    <div ng-messages="SubscribeForm.Password2.$error" >
                         <div ng-message="required">This is required.</div>
                     </div>
                 </md-input-container>
@@ -31,7 +37,7 @@
             <!--Hit button subscribe -->
 
             <div layout-margin  >
-                <md-button   style="margin-left: 85%; margin-top: 5%" ng-click="UserInformation.SendRequest()" flex-offset="50" md-no-ink class="md-raised  md-primary"  >Subscribe</md-button>
+                <md-button   type="submit" style="margin-left: 85%; margin-top: 5%" ng-click="UserInformation.SendRequest()" flex-offset="50" md-no-ink class="md-raised  md-primary"  >Subscribe</md-button>
             </div>
 
         </form>

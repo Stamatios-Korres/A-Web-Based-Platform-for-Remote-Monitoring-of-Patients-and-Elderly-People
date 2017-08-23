@@ -74,7 +74,6 @@
     <div style='height: 100%' ng-controller="NotificationController" >
         <div style='height: 100%' ng-controller="SettingController" >
             <div style='height: 100%' ng-controller="OnlineCtrl" >
-
             <div style="height: 100%" layout="column">
 
              <!--Toolbar of the App (Fixed)-->
@@ -254,6 +253,7 @@
                                 <md-button    ng-show='videoInfo.Type === "Incoming"  &&  videoInfo.InCall === false' ng-click="videoInfo.acceptCall()" layout-margin style='background-color: #4cae4c' class=" md-raised ">Accept </md-button>
                                 <md-button    ng-show='videoInfo.Type === "Incoming"  &&  videoInfo.InCall === false' ng-click="videoInfo.rejectCall()" layout-margin class="md-warn md-raised">Reject</md-button>
                                 <md-button    ng-show='videoInfo.InCall === true' ng-click="videoInfo.hangUp()" layout-margin class=" md-raised md-primary">Hang-up</md-button>
+                                <md-button ng-show='videoInfo.InCall === true' ng-click='videoInfo.mute()' class="md-fab md-primary md-icon-button"><i class="material-icons">mic_off</i></md-button>
                                 <h1 class="md-title" >{{videoInfo.message}}</h1>
                             </md-toolbar>
                         </div>

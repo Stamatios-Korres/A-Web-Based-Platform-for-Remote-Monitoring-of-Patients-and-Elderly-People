@@ -21,14 +21,12 @@ angular.module('Openhealth').service('FriendsAndState',function(){
             }
         },
         addfriends: function (name, state,unread) {
-            console.log(unread+' messages from: '+name);
             var newUser = {
                 username: name,
                 state: state,
                 unread: unread,
                 category:null
             };
-            console.log(typeof newUser.unread);
             friends.push(newUser);
         },
         newmessage:function(name){
@@ -267,6 +265,8 @@ angular.module('Openhealth').service('VideoServices',function($timeout,$rootScop
             {'urls': 'turn:test.menychtas.com:3478', 'username': 'bioassistclient', 'credential': 'b10cl13nt'}
         ]
     };
+    var localstreamVideo;
+    var remotestreamVideo;
 
     var target;  // Names of the users in call
     var myself;
@@ -300,8 +300,7 @@ angular.module('Openhealth').service('VideoServices',function($timeout,$rootScop
     function closePeer(){
         target_id = -1; // Unique Id's to distinct multiple User's logged in the same Account
         mine_id = -1;
-        if (MyPeerConnection)
-            MyPeerConnection.close();
+        MyPeerConnection.close();
         MyPeerConnection = null;
         SDPCandiates = null;
         //reset flags
@@ -345,27 +344,36 @@ angular.module('Openhealth').service('VideoServices',function($timeout,$rootScop
     function CloseVideo (){
         var remoteVideo = document.getElementById("received_video");
         var localVideo = document.getElementById("local_video");
-           if (remoteVideo.srcObject) {
-               console.log('Remote is killed');
-               remoteVideo.srcObject.getAudioTracks()[0].stop();
-               remoteVideo.srcObject.getVideoTracks()[0].stop();
-               remoteVideo.srcObject.getTracks()[1].stop();
-               remoteVideo.srcObject.getTracks()[0].stop();
-                remoteVideo.srcObject = null;
-           }
-           if (localVideo.srcObject) {
-                console.log('Local is killed');
-                localVideo.srcObject.getAudioTracks()[0].stop();
-                localVideo.srcObject.getVideoTracks()[0].stop();
-                localVideo.srcObject.getTracks()[0].stop();
-                localVideo.srcObject.getTracks()[1].stop();
-                localVideo.srcObject = null;
+
+        MyPeerConnection.removeStream(localstreamVideo);
+        if (localVideo.srcObject) {
+               console.log('Local is killed');
+               localstreamVideo.getAudioTracks().forEach(function(track) {track.stop(); });
+               localstreamVideo.getVideoTracks().forEach(function(track) {track.stop();});
+               localstreamVideo.getTracks().forEach(function(track) {track.stop(); });
+            if (localstreamVideo.active) {
+                console.log('WHy the fuck??');
             }
-            closePeer();
-            console.log('Ok video is closed');
+               localVideo.srcObject = null;
+            }
+        if (remoteVideo.srcObject) {
+            console.log('Remote is killed');
+            remotestreamVideo.getAudioTracks().forEach(function(track) {track.stop(); });
+            remotestreamVideo.getVideoTracks().forEach(function(track) {track.stop();});
+            remotestreamVideo.getTracks().forEach(function(track) {track.stop(); });
+            remoteVideo.srcObject = null;
+            if (remotestreamVideo.active) {
+                console.log('WHy the fuck??');
+            }
+        }
+        localstreamVideo = null;
+        remotestreamVideo = null;
+        closePeer();
+        console.log('Ok video is closed');
     }
     function handleAddStreamEvent(event) { // It is called only when remote stream has arrived
-        console.log("Received incoming stream");
+        console.log('Setting Remote stream' );
+        remotestreamVideo = event.stream;
         document.getElementById("received_video").srcObject = event.stream;
     }
     function handleGetUserMediaError(e) {
@@ -404,10 +412,15 @@ angular.module('Openhealth').service('VideoServices',function($timeout,$rootScop
             }
         }
     }
+    function handleRemoveStreamEvent(event){
+        alert('Remove Stream Event');
+        console.log(event);
 
+    }
 
     services = {};   // Visible to the outside word function in order to set the object
     services.reset = function(){
+        CloseVideo();
         response=null;
         SDPCandiates=null;
         MyPeerConnection=null;
@@ -457,7 +470,9 @@ angular.module('Openhealth').service('VideoServices',function($timeout,$rootScop
             case  'Caller' :
                 navigator.mediaDevices.getUserMedia(mediaConstraints)
                     .then(function (localStream) {
+                        console.log('Setting Local stream' );
                         document.getElementById("local_video").srcObject = localStream;
+                        localstreamVideo = localStream;
                         MyPeerConnection.addStream(localStream);
                     })
                     .catch(handleGetUserMediaError);
@@ -470,7 +485,9 @@ angular.module('Openhealth').service('VideoServices',function($timeout,$rootScop
                 })
                     .then(function (stream) {
                         localStream = stream;
+                        console.log('Setting Local stream' );
                         document.getElementById("local_video").srcObject = localStream;
+                        localstreamVideo = localStream;
                         return MyPeerConnection.addStream(localStream);
                     })
                     .then(function () {
@@ -497,7 +514,7 @@ angular.module('Openhealth').service('VideoServices',function($timeout,$rootScop
         }
         MyPeerConnection.onicecandidate = handleICECandidateEvent;
         MyPeerConnection.onaddstream = handleAddStreamEvent;
-        // myPeerConnection.onremovestream = handleRemoveStreamEvent;
+        MyPeerConnection.onremovestream = handleRemoveStreamEvent;
         MyPeerConnection.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
         //myPeerConnection.onicegatheringstatechange = handleICEGatheringStateChangeEvent;
         // myPeerConnection.onsignalingstatechange = handleSignalingStateChangeEvent;
@@ -550,6 +567,14 @@ angular.module('Openhealth').service('VideoServices',function($timeout,$rootScop
     };
     services.getBusy = function(){
         return busy;
+    };
+    services.mute = function(){
+        if(localstreamVideo)
+            localstreamVideo.getAudioTracks()[0].enabled = false;
+    };
+    services.unmute = function(){
+        if(localstreamVideo)
+            localstreamVideo.getAudioTracks()[0].enabled = true;
     };
 
 
