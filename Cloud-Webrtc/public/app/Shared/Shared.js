@@ -345,7 +345,6 @@ angular.module('Openhealth').service('VideoServices',function($timeout,$rootScop
         var remoteVideo = document.getElementById("received_video");
         var localVideo = document.getElementById("local_video");
 
-        MyPeerConnection.removeStream(localstreamVideo);
         if (localVideo.srcObject) {
                console.log('Local is killed');
                localstreamVideo.getAudioTracks().forEach(function(track) {track.stop(); });
