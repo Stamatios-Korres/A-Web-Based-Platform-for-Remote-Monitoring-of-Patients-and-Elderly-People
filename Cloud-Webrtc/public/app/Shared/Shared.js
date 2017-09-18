@@ -300,7 +300,8 @@ angular.module('Openhealth').service('VideoServices',function($timeout,$rootScop
     function closePeer(){
         target_id = -1; // Unique Id's to distinct multiple User's logged in the same Account
         mine_id = -1;
-        MyPeerConnection.close();
+        if(MyPeerConnection)
+            MyPeerConnection.close();
         MyPeerConnection = null;
         SDPCandiates = null;
         //reset flags
