@@ -2,7 +2,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-
 var notification = new Schema({
     description:{
         type:'String',
@@ -49,9 +48,7 @@ var notification = new Schema({
             'no'
         ],
         required:true
-
     }
-
 });
 
 module.exports= mongoose.model('notification',notification);
