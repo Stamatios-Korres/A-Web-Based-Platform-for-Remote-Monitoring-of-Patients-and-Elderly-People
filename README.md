@@ -7,10 +7,10 @@ In this work social and health services were integrated into one application to 
 
 ### Description
 
-The application is two Single Page Applications [SPA](https://en.wikipedia.org/wiki/Single-page_application) and two backend WebServers. The patient access point was built upon a [Raspberry-Pi](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) equiped with the essential peripherals (sensors, camera, screen).
-The Server integrated in the Raspberry is responsible for every off-line service. When an online-connection is requested, communication with the main Server is required. The main Server is responsible for
+The application is a combination of two Single Page Applications [SPA](https://en.wikipedia.org/wiki/Single-page_application) and two Web-Servers. The patient access point was built upon a [Raspberry-Pi](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) equiped with the essential peripherals (sensors, camera, screen).
+The Server integrated in the Raspberry is responsible for every off-line service. When an online-connection is requested, communication with the main Server is required. The main Server is also responsible for
 the *Signaling*, *message forwarding* , *Oauth2 authentication protocol*, and the *Social Network*. The SPA for the doctors/relatives also requires internet connection, and it is serviced only by the main Server.
-Emphasis has been put for security reasons, due to the sensitive nature of the patient's health history. The main ascpect was that the data were locally stored in the access point of the patient and only being forwarded thrgough the internet; No cloud-storage takes place.
+Emphasis has been put for security reasons, due to the sensitive nature of the patient's health history. The main countermeasure was that the data were only locally stored in the access point of the patient and only being forwarded thrgough the internet; No cloud-storage takes place.
 
 
 ### Biuld With 
@@ -20,4 +20,5 @@ Emphasis has been put for security reasons, due to the sensitive nature of the p
 * [Websockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
 * [jQuery](https://jquery.com/)
 * [MongoDB](https://www.mongodb.com/)
+* [OAtuh2](https://oauth.net/2/)
 
